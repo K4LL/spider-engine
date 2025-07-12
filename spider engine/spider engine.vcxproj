@@ -77,11 +77,13 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\DirectX-Headers-1.616.0\include\directx;$(ProjectDir)dependencies\DirectX-Headers-1.616.0\include\wsl;$(ProjectDir)dependencies\DirectX-Headers-1.616.0\include\dxguids;$(ProjectDir)flecs\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\include;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\dxc\inc</AdditionalIncludeDirectories>
+      <AdditionalOptions>-DNOMINMAX %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(ProjectDir)dependencies\dxc\lib\x86\dxcompiler.lib;$(ProjectDir)dependencies\dxc\lib\x86\dxil.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -93,13 +95,15 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\DirectX-Headers-1.616.0\include\directx;$(ProjectDir)dependencies\DirectX-Headers-1.616.0\include\wsl;$(ProjectDir)dependencies\DirectX-Headers-1.616.0\include\dxguids;$(ProjectDir)flecs\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\include;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\dxc\inc</AdditionalIncludeDirectories>
+      <AdditionalOptions>-DNOMINMAX %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(ProjectDir)dependencies\dxc\lib\x86\dxcompiler.lib;$(ProjectDir)dependencies\dxc\lib\x86\dxil.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -109,11 +113,13 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\DirectX-Headers-1.616.0\include\directx;$(ProjectDir)dependencies\DirectX-Headers-1.616.0\include\wsl;$(ProjectDir)dependencies\DirectX-Headers-1.616.0\include\dxguids;$(ProjectDir)flecs\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\include;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\dxc\inc</AdditionalIncludeDirectories>
+      <AdditionalOptions>-DNOMINMAX %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(ProjectDir)dependencies\dxc\lib\x64\dxcompiler.lib;$(ProjectDir)dependencies\dxc\lib\x64\dxil.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -125,23 +131,29 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\DirectX-Headers-1.616.0\include\directx;$(ProjectDir)dependencies\DirectX-Headers-1.616.0\include\wsl;$(ProjectDir)dependencies\DirectX-Headers-1.616.0\include\dxguids;$(ProjectDir)flecs\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\include;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\dxc\inc</AdditionalIncludeDirectories>
+      <AdditionalOptions>-DNOMINMAX %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(ProjectDir)dependencies\dxc\lib\x64\dxcompiler.lib;$(ProjectDir)dependencies\dxc\lib\x64\dxil.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="tester.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="debug.hpp" />
+    <ClInclude Include="definitions.hpp" />
+    <ClInclude Include="dx12_policies.hpp" />
+    <ClInclude Include="dx12_types.hpp" />
     <ClInclude Include="fast_array.hpp" />
     <ClInclude Include="policies.hpp" />
-    <ClInclude Include="renderer.hpp" />
-    <ClInclude Include="types.hpp" />
+    <ClInclude Include="dx12_renderer.hpp" />
+    <ClInclude Include="concepts.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

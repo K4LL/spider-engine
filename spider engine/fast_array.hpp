@@ -4,7 +4,7 @@
 #include <iterator>
 #include <cassert>
 
-#include "types.hpp"
+#include "concepts.hpp"
 
 namespace spider_engine {
 	template <typename Ty, typename Allocator = std::allocator<Ty>>
@@ -100,7 +100,7 @@ namespace spider_engine {
 		void pushBack(Ty&& value) {
 			if (this->size_ + 1 > this->capacity_) this->resizeImpl(this->capacity_ << 1);
 
-			std::construct_at(this->storage_ + this->size_, std::forward<Ty>(value));
+			new (this->storage_ + this->size_) Ty(std::forward<Ty>(value));
 			++this->size_;
 		}
 
@@ -108,7 +108,7 @@ namespace spider_engine {
 		void emplaceBack(Args&&... args) {
 			if (this->size_ + 1 > this->capacity_) this->resizeImpl(this->capacity_ << 1);
 
-			std::construct_at(this->storage_ + this->size_, std::forward<Args>(args)...);
+			new (this->storage_ + this->size_) Ty(std::forward<Args>(args)...);
 			++this->size_;
 		}
 
@@ -187,6 +187,32 @@ namespace spider_engine {
 			return this->storage_[index];
 		}
 
+		FastArray& operator=(std::initializer_list<Ty> initList) {
+			// Se já tem dados, destrói e desaloca
+			if (this->storage_) {
+				if constexpr (!std::is_trivially_destructible_v<Ty>)
+					std::destroy_n(this->storage_, this->size_);
+				this->allocator_.deallocate(this->storage_, this->capacity_);
+				this->storage_ = nullptr;
+			}
+
+			this->size_ = initList.size();
+			this->capacity_ = this->size_ * 2; // sua regra de capacidade
+
+			if (this->capacity_ > 0) {
+				this->storage_ = this->allocator_.allocate(this->capacity_);
+				assert(this->storage_);
+
+				if constexpr (std::is_trivially_copyable_v<Ty>) {
+					std::memcpy(this->storage_, initList.begin(), this->size_ * sizeof(Ty));
+				}
+				else {
+					std::uninitialized_copy(initList.begin(), initList.end(), this->storage_);
+				}
+			}
+
+			return *this;
+		}
 		FastArray& operator=(const FastArray& other) {
 			if (this != &other) {
 				if (this->storage_) {

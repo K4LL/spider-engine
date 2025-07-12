@@ -5,8 +5,6 @@
 #include "policies.hpp"
 
 namespace spider_engine {
-	using Entity = size_t;
-
 	template <typename Ty>
 	concept NothrowMoveConstructible = std::is_nothrow_move_constructible_v<Ty>;
 

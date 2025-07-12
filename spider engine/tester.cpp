@@ -1,7 +1,7 @@
 #include <iostream>
 #include <Windows.h>
 
-#include "renderer.hpp"
+#include "dx12_renderer.hpp"
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
@@ -25,37 +25,77 @@ bool isButtonDown(int vkey) {
 }
 
 // Shader Source Code
-const char* vertexShaderSrc = R"(
-// vertex.hlsl
-struct VSInput { float3 pos : POSITION; };
-struct VSOutput { float4 pos : SV_POSITION; };
+std::wstring vertexShaderSrc = LR"(
+
+struct VSInput {
+    float3 position : POSITION;
+    float4 color    : COLOR;
+};
+
+struct VSOutput {
+    float4 position : SV_POSITION;
+    float4 color    : COLOR;
+};
+
 VSOutput main(VSInput input) {
     VSOutput output;
-    output.pos = float4(input.pos, 1.0f);
+    output.position = float4(input.position, 1.0);
+    output.color = input.color;
     return output;
 }
 )";
 
-const char* pixelShaderSrc = R"(
-// pixel.hlsl
-float4 main() : SV_TARGET {
-    return float4(1, 0, 0, 1); // red
+std::wstring pixelShaderSrc = LR"(
+cbuffer colorData : register(b0)
+{
+    float4 colorr;
+};
+
+struct PSInput {
+    float4 position : SV_POSITION;
+    float4 color    : COLOR;
+};
+
+float4 main(PSInput input) : SV_TARGET {
+    return colorr;
 }
 )";
 
 using namespace spider_engine;
+using namespace spider_engine::d3dx12;
 
-FastArray<Vertex> triangleVertices = {
-    { {  0.0f,  0.5f, 0.0f } },
-    { { 0.5f, -0.5f, 0.0f } },
-    { { -0.5f, -0.5f, 0.0f } },
+FastArray<Vertex> cubeVertices = {
+    { {  0.0f,  0.5f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } }, // Top (vermelho)
+    { {  0.5f, -0.5f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } }, // Right (verde)
+    { { -0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } }, // Left (azul)
 };
+
+FastArray<uint32_t> indices = {
+    0, 1, 2
+};
+
 
 template <typename T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
     AllocConsole();
+
+    FILE* fp;
+    freopen_s(&fp, "CONOUT$", "w", stdout);  // Redirect stdout
+    freopen_s(&fp, "CONOUT$", "w", stderr);  // Redirect stderr
+    freopen_s(&fp, "CONIN$", "r", stdin);    // Redirect stdin
+
+    // Sync C++ streams with C I/O
+    std::ios::sync_with_stdio();
+
+    // Optional: clear error flags
+    std::wcout.clear();
+    std::cout.clear();
+    std::wcerr.clear();
+    std::cerr.clear();
+    std::wcin.clear();
+    std::cin.clear();
 
     const wchar_t CLASS_NAME[] = L"DX12WindowClass";
 
@@ -70,25 +110,34 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
         CW_USEDEFAULT, CW_USEDEFAULT, 1200, 720, nullptr, nullptr, hInstance, nullptr);
     ShowWindow(hwnd, nCmdShow);
 
-    Renderer<2> renderer(hwnd, 0, 1, 0);
+    DX12Renderer renderer(hwnd, 2, false, false, 0);
+    DX12Compiler compiler(renderer);
+    
+	Mesh mesh                                 = renderer.createMesh(cubeVertices, indices);
+    FastArray<ShaderDescription> descriptions = { { vertexShaderSrc, ShaderStage::STAGE_VERTEX}, { pixelShaderSrc, ShaderStage::STAGE_PIXEL } };
+	RenderPipeline pipeline                   = compiler.createRenderPipeline<UseSourcePolicy>(descriptions);
 
-	Mesh mesh               = renderer.createMesh(triangleVertices);
-	RenderPipeline pipeline = renderer.createRenderPipeline(vertexShaderSrc, pixelShaderSrc);
+    DirectX::XMFLOAT4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
+    pipeline.bindBuffer("colorData", ShaderStage::STAGE_PIXEL, color);
 
     // Message Loop
     MSG msg = {};
     while (msg.message != WM_QUIT) {
-		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-			continue;
-		}
-
-        if (isButtonDown(VK_F11)) {
-			renderer.setFullScreen(!renderer.isFullScreen());
+        if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+            continue;
         }
 
+        if (isButtonDown(VK_F11)) {
+            renderer.setFullScreen(!renderer.isFullScreen());
+        }
+
+        std::cout << "Requirement name: " << std::get<0>(pipeline.getRequirements()[0]) << std::endl;
+
+        renderer.beginFrame();
         renderer.draw(pipeline, mesh);
+        renderer.endFrame();
         renderer.present();
     }
 
