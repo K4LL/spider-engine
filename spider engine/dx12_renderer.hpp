@@ -324,7 +324,7 @@ namespace spider_engine::d3dx12 {
 			size_t* alignedSizes    = new size_t[count];
 			size_t totalSizeInBytes = 0;
 			for (uint32_t i = 0; i < count; ++i) {
-				auto& size = sizesBegin[i];
+				auto& size        = sizesBegin[i];
 				alignedSizes[i]   = (size + 255) & ~255;
 				totalSizeInBytes += alignedSizes[i];
 			}
@@ -371,6 +371,7 @@ namespace spider_engine::d3dx12 {
 				buffer.cpuHandle_   = cpuHandle;
 				buffer.gpuHandle_   = gpuHandle;
 				buffer.stage_       = stage;
+				buffer.index_       = i;
 
 				D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
 				cbvDesc.BufferLocation					= resource->GetGPUVirtualAddress() + offset;
@@ -497,10 +498,8 @@ namespace spider_engine::d3dx12 {
 				};
 				cmd->SetDescriptorHeaps(1, descriptorHeaps);
 
-				int i = 0;
 				for (auto [key, value] : pipeline.requiredConstantBuffers_) {
-					cmd->SetGraphicsRootConstantBufferView(i, value.getGPUVirtualAddress());
-					++i;
+					cmd->SetGraphicsRootConstantBufferView(value.index_, value.resource_.Get()->GetGPUVirtualAddress());
 				}
 			}
 
@@ -1009,11 +1008,14 @@ namespace spider_engine::d3dx12 {
 				delete[] constantBufferStages;
 			}
 			for (auto it = constantBuffersArray; it != constantBuffersArray + shaders.size(); ++it) {
+				uint32_t index = 0;
 				for (auto constantBuffer = it->begin; constantBuffer != it->end; ++constantBuffer) {
+					constantBuffer->index_ = index;
 					requiredConstantBuffers.emplace(
 						std::make_pair(constantBuffer->name_, constantBuffer->stage_),
 						*constantBuffer
 					);
+					++index;
 				}
 			}
 

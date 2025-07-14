@@ -114,7 +114,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
     DX12Compiler compiler(renderer);
     
 	Mesh mesh                                 = renderer.createMesh(cubeVertices, indices);
-    FastArray<ShaderDescription> descriptions = { { vertexShaderSrc, ShaderStage::STAGE_VERTEX}, { pixelShaderSrc, ShaderStage::STAGE_PIXEL } };
+    FastArray<ShaderDescription> descriptions = { { vertexShaderSrc, ShaderStage::STAGE_VERTEX }, { pixelShaderSrc, ShaderStage::STAGE_PIXEL } };
 	RenderPipeline pipeline                   = compiler.createRenderPipeline<UseSourcePolicy>(descriptions);
 
     DirectX::XMFLOAT4 color = { 1.0f, 1.0f, 1.0f, 1.0f };

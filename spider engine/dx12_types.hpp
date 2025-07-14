@@ -107,6 +107,7 @@ namespace spider_engine::d3dx12 {
 		CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle_;
 
 		ShaderStage stage_;
+		uint32_t    index_;
 
 		void* mappedData_;
 
@@ -144,6 +145,9 @@ namespace spider_engine::d3dx12 {
 		}
 		D3D12_GPU_VIRTUAL_ADDRESS getGPUVirtualAddress() const {
 			return resource_->GetGPUVirtualAddress();
+		}
+		uint32_t getIndex() const {
+			return this->index_;
 		}
 
 		ConstantBuffer& operator=(const ConstantBuffer& other) = default;
