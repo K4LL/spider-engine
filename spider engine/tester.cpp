@@ -2,6 +2,7 @@
 #include <Windows.h>
 
 #include "dx12_renderer.hpp"
+#include "camera.hpp"
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
@@ -26,6 +27,13 @@ bool isButtonDown(int vkey) {
 
 // Shader Source Code
 std::wstring vertexShaderSrc = LR"(
+cbuffer frameData : register(b0)
+{
+    float4x4 projection;
+    float4x4 view;
+    float4x4 model;
+    float4   cameraPosition;
+};
 
 struct VSInput {
     float3 position : POSITION;
@@ -38,36 +46,36 @@ struct VSOutput {
 };
 
 VSOutput main(VSInput input) {
-    VSOutput output;
-    output.position = float4(input.position, 1.0);
-    output.color = input.color;
-    return output;
+    VSOutput o;
+
+    float4 worldPos = mul(float4(input.position, 1.0), model);
+    float4 viewPos  = mul(worldPos, view);
+    o.position      = mul(viewPos, projection);
+    o.color         = input.color;
+
+    return o;
 }
 )";
 
 std::wstring pixelShaderSrc = LR"(
-cbuffer colorData : register(b0)
-{
-    float4 colorr;
-};
-
 struct PSInput {
     float4 position : SV_POSITION;
     float4 color    : COLOR;
 };
 
 float4 main(PSInput input) : SV_TARGET {
-    return colorr;
+    return input.color;
 }
 )";
 
 using namespace spider_engine;
 using namespace spider_engine::d3dx12;
+using namespace spider_engine::rendering;
 
 FastArray<Vertex> cubeVertices = {
-    { {  0.0f,  0.5f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } }, // Top (vermelho)
-    { {  0.5f, -0.5f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } }, // Right (verde)
-    { { -0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } }, // Left (azul)
+    { {  0.0f,  0.5f, 0.0f }, { 1,0,0,1 } },
+    { {  0.5f, -0.5f, 0.0f }, { 0,1,0,1 } },
+    { { -0.5f, -0.5f, 0.0f }, { 0,0,1,1 } },
 };
 
 FastArray<uint32_t> indices = {
@@ -86,10 +94,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
     freopen_s(&fp, "CONOUT$", "w", stderr);  // Redirect stderr
     freopen_s(&fp, "CONIN$", "r", stdin);    // Redirect stdin
 
-    // Sync C++ streams with C I/O
     std::ios::sync_with_stdio();
 
-    // Optional: clear error flags
     std::wcout.clear();
     std::cout.clear();
     std::wcerr.clear();
@@ -117,8 +123,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
     FastArray<ShaderDescription> descriptions = { { vertexShaderSrc, ShaderStage::STAGE_VERTEX }, { pixelShaderSrc, ShaderStage::STAGE_PIXEL } };
 	RenderPipeline pipeline                   = compiler.createRenderPipeline<UseSourcePolicy>(descriptions);
 
-    DirectX::XMFLOAT4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
-    pipeline.bindBuffer("colorData", ShaderStage::STAGE_PIXEL, color);
+    Camera camera(1200, 720);
+	camera.transform.position = DirectX::XMVectorSet(0.0f, 0.0f, -2.0f, 1.0f);
 
     // Message Loop
     MSG msg = {};
@@ -133,7 +139,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
             renderer.setFullScreen(!renderer.isFullScreen());
         }
 
-        std::cout << "Requirement name: " << std::get<0>(pipeline.getRequirements()[0]) << std::endl;
+        camera.updateViewMatrix();
+		camera.updateProjectionMatrix();
+
+        FrameData frameData  = {};
+        frameData.projection = camera.getProjectionMatrix();
+        frameData.view       = camera.getViewMatrix();
+        frameData.model      = DirectX::XMMatrixIdentity();
+        XMStoreFloat4(&frameData.cameraPosition, camera.transform.position);
+        pipeline.bindBuffer<>("frameData", ShaderStage::STAGE_VERTEX, frameData);
 
         renderer.beginFrame();
         renderer.draw(pipeline, mesh);
