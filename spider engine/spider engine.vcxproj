@@ -146,6 +146,7 @@
     <ClCompile Include="tester.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="camera.hpp" />
     <ClInclude Include="debug.hpp" />
     <ClInclude Include="definitions.hpp" />
     <ClInclude Include="dx12_policies.hpp" />
@@ -154,6 +155,7 @@
     <ClInclude Include="policies.hpp" />
     <ClInclude Include="dx12_renderer.hpp" />
     <ClInclude Include="concepts.hpp" />
+    <ClInclude Include="types.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

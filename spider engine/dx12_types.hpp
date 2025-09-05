@@ -52,8 +52,8 @@ namespace spider_engine::d3dx12 {
 	};
 
 	const D3D12_INPUT_ELEMENT_DESC psInputLayout[] = {
-	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex, position), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-	{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, offsetof(Vertex, color), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex, position), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, offsetof(Vertex, color), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 
 	struct VertexArrayBuffer {
@@ -92,9 +92,6 @@ namespace spider_engine::d3dx12 {
 		ShaderStage  stage;
 	};
 
-	struct RequiredConstantBuffers {
-		FastArray<std::wstring> required;
-	};
 	class ConstantBuffer {
 	private:
 		std::string name_;
@@ -162,7 +159,6 @@ namespace spider_engine::d3dx12 {
 		}
 	};
 
-
 	struct ResourceBindingData {
 		std::string			  name;
 		D3D_SHADER_INPUT_TYPE type;
@@ -218,7 +214,8 @@ namespace spider_engine::d3dx12 {
 
 			return result;
 		}
-		template <typename Ty>
+		template <typename Ty, typename Policy = DefaultPolicy>
+		requires (SameAs<Policy, DefaultPolicy>)
 		void bindBuffer(const std::string& name, const ShaderStage stage, Ty&& data) {
 			auto it = requiredConstantBuffers_.find(std::make_pair(name, stage));
 			if (it == requiredConstantBuffers_.end()) {
@@ -228,12 +225,30 @@ namespace spider_engine::d3dx12 {
 
 			it->second.copy(std::forward<Ty>(data));
 		}
-		ConstantBuffer* getBufferPtr(const std::string& name, const ShaderStage stage) {
+		template <typename Ty, typename Policy = DefaultPolicy>
+		requires (SameAs<Policy, NoThrowPolicy>)
+		void bindBuffer(const std::string& name, const ShaderStage stage, Ty&& data) noexcept {
+			auto it = requiredConstantBuffers_.find(std::make_pair(name, stage));
+			if (it == requiredConstantBuffers_.end()) return;
+
+			it->second.copy(std::forward<Ty>(data));
+		}
+		template <typename Policy = DefaultPolicy>
+		requires (SameAs<Policy, DefaultPolicy>)
+		ConstantBuffer* getBufferPtr(const std::string& name, const ShaderStage stage) noexcept {
 			auto it = requiredConstantBuffers_.find(std::make_pair(name, stage));
 			if (it == requiredConstantBuffers_.end()) {
 				throw std::runtime_error("Could not find buffer");
 				return nullptr;
 			}
+			return &it->second;
+		}
+		template <typename Policy = DefaultPolicy>
+		requires (SameAs<Policy, NoThrowPolicy>)
+		ConstantBuffer* getBufferPtr(const std::string& name, const ShaderStage stage) noexcept {
+			auto it = requiredConstantBuffers_.find(std::make_pair(name, stage));
+			if (it == requiredConstantBuffers_.end()) return nullptr;
+
 			return &it->second;
 		}
 	};

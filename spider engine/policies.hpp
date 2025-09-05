@@ -1,6 +1,8 @@
 #pragma once
 
 namespace spider_engine {
+	struct DefaultPolicy {};
+
 	struct PrioritizeMemoryPolicy {};
 	struct PrioritizePerformancePolicy {};
 	struct PrioritizeSafetyPolicy {};
@@ -8,4 +10,7 @@ namespace spider_engine {
 
 	struct UncopyablePolicy {};
 	struct UnmovablePolicy {};
+
+	struct NoThrowPolicy {};
+	struct ThrowPolicy {};
 };
