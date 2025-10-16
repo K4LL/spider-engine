@@ -77,7 +77,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\include;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\dxc\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\distr;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\dxc\inc</AdditionalIncludeDirectories>
       <AdditionalOptions>-DNOMINMAX %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -95,7 +95,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\include;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\dxc\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\distr;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\dxc\inc</AdditionalIncludeDirectories>
       <AdditionalOptions>-DNOMINMAX %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -113,7 +113,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\include;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\dxc\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\distr;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\dxc\inc</AdditionalIncludeDirectories>
       <AdditionalOptions>-DNOMINMAX %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -131,7 +131,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\include;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\dxc\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\distr;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\dxc\inc</AdditionalIncludeDirectories>
       <AdditionalOptions>-DNOMINMAX %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -143,10 +143,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="dependencies\flecs\distr\flecs.c" />
     <ClCompile Include="tester.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.hpp" />
+    <ClInclude Include="core_engine.hpp" />
     <ClInclude Include="debug.hpp" />
     <ClInclude Include="definitions.hpp" />
     <ClInclude Include="dx12_policies.hpp" />

@@ -3,11 +3,11 @@
 #include "debug.hpp"
 
 #ifdef NDEBUG
-#define SPIDER_DBG_CODE(code) code
-#define SPIDER_DBG_VAR(var) var
+#define SPIDER_DBG_CODE(code)
+#define SPIDER_DBG_VAR(var)
 #define SPIDER_DX12_ERROR_CHECK_PREPARE
 #define SPIDER_DX12_ERROR_CHECK(expr) expr
-#define SPIDER_DBG_ASSERT(expr) expr
+#define SPIDER_CODE_SWAP(dbg, rel) rel
 #else
 #define SPIDER_DBG_CODE(code) code
 #define SPIDER_DBG_VAR(var) var
@@ -27,6 +27,7 @@
         throw std::runtime_error("DX12 Error.");                             \
     }                                                                        \
 }
+#define SPIDER_CODE_SWAP(dbg, rel) dbg
 #endif
 
 #define SPIDER_RAW_BITCAST(Target, origin) (*reinterpret_cast<Target*>(reinterpret_cast<void*>(&origin)))

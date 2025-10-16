@@ -8,7 +8,7 @@ namespace spider_engine::rendering {
 		DirectX::XMVECTOR rotation;
 
 		Transform() : 
-			scale(DirectX::XMVectorSet(1.0f, 1.0f, 1.0f, 0.0f)),
+			scale(DirectX::XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f)),
 			position(DirectX::XMVectorZero()),
 			rotation(DirectX::XMQuaternionIdentity()) 
 		{}
@@ -25,6 +25,5 @@ namespace spider_engine::rendering {
 		DirectX::XMMATRIX projection;
 		DirectX::XMMATRIX view;
 		DirectX::XMMATRIX model;
-		DirectX::XMFLOAT4 cameraPosition;
 	};
 }

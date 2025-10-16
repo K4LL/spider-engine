@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Arquivos de Recurso">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="Arquivos de Cabeçalho\dx12">
       <UniqueIdentifier>{12eef540-e0bc-4a4a-8c57-11ef6ff95c81}</UniqueIdentifier>
     </Filter>
@@ -22,10 +18,16 @@
     <Filter Include="Arquivos de Cabeçalho\rendering">
       <UniqueIdentifier>{f4edfcc5-cb56-464b-8fc1-0c6e589832e8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="flecs">
+      <UniqueIdentifier>{029d3902-0f41-473e-afcd-0f68363b9e31}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="tester.cpp">
       <Filter>Arquivos de Origem</Filter>
+    </ClCompile>
+    <ClCompile Include="dependencies\flecs\distr\flecs.c">
+      <Filter>flecs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -57,6 +59,9 @@
       <Filter>Arquivos de Cabeçalho\rendering</Filter>
     </ClInclude>
     <ClInclude Include="types.hpp">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
+    <ClInclude Include="core_engine.hpp">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
   </ItemGroup>

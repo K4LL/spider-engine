@@ -1,7 +1,8 @@
 #include <iostream>
 #include <Windows.h>
+#include <thread>
 
-#include "dx12_renderer.hpp"
+#include "core_engine.hpp"
 #include "camera.hpp"
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -32,7 +33,6 @@ cbuffer frameData : register(b0)
     float4x4 projection;
     float4x4 view;
     float4x4 model;
-    float4   cameraPosition;
 };
 
 struct VSInput {
@@ -71,6 +71,7 @@ float4 main(PSInput input) : SV_TARGET {
 using namespace spider_engine;
 using namespace spider_engine::d3dx12;
 using namespace spider_engine::rendering;
+using namespace spider_engine::core_engine;
 
 FastArray<Vertex> cubeVertices = {
     { {  0.0f,  0.5f, 0.0f }, { 1,0,0,1 } },
@@ -105,23 +106,33 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
 
     const wchar_t CLASS_NAME[] = L"DX12WindowClass";
 
-    WNDCLASS wc = {};
-    wc.lpfnWndProc = WindowProc;
-    wc.hInstance = hInstance;
+    WNDCLASS wc      = {};
+    wc.lpfnWndProc   = WindowProc;
+    wc.hInstance     = hInstance;
     wc.lpszClassName = CLASS_NAME;
 
     RegisterClass(&wc);
 
-    HWND hwnd = CreateWindowEx(0, CLASS_NAME, L"DirectX 12 Triangle", WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, 1200, 720, nullptr, nullptr, hInstance, nullptr);
+    HWND hwnd = CreateWindowEx(
+        0, CLASS_NAME, L"DirectX 12 Triangle", WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT, 1200, 720, nullptr, nullptr, hInstance, nullptr
+    );
     ShowWindow(hwnd, nCmdShow);
 
-    DX12Renderer renderer(hwnd, 2, false, false, 0);
-    DX12Compiler compiler(renderer);
+    CoreEngine core_engine;
+	core_engine.intitializeRenderingSystems(hwnd, 2, false, false, 0);
     
-	Mesh mesh                                 = renderer.createMesh(cubeVertices, indices);
-    FastArray<ShaderDescription> descriptions = { { vertexShaderSrc, ShaderStage::STAGE_VERTEX }, { pixelShaderSrc, ShaderStage::STAGE_PIXEL } };
-	RenderPipeline pipeline                   = compiler.createRenderPipeline<UseSourcePolicy>(descriptions);
+	DX12Renderer& renderer = core_engine.getRenderer();
+	DX12Compiler& compiler = core_engine.getCompiler();
+
+    FastArray<ShaderDescription> descriptions = { 
+        { vertexShaderSrc, ShaderStage::STAGE_VERTEX }, { pixelShaderSrc, ShaderStage::STAGE_PIXEL }
+    };
+	RenderPipeline pipeline = compiler.createRenderPipeline<UseSourcePolicy>(descriptions);
+
+    Renderizable renderizable = renderer.createRenderizable(cubeVertices, indices);
+	flecs::entity entity = core_engine.createEntity("Cube");
+	core_engine.getWorld().entity(entity).set<Renderizable>(std::move(renderizable));
 
     Camera camera(1200, 720);
 	camera.transform.position = DirectX::XMVectorSet(0.0f, 0.0f, -2.0f, 1.0f);
@@ -142,15 +153,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
         camera.updateViewMatrix();
 		camera.updateProjectionMatrix();
 
-        FrameData frameData  = {};
-        frameData.projection = camera.getProjectionMatrix();
-        frameData.view       = camera.getViewMatrix();
-        frameData.model      = DirectX::XMMatrixIdentity();
-        XMStoreFloat4(&frameData.cameraPosition, camera.transform.position);
-        pipeline.bindBuffer<>("frameData", ShaderStage::STAGE_VERTEX, frameData);
-
         renderer.beginFrame();
-        renderer.draw(pipeline, mesh);
+        renderer.draw(entity, pipeline, camera);
         renderer.endFrame();
         renderer.present();
     }

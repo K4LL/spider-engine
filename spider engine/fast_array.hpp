@@ -53,13 +53,19 @@ namespace spider_engine {
 		using Iterator = Ty*;
 		using ConstIterator = const Ty*;
 
-		FastArray() noexcept : storage_(nullptr), size_(0), capacity_(0) {
+		FastArray() noexcept : 
+			storage_(nullptr), size_(0), capacity_(0) 
+		{
 			this->resizeImpl(1);
 		}
-		FastArray(const size_t initialCapacity) : storage_(nullptr), size_(0), capacity_(initialCapacity) {
+		FastArray(const size_t initialCapacity) : 
+			storage_(nullptr), size_(0), capacity_(initialCapacity) 
+		{
 			this->resizeImpl(initialCapacity);
 		}
-		FastArray(const std::initializer_list<Ty>& initList) : storage_(nullptr), size_(initList.size()), capacity_(initList.size() * 2) {
+		FastArray(const std::initializer_list<Ty>& initList) : 
+			storage_(nullptr), size_(initList.size()), capacity_(initList.size() * 2) 
+		{
 			this->storage_ = this->allocator_.allocate(this->capacity_);
 			if constexpr (std::is_trivially_copyable_v<Ty>) {
 				std::memcpy(this->storage_, initList.begin(), this->size_ * sizeof(Ty));
@@ -68,8 +74,14 @@ namespace spider_engine {
 				std::uninitialized_copy(initList.begin(), initList.end(), this->storage_);
 			}
 		}
-		FastArray(Ty* storage, size_t size, size_t capacity = size) : storage_(storage), size_(size), capacity_(capacity) {}
-		FastArray(const FastArray& other) : storage_(nullptr), size_(other.size_), capacity_(other.capacity_) {
+		FastArray(Ty*          storage, 
+				  const size_t size, 
+				  const size_t capacity) : 
+			storage_(storage), size_(size), capacity_(capacity) 
+		{}
+		FastArray(const FastArray& other) : 
+			storage_(nullptr), size_(other.size_), capacity_(other.capacity_) 
+		{
 			if (this->size_ > 0) {
 				this->storage_ = this->allocator_.allocate(this->capacity_);
 				assert(this->storage_);
@@ -83,6 +95,16 @@ namespace spider_engine {
 			other.storage_  = nullptr;
 			other.size_     = 0;
 			other.capacity_ = 0;
+		}
+		template <typename U>
+		FastArray(const FastArray<U>& other) : 
+			storage_(nullptr), size_(other.size()), capacity_(other.capacity()) 
+		{
+			if (this->size_ > 0) {
+				this->storage_ = this->allocator_.allocate(this->capacity_);
+				assert(this->storage_);
+				this->copyElements(this->storage_);
+			}
 		}
 
 		~FastArray() {
@@ -188,7 +210,6 @@ namespace spider_engine {
 		}
 
 		FastArray& operator=(std::initializer_list<Ty> initList) {
-			// Se já tem dados, destrói e desaloca
 			if (this->storage_) {
 				if constexpr (!std::is_trivially_destructible_v<Ty>)
 					std::destroy_n(this->storage_, this->size_);
@@ -197,7 +218,7 @@ namespace spider_engine {
 			}
 
 			this->size_ = initList.size();
-			this->capacity_ = this->size_ * 2; // sua regra de capacidade
+			this->capacity_ = this->size_ * 2;
 
 			if (this->capacity_ > 0) {
 				this->storage_ = this->allocator_.allocate(this->capacity_);
