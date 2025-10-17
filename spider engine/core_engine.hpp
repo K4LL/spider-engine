@@ -50,6 +50,54 @@ namespace spider_engine::core_engine {
 			renderer_ = std::make_unique<d3dx12::DX12Renderer>(&world_, hwnd, bufferCount, isFullScreen, isVSync, deviceId);
 			compiler_ = std::make_unique<d3dx12::DX12Compiler>(&world_, *renderer_);
 		}
+		void initializeDebugSystems(const bool enableLogs     = true,
+									const bool enableWarnings = true,
+									const bool enableErrors   = true) 
+		{
+			AllocConsole();
+
+			FILE* fp;
+			freopen_s(&fp, "CONOUT$", "w", stdout);
+			freopen_s(&fp, "CONOUT$", "w", stderr);
+			freopen_s(&fp, "CONIN$", "r", stdin);
+
+			std::ios::sync_with_stdio();
+
+			std::wcout.clear();
+			std::cout.clear();
+			std::wcerr.clear();
+			std::cerr.clear();
+			std::wcin.clear();
+			std::cin.clear();
+
+			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+			system("cls");
+			SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+			
+			std::wstring title =
+				LR"(  ___ ___ ___ ___  ___ ___   ___ _  _  ___ ___ _  _ ___ 
+ / __| _ \_ _|   \| __| _ \ | __| \| |/ __|_ _| \| | __|
+ \__ \  _/| || |) | _||   / | _|| .` | (_ || || .` | _| 
+ |___/_| |___|___/|___|_|_\ |___|_|\_|\___|___|_|\_|___|                                                      
+)";
+
+			SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+			std::wcout << title << L"\n";
+
+			auto printFlag = [&](const std::wstring& label, bool enabled, WORD color) {
+				SetConsoleTextAttribute(hConsole, color | (enabled ? FOREGROUND_INTENSITY : 0));
+				std::wcout << L"[" << (enabled ? L"ENABLED" : L"DISABLED") << L"] " << label << L"\n";
+				};
+
+			printFlag(L"Logs", enableLogs, FOREGROUND_GREEN);
+			printFlag(L"Warnings", enableWarnings, FOREGROUND_RED | FOREGROUND_GREEN);
+			printFlag(L"Errors", enableErrors, FOREGROUND_RED);
+
+			SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+
+			std::wcout << L"\n";
+		}
 
 		flecs::entity createEntity(const std::string& name = "") {
 			if (name.empty()) return world_.entity();

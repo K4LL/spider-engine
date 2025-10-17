@@ -88,22 +88,6 @@ template <typename T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
-    AllocConsole();
-
-    FILE* fp;
-    freopen_s(&fp, "CONOUT$", "w", stdout);  // Redirect stdout
-    freopen_s(&fp, "CONOUT$", "w", stderr);  // Redirect stderr
-    freopen_s(&fp, "CONIN$", "r", stdin);    // Redirect stdin
-
-    std::ios::sync_with_stdio();
-
-    std::wcout.clear();
-    std::cout.clear();
-    std::wcerr.clear();
-    std::cerr.clear();
-    std::wcin.clear();
-    std::cin.clear();
-
     const wchar_t CLASS_NAME[] = L"DX12WindowClass";
 
     WNDCLASS wc      = {};
@@ -121,6 +105,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
 
     CoreEngine core_engine;
 	core_engine.intitializeRenderingSystems(hwnd, 2, false, false, 0);
+	core_engine.initializeDebugSystems(true, true, true);
     
 	DX12Renderer& renderer = core_engine.getRenderer();
 	DX12Compiler& compiler = core_engine.getCompiler();
