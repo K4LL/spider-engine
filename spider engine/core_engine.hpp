@@ -1,17 +1,56 @@
 #pragma once
 #include <memory>
 
+#include "window.hpp"
 #include "dx12_renderer.hpp"
+#include "camera.hpp"
 
 #include "flecs.h"
 
 namespace spider_engine::core_engine {
+	struct RenderingSystemDescription {
+		std::wstring windowName;
+		std::wstring windowClassName;
+
+		uint_t x;
+		uint_t y;
+
+		uint_t width;
+		uint_t height;
+
+		uint8_t  bufferCount;
+		uint32_t threadCount;
+
+		bool isFullScreen;
+		bool isVSync;
+
+		uint8_t deviceId;
+
+		RenderingSystemDescription() :
+			windowName(L"Spider Engine Window"),
+			windowClassName(L"SpiderEngineMainWindowClass"),
+			x(0),
+			y(0),
+			width(0),
+			height(0),
+			bufferCount(2),
+			threadCount(4),
+			isFullScreen(false),
+			isVSync(true),
+			deviceId(0)
+		{}
+	};
+
 	class CoreEngine {
 	private:
 		flecs::world world_;
 
+		std::unique_ptr<Window> window_;
+
 		std::unique_ptr<d3dx12::DX12Renderer> renderer_;
 		std::unique_ptr<d3dx12::DX12Compiler> compiler_;
+
+		std::unique_ptr<spider_engine::rendering::Camera> camera_;
 
 	public:
 		template <typename... Types>
@@ -23,12 +62,19 @@ namespace spider_engine::core_engine {
 			world_.component<d3dx12::IndexArrayBuffer>();
 			world_.component<d3dx12::ConstantBufferVariable>();
 			world_.component<d3dx12::ConstantBufferData>();
+			world_.component<d3dx12::ShaderResourceView>();
+			world_.component<d3dx12::ShaderResourceViews>();
+			world_.component<d3dx12::ShaderResourceViewData>();
+			world_.component<d3dx12::Sampler>();
+			world_.component<d3dx12::Samplers>();
+			world_.component<d3dx12::SamplerData>();
 			world_.component<d3dx12::ShaderDescription>();
 			world_.component<d3dx12::ConstantBuffer>();
 			world_.component<d3dx12::ConstantBuffers>();
 			world_.component<d3dx12::ResourceBindingData>();
 			world_.component<d3dx12::ShaderData>();
 			world_.component<d3dx12::Mesh>();
+			world_.component<d3dx12::Texture2D>();
 			world_.component<d3dx12::Renderizable>();
 			world_.component<d3dx12::Shader>();
 			world_.component<d3dx12::RenderPipeline>();
@@ -41,14 +87,29 @@ namespace spider_engine::core_engine {
 			(world_.component<Types>(), ...);
 		}
 
-		void intitializeRenderingSystems(HWND          hwnd,
-										 const uint8_t bufferCount,
-										 const bool    isFullScreen = false,
-										 const bool    isVSync      = true,
-										 const uint8_t deviceId     = 0) 
+		void intitializeRenderingSystems(const RenderingSystemDescription& description) 
 		{
-			renderer_ = std::make_unique<d3dx12::DX12Renderer>(&world_, hwnd, bufferCount, isFullScreen, isVSync, deviceId);
+			window_ = std::make_unique<Window>(
+				description.windowName,
+				description.width,
+				description.height,
+				description.x,
+				description.y,
+				description.windowClassName
+			);
+			renderer_ = std::make_unique<d3dx12::DX12Renderer>(
+				&world_,
+				window_->hwnd_,
+				description.bufferCount,
+				description.threadCount,
+				description.isFullScreen,
+				description.isVSync,
+				description.deviceId
+			);
 			compiler_ = std::make_unique<d3dx12::DX12Compiler>(&world_, *renderer_);
+
+			camera_ = std::make_unique<spider_engine::rendering::Camera>(window_->width_, window_->height_);
+			std::cout << "HEw";
 		}
 		void initializeDebugSystems(const bool enableLogs     = true,
 									const bool enableWarnings = true,
@@ -149,6 +210,18 @@ namespace spider_engine::core_engine {
 #endif
 		}
 
+		void start(std::function<void()> fn) {
+			MSG msg = {};
+			while (msg.message != WM_QUIT && window_->isRunning_) {
+				while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+					TranslateMessage(&msg);
+					DispatchMessage(&msg);
+				}
+				fn();
+			}
+		}
+		void stop() {}
+
 		flecs::entity createEntity(const std::string& name = "") {
 			if (name.empty()) return world_.entity();
 			return world_.entity(name.c_str());
@@ -176,6 +249,10 @@ namespace spider_engine::core_engine {
 		}
 		d3dx12::DX12Compiler& getCompiler() {
 			return *compiler_;
+		}
+
+		spider_engine::rendering::Camera& getCamera() {
+			return *camera_;
 		}
 	};
 }

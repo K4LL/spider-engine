@@ -11,9 +11,9 @@
 #include <comdef.h>
 
 #include "d3dx12.h"
-
 #include "dxcapi.h"
 #include "d3d12shader.h"
+#include "DirectXTex/DirectXTex.h"
 
 #include "fast_array.hpp"
 #include "definitions.hpp"
@@ -77,11 +77,14 @@ namespace spider_engine::d3dx12 {
 		size_t size;
 	};
 
-	struct Texture {
+	struct Texture2D {
 		Microsoft::WRL::ComPtr<ID3D12Resource> resource;
-		uint32_t							   width;
-		uint32_t							   height;
-		uint32_t							   depth;
+		Microsoft::WRL::ComPtr<ID3D12Resource> uploadResource;
+
+		D3D12_SUBRESOURCE_DATA textureData;
+
+		uint32_t width;
+		uint32_t height;
 	};
 
 	struct ConstantBufferVariable {
@@ -103,6 +106,16 @@ namespace spider_engine::d3dx12 {
 	};
 
 	struct ShaderResourceViewData {
+		std::string name;
+		uint32_t    size;
+
+		uint32_t bindPoint;
+		uint32_t space;
+
+		ShaderStage stage;
+	};
+
+	struct SamplerData {
 		std::string name;
 		uint32_t    size;
 
@@ -189,7 +202,7 @@ namespace spider_engine::d3dx12 {
 			resource_->Unmap(0, nullptr);
 		}
 
-		std::string getName() {
+		std::string_view getName() {
 			return this->name_;
 		}
 		size_t getSizeInBytes() {
@@ -209,8 +222,8 @@ namespace spider_engine::d3dx12 {
 			return this->index_;
 		}
 
-		ConstantBuffer& operator=(const ConstantBuffer& other) = default;
-		ConstantBuffer& operator=(ConstantBuffer&& other) = default;
+		ConstantBuffer& operator=(const ConstantBuffer& other)     = default;
+		ConstantBuffer& operator=(ConstantBuffer&& other) noexcept = default;
 	};
 	struct ConstantBuffers {
 		ConstantBuffer* begin;
@@ -251,7 +264,7 @@ namespace spider_engine::d3dx12 {
 		ShaderResourceView(const ShaderResourceView&)     = default;
 		ShaderResourceView(ShaderResourceView&&) noexcept = default;
 
-		std::string getName() {
+		std::string_view getName() {
 			return this->name_;
 		}
 		size_t getSizeInBytes() {
@@ -267,12 +280,66 @@ namespace spider_engine::d3dx12 {
 			return this->index_;
 		}
 
-		ShaderResourceView& operator=(const ShaderResourceView& other) = default;
-		ShaderResourceView& operator=(ShaderResourceView&& other)      = default;
+		ShaderResourceView& operator=(const ShaderResourceView& other)     = default;
+		ShaderResourceView& operator=(ShaderResourceView&& other) noexcept = default;
 	};
 	struct ShaderResourceViews {
 		ShaderResourceView* begin;
 		ShaderResourceView* end;
+
+		const size_t getSize() const {
+			return static_cast<size_t>(end - begin);
+		}
+	};
+
+	class Sampler {
+	private:
+		std::string	name_;
+
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> heap_;
+		CD3DX12_CPU_DESCRIPTOR_HANDLE				 cpuHandle_;
+		CD3DX12_GPU_DESCRIPTOR_HANDLE				 gpuHandle_;
+
+		ShaderStage	stage_;
+		uint32_t	index_;
+
+	public:
+		friend class DX12Renderer;
+		friend class DX12Compiler;
+
+		Sampler() :
+			name_(""),
+			stage_(ShaderStage::STAGE_ALL),
+			index_(0)
+		{}
+		Sampler(const Sampler&)     = default;
+		Sampler(Sampler&&) noexcept = default;
+
+		std::string_view getName() {
+			return this->name_;
+		}
+
+		CD3DX12_CPU_DESCRIPTOR_HANDLE getCPUHandle() const {
+			return this->cpuHandle_;
+		}
+		CD3DX12_GPU_DESCRIPTOR_HANDLE getGPUHandle() const {
+			return this->gpuHandle_;
+		}
+
+		ShaderStage getStage() {
+			return this->stage_;
+		}
+
+		uint32_t getIndex() const {
+			return this->index_;
+		}
+
+		Sampler& operator=(const Sampler& other)     = default;
+		Sampler& operator=(Sampler&& other) noexcept = default;
+	};
+	struct Samplers {
+		Sampler* begin;
+		Sampler* end;
 
 		const size_t getSize() const {
 			return static_cast<size_t>(end - begin);
@@ -293,6 +360,7 @@ namespace spider_engine::d3dx12 {
 		Microsoft::WRL::ComPtr<ID3D12ShaderReflection> rawReflection;
 		FastArray<ConstantBufferData>				   constantBuffers;
 		FastArray<ShaderResourceViewData>		       shaderResourceViews;
+		FastArray<SamplerData>					       samplers;
 		FastArray<ResourceBindingData>                 shaderResourceBindingData;
 	};
 
@@ -303,6 +371,7 @@ namespace spider_engine::d3dx12 {
 
 	struct Renderizable {
 		Mesh				 mesh;
+		Texture2D			 texture;
 		rendering::Transform transform;
 	};
 
@@ -322,6 +391,7 @@ namespace spider_engine::d3dx12 {
 
 		ska::flat_hash_map<std::pair<std::string, ShaderStage>, ConstantBuffer>     requiredConstantBuffers_;
 		ska::flat_hash_map<std::pair<std::string, ShaderStage>, ShaderResourceView> requiredShaderResourceViews_;
+		ska::flat_hash_map<std::pair<std::string, ShaderStage>, Sampler>            requiredSamplers_;
 
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState_;
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature_;
@@ -380,18 +450,6 @@ namespace spider_engine::d3dx12 {
 			if (it == requiredConstantBuffers_.end()) return nullptr;
 
 			return &it->second;
-		}
-
-		template <typename Ty, typename Policy = DefaultPolicy>
-		requires (SameAs<Policy, DefaultPolicy>)
-		void bindResourceView(const std::string& name, const ShaderStage stage, Ty&& data) {
-			auto it = requiredShaderResourceViews_.find(std::make_pair(name, stage));
-			if (it == requiredShaderResourceViews_.end()) {
-				throw std::runtime_error("Could not find resource view");
-				return;
-			}
-
-
 		}
 	};
 }

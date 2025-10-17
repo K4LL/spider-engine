@@ -5,17 +5,6 @@
 #include "core_engine.hpp"
 #include "camera.hpp"
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    switch (uMsg) {
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        return 0;
-
-    default:
-        return DefWindowProc(hwnd, uMsg, wParam, lParam);
-    }
-}
-
 bool isButtonDown(int vkey) {
     static bool prev[256] = {};
 
@@ -86,29 +75,16 @@ FastArray<uint32_t> indices = {
 
 template <typename T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
-
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
-    const wchar_t CLASS_NAME[] = L"DX12WindowClass";
+	RenderingSystemDescription renderingSystemDescription;
+	renderingSystemDescription.windowName = L"Spider Engine DX12 Test Window";
 
-    WNDCLASS wc      = {};
-    wc.lpfnWndProc   = WindowProc;
-    wc.hInstance     = hInstance;
-    wc.lpszClassName = CLASS_NAME;
-
-    RegisterClass(&wc);
-
-    HWND hwnd = CreateWindowEx(
-        0, CLASS_NAME, L"DirectX 12 Triangle", WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, 1200, 720, nullptr, nullptr, hInstance, nullptr
-    );
-    ShowWindow(hwnd, nCmdShow);
-
-    CoreEngine core_engine;
-	core_engine.intitializeRenderingSystems(hwnd, 2, false, false, 0);
-	core_engine.initializeDebugSystems(true, true, true);
+    CoreEngine coreEngine;
+	coreEngine.intitializeRenderingSystems(renderingSystemDescription);
+    coreEngine.initializeDebugSystems(true, true, true);
     
-	DX12Renderer& renderer = core_engine.getRenderer();
-	DX12Compiler& compiler = core_engine.getCompiler();
+	DX12Renderer& renderer = coreEngine.getRenderer();
+	DX12Compiler& compiler = coreEngine.getCompiler();
 
     FastArray<ShaderDescription> descriptions = { 
         { vertexShaderSrc, ShaderStage::STAGE_VERTEX }, { pixelShaderSrc, ShaderStage::STAGE_PIXEL }
@@ -116,33 +92,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
 	RenderPipeline pipeline = compiler.createRenderPipeline<UseSourcePolicy>(descriptions);
 
     Renderizable renderizable = renderer.createRenderizable(cubeVertices, indices);
-	flecs::entity entity = core_engine.createEntity("Cube");
-	core_engine.getWorld().entity(entity).set<Renderizable>(std::move(renderizable));
+	flecs::entity entity = coreEngine.createEntity("Cube");
+    coreEngine.getWorld().entity(entity).set<Renderizable>(std::move(renderizable));
 
-    Camera camera(1200, 720);
+	Camera& camera = coreEngine.getCamera();
 	camera.transform.position = DirectX::XMVectorSet(0.0f, 0.0f, -2.0f, 1.0f);
 
-    // Message Loop
-    MSG msg = {};
-    while (msg.message != WM_QUIT) {
-        if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-            continue;
-        }
-
+    auto updateLoop = [&]() {
         if (isButtonDown(VK_F11)) {
             renderer.setFullScreen(!renderer.isFullScreen());
         }
 
         camera.updateViewMatrix();
-		camera.updateProjectionMatrix();
+        camera.updateProjectionMatrix();
 
         renderer.beginFrame();
         renderer.draw(entity, pipeline, camera);
         renderer.endFrame();
         renderer.present();
-    }
+    };
+
+	coreEngine.start(updateLoop);
 
     return 0;
 }

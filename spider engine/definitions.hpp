@@ -1,3 +1,4 @@
+#pragma once
 #include <format>
 
 #include "debug.hpp"
@@ -31,3 +32,5 @@
 #endif
 
 #define SPIDER_RAW_BITCAST(Target, origin) (*reinterpret_cast<Target*>(reinterpret_cast<void*>(&origin)))
+
+using uint_t = unsigned int;

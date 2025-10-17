@@ -11,7 +11,7 @@ namespace spider_engine::rendering {
 
         float fovY_  = DirectX::XM_PIDIV4;
         float nearZ_ = 0.01f;
-        float farZ_  = 100.0f;
+        float farZ_  = 1000.0f;
 
         DirectX::XMVECTOR up_               = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
         DirectX::XMMATRIX viewMatrix_       = DirectX::XMMatrixIdentity();
