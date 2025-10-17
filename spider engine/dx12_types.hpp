@@ -11,9 +11,9 @@
 #include <comdef.h>
 
 #include "d3dx12.h"
-
 #include "dxcapi.h"
 #include "d3d12shader.h"
+#include "DirectXTex/DirectXTex.h"
 
 #include "fast_array.hpp"
 #include "definitions.hpp"
@@ -56,6 +56,14 @@ namespace spider_engine::d3dx12 {
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, offsetof(Vertex, color), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 
+	class DescriptorHeap {
+	private:
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> heap_;
+		CD3DX12_CPU_DESCRIPTOR_HANDLE				 cpuHandle_;
+		CD3DX12_GPU_DESCRIPTOR_HANDLE				 gpuHandle_;
+		const size_t								 capacity_;
+	};
+
 	struct VertexArrayBuffer {
 		Microsoft::WRL::ComPtr<ID3D12Resource> vertexArrayBuffer;
 		D3D12_VERTEX_BUFFER_VIEW			   vertexArrayBufferView;
@@ -67,6 +75,16 @@ namespace spider_engine::d3dx12 {
 		D3D12_INDEX_BUFFER_VIEW			       indexArrayBufferView;
 
 		size_t size;
+	};
+
+	struct Texture2D {
+		Microsoft::WRL::ComPtr<ID3D12Resource> resource;
+		Microsoft::WRL::ComPtr<ID3D12Resource> uploadResource;
+
+		D3D12_SUBRESOURCE_DATA textureData;
+
+		uint32_t width;
+		uint32_t height;
 	};
 
 	struct ConstantBufferVariable {
@@ -87,9 +105,65 @@ namespace spider_engine::d3dx12 {
 		FastArray<ConstantBufferVariable> variables;
 	};
 
-	struct ShaderDescription {
+	struct ShaderResourceViewData {
+		std::string name;
+		uint32_t    size;
+
+		uint32_t bindPoint;
+		uint32_t space;
+
+		ShaderStage stage;
+	};
+
+	struct SamplerData {
+		std::string name;
+		uint32_t    size;
+
+		uint32_t bindPoint;
+		uint32_t space;
+
+		ShaderStage stage;
+	};
+
+	class ShaderDescription {
+	private:
+		FastArray<FastArray<uint8_t>> shaderResourceViewData_;
+
+	public:
 		std::wstring pathOrSource;
 		ShaderStage  stage;
+
+		ShaderDescription() = default;
+		ShaderDescription(std::wstring pathOrSource, 
+						  ShaderStage  stage) : 
+			pathOrSource(pathOrSource), stage(stage) 
+		{}
+		ShaderDescription(FastArray<FastArray<uint8_t>> shaderResourceViewData, 
+						  ShaderStage				    stage) : 
+			shaderResourceViewData_(shaderResourceViewData), stage(stage) 
+		{}
+		ShaderDescription(const ShaderDescription&)     = default;
+		ShaderDescription(ShaderDescription&&) noexcept = default;
+
+		template <typename Ty>
+		void setShaderResourceViewData(FastArray<FastArray<Ty>>& data) {
+			shaderResourceViewData_ = data;
+		}
+		template <typename Ty>
+		void addShaderResourceViewData(FastArray<Ty>& data) {
+			shaderResourceViewData_.pushBack(data);
+		}
+
+		template <typename Ty>
+		FastArray<FastArray<Ty>> getShaderResourceViewData() {
+			return FastArray<FastArray<Ty>>(shaderResourceViewData_);
+		}
+		FastArray<FastArray<uint8_t>>& getShaderResourceViewRawData() {
+			return shaderResourceViewData_;
+		}
+		const FastArray<FastArray<uint8_t>>& getConstShaderResourceViewRawData() const {
+			return shaderResourceViewData_;
+		}
 	};
 
 	class ConstantBuffer {
@@ -118,6 +192,7 @@ namespace spider_engine::d3dx12 {
 
 		void open() {
 			resource_->Map(0, nullptr, &mappedData_);
+			mappedData_ = reinterpret_cast<uint8_t*>(mappedData_) + (index_ * sizeInBytes_);
 		}
 		template <typename Ty>
 		void copy(const Ty& data) {
@@ -127,7 +202,7 @@ namespace spider_engine::d3dx12 {
 			resource_->Unmap(0, nullptr);
 		}
 
-		std::string getName() {
+		std::string_view getName() {
 			return this->name_;
 		}
 		size_t getSizeInBytes() {
@@ -147,12 +222,124 @@ namespace spider_engine::d3dx12 {
 			return this->index_;
 		}
 
-		ConstantBuffer& operator=(const ConstantBuffer& other) = default;
-		ConstantBuffer& operator=(ConstantBuffer&& other) = default;
+		ConstantBuffer& operator=(const ConstantBuffer& other)     = default;
+		ConstantBuffer& operator=(ConstantBuffer&& other) noexcept = default;
 	};
 	struct ConstantBuffers {
 		ConstantBuffer* begin;
 		ConstantBuffer* end;
+
+		const size_t getSize() const {
+			return static_cast<size_t>(end - begin);
+		}
+	};
+
+	class ShaderResourceView {
+	private:
+		std::string name_;
+		size_t      sizeInBytes_;
+
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> heap_;
+		Microsoft::WRL::ComPtr<ID3D12Resource>       resource_;
+		
+		CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle_;
+		CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle_;
+
+		ShaderStage stage_;
+		uint32_t    index_;
+
+	public:
+		friend class DX12Renderer;
+		friend class DX12Compiler;
+		friend class RenderPipeline;
+
+		ShaderResourceView() : 
+			name_(""), 
+			sizeInBytes_(0), 
+			stage_(ShaderStage::STAGE_ALL), 
+			index_(0), 
+			cpuHandle_(D3D12_CPU_DESCRIPTOR_HANDLE(NULL)),
+			gpuHandle_(D3D12_GPU_DESCRIPTOR_HANDLE(NULL))
+		{}
+		ShaderResourceView(const ShaderResourceView&)     = default;
+		ShaderResourceView(ShaderResourceView&&) noexcept = default;
+
+		std::string_view getName() {
+			return this->name_;
+		}
+		size_t getSizeInBytes() {
+			return this->sizeInBytes_;
+		}
+		ShaderStage getStage() {
+			return this->stage_;
+		}
+		D3D12_GPU_VIRTUAL_ADDRESS getGPUVirtualAddress() const {
+			return resource_->GetGPUVirtualAddress();
+		}
+		uint32_t getIndex() const {
+			return this->index_;
+		}
+
+		ShaderResourceView& operator=(const ShaderResourceView& other)     = default;
+		ShaderResourceView& operator=(ShaderResourceView&& other) noexcept = default;
+	};
+	struct ShaderResourceViews {
+		ShaderResourceView* begin;
+		ShaderResourceView* end;
+
+		const size_t getSize() const {
+			return static_cast<size_t>(end - begin);
+		}
+	};
+
+	class Sampler {
+	private:
+		std::string	name_;
+
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> heap_;
+		CD3DX12_CPU_DESCRIPTOR_HANDLE				 cpuHandle_;
+		CD3DX12_GPU_DESCRIPTOR_HANDLE				 gpuHandle_;
+
+		ShaderStage	stage_;
+		uint32_t	index_;
+
+	public:
+		friend class DX12Renderer;
+		friend class DX12Compiler;
+
+		Sampler() :
+			name_(""),
+			stage_(ShaderStage::STAGE_ALL),
+			index_(0)
+		{}
+		Sampler(const Sampler&)     = default;
+		Sampler(Sampler&&) noexcept = default;
+
+		std::string_view getName() {
+			return this->name_;
+		}
+
+		CD3DX12_CPU_DESCRIPTOR_HANDLE getCPUHandle() const {
+			return this->cpuHandle_;
+		}
+		CD3DX12_GPU_DESCRIPTOR_HANDLE getGPUHandle() const {
+			return this->gpuHandle_;
+		}
+
+		ShaderStage getStage() {
+			return this->stage_;
+		}
+
+		uint32_t getIndex() const {
+			return this->index_;
+		}
+
+		Sampler& operator=(const Sampler& other)     = default;
+		Sampler& operator=(Sampler&& other) noexcept = default;
+	};
+	struct Samplers {
+		Sampler* begin;
+		Sampler* end;
 
 		const size_t getSize() const {
 			return static_cast<size_t>(end - begin);
@@ -168,15 +355,24 @@ namespace spider_engine::d3dx12 {
 
 		ShaderStage stage;
 	};
+
 	struct ShaderData {
 		Microsoft::WRL::ComPtr<ID3D12ShaderReflection> rawReflection;
 		FastArray<ConstantBufferData>				   constantBuffers;
-		FastArray<ResourceBindingData>                 resourceBindingDatas;
+		FastArray<ShaderResourceViewData>		       shaderResourceViews;
+		FastArray<SamplerData>					       samplers;
+		FastArray<ResourceBindingData>                 shaderResourceBindingData;
 	};
 
 	struct Mesh {
 		std::unique_ptr<VertexArrayBuffer> vertexArrayBuffer;
 		std::unique_ptr<IndexArrayBuffer>  indexArrayBuffer;
+	};
+
+	struct Renderizable {
+		Mesh				 mesh;
+		Texture2D			 texture;
+		rendering::Transform transform;
 	};
 
 	struct Shader {
@@ -189,9 +385,13 @@ namespace spider_engine::d3dx12 {
 	};
 	class RenderPipeline {
 	private:
+		DX12Renderer* renderer_;
+
 		FastArray<Shader> shaders_;
 
-		ska::flat_hash_map<std::pair<std::string, ShaderStage>, ConstantBuffer> requiredConstantBuffers_;
+		ska::flat_hash_map<std::pair<std::string, ShaderStage>, ConstantBuffer>     requiredConstantBuffers_;
+		ska::flat_hash_map<std::pair<std::string, ShaderStage>, ShaderResourceView> requiredShaderResourceViews_;
+		ska::flat_hash_map<std::pair<std::string, ShaderStage>, Sampler>            requiredSamplers_;
 
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState_;
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature_;
