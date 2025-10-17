@@ -1928,7 +1928,7 @@ namespace spider_engine::d3dx12 {
 					memcpy(shaderResourceViewRawDataArrayBegin[j], block, dataSize);
 				}
 
-				renderer_->createShaderResourceViews(
+				shaderResourceViewArray[i] = renderer_->createShaderResourceViews(
 					shaderResourceViewNames,
 					shaderResourceViewNames + shaderResourceViewsSize,
 					shaderResourceViewRawDataArrayBegin,
