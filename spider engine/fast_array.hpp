@@ -34,37 +34,43 @@ namespace spider_engine {
 			std::uninitialized_copy_n(this->storage_, this->size_, dest);
 		}
 
-		void resizeImpl(const size_t newCapacity) {
-			Ty* buff = this->allocator_.allocate(newCapacity);
+		void resizeImpl(size_t newCapacity) {
+			Ty* newStorage = allocator_.allocate(newCapacity);
 
-			assert(buff);
-			if (this->storage_) {
-				this->moveOrCopyElements(buff);
+			if (storage_) {
+				if constexpr (std::is_nothrow_move_constructible_v<Ty> || !std::is_copy_constructible_v<Ty>)
+					std::uninitialized_move_n(storage_, size_, newStorage);
+				else
+					std::uninitialized_copy_n(storage_, size_, newStorage);
 
-				if constexpr (!std::is_trivially_destructible_v<Ty>) std::destroy_n(this->storage_, this->size_);
-				this->allocator_.deallocate(this->storage_, this->capacity_);
+				if constexpr (!std::is_trivially_destructible_v<Ty>)
+					std::destroy_n(storage_, size_);
+				allocator_.deallocate(storage_, capacity_);
 			}
 
-			this->storage_ = buff;
-			this->capacity_ = newCapacity;
+			storage_  = newStorage;
+			capacity_ = newCapacity;
 		}
 
 	public:
 		using Iterator = Ty*;
 		using ConstIterator = const Ty*;
 
-		FastArray() noexcept : 
-			storage_(nullptr), size_(0), capacity_(0) 
+		FastArray() noexcept :
+			storage_(nullptr), size_(0), 
+			capacity_(0)
 		{
 			this->resizeImpl(1);
 		}
-		FastArray(const size_t initialCapacity) : 
-			storage_(nullptr), size_(0), capacity_(initialCapacity) 
+		FastArray(const size_t initialCapacity) :
+			storage_(nullptr), size_(0), 
+			capacity_(initialCapacity)
 		{
 			this->resizeImpl(initialCapacity);
 		}
-		FastArray(const std::initializer_list<Ty>& initList) : 
-			storage_(nullptr), size_(initList.size()), capacity_(initList.size() * 2) 
+		FastArray(const std::initializer_list<Ty>& initList) :
+			storage_(nullptr), size_(initList.size()), 
+			capacity_(initList.size() * 2)
 		{
 			this->storage_ = this->allocator_.allocate(this->capacity_);
 			if constexpr (std::is_trivially_copyable_v<Ty>) {
@@ -74,13 +80,15 @@ namespace spider_engine {
 				std::uninitialized_copy(initList.begin(), initList.end(), this->storage_);
 			}
 		}
-		FastArray(Ty*          storage, 
-				  const size_t size, 
-				  const size_t capacity) : 
-			storage_(storage), size_(size), capacity_(capacity) 
+		FastArray(Ty*	       storage,
+				  const size_t size,
+				  const size_t capacity) :
+			storage_(storage), 
+			size_(size), 
+			capacity_(capacity)
 		{}
-		FastArray(const FastArray& other) : 
-			storage_(nullptr), size_(other.size_), capacity_(other.capacity_) 
+		FastArray(const FastArray& other) :
+			storage_(nullptr), size_(other.size_), capacity_(other.capacity_)
 		{
 			if (this->size_ > 0) {
 				this->storage_ = this->allocator_.allocate(this->capacity_);
@@ -89,16 +97,21 @@ namespace spider_engine {
 				else std::uninitialized_copy_n(other.storage_, other.size_, this->storage_);
 			}
 		}
-		FastArray(FastArray&& other) noexcept :
-			storage_(other.storage_), size_(other.size_), capacity_(other.capacity_)
+		template <typename U>
+		FastArray(FastArray<U>&& other) noexcept :
+			storage_(other.storage_), 
+			size_(other.size_), 
+			capacity_(other.capacity_)
 		{
 			other.storage_  = nullptr;
 			other.size_     = 0;
 			other.capacity_ = 0;
 		}
 		template <typename U>
-		FastArray(const FastArray<U>& other) : 
-			storage_(nullptr), size_(other.size()), capacity_(other.capacity()) 
+		FastArray(const FastArray<U>& other) :
+			storage_(nullptr), 
+			size_(other.size()), 
+			capacity_(other.capacity())
 		{
 			if (this->size_ > 0) {
 				this->storage_ = this->allocator_.allocate(this->capacity_);
@@ -108,9 +121,9 @@ namespace spider_engine {
 		}
 
 		~FastArray() {
-			if (this->storage_) {
-				if constexpr (!std::is_trivially_destructible_v<Ty>) std::destroy_n(this->storage_, this->size_);
-				this->allocator_.deallocate(this->storage_, this->capacity_);
+			if (storage_) {
+				if constexpr (!std::is_trivially_destructible_v<Ty>) std::destroy_n(storage_, size_);
+				allocator_.deallocate(storage_, capacity_);
 			}
 		}
 
@@ -118,14 +131,14 @@ namespace spider_engine {
 			this->resizeImpl(newSize);
 		}
 
-		template <typename Ty>
-		void pushBack(Ty&& value) {
-			if (this->size_ + 1 > this->capacity_) this->resizeImpl(this->capacity_ << 1);
+		template <typename U>
+		void pushBack(U&& value) {
+			if (this->size_ + 1 > this->capacity_)
+				this->resizeImpl(this->capacity_ << 1);
 
-			new (this->storage_ + this->size_) Ty(std::forward<Ty>(value));
+			new (this->storage_ + this->size_) Ty(std::forward<U>(value));
 			++this->size_;
 		}
-
 		template <typename... Args>
 		void emplaceBack(Args&&... args) {
 			if (this->size_ + 1 > this->capacity_) this->resizeImpl(this->capacity_ << 1);
@@ -174,17 +187,21 @@ namespace spider_engine {
 			return this->storage_ + this->size_;
 		}
 
-		Ty* data() { 
-			return this->storage_; 
+		Ty* data() {
+			return this->storage_;
 		}
-		const Ty* data() const { 
-			return this->storage_; 
+		const Ty* data() const {
+			return this->storage_;
 		}
 
-		size_t size() const {
+		const bool empty() const {
+			return this->size_ == 0;
+		}
+
+		const size_t size() const {
 			return this->size_;
 		}
-		size_t capacity() const {
+		const size_t capacity() const {
 			return this->capacity_;
 		}
 
@@ -217,7 +234,7 @@ namespace spider_engine {
 				this->storage_ = nullptr;
 			}
 
-			this->size_ = initList.size();
+			this->size_     = initList.size();
 			this->capacity_ = this->size_ * 2;
 
 			if (this->capacity_ > 0) {
@@ -241,7 +258,7 @@ namespace spider_engine {
 					this->allocator_.deallocate(this->storage_, this->capacity_);
 				}
 
-				this->size_ = other.size_;
+				this->size_     = other.size_;
 				this->capacity_ = other.capacity_;
 
 				if (this->size_ > 0) {
@@ -260,12 +277,12 @@ namespace spider_engine {
 					this->allocator_.deallocate(this->storage_, this->capacity_);
 				}
 
-				this->storage_ = other.storage_;
-				this->size_ = other.size_;
+				this->storage_  = other.storage_;
+				this->size_     = other.size_;
 				this->capacity_ = other.capacity_;
 
-				other.storage_ = nullptr;
-				other.size_ = 0;
+				other.storage_  = nullptr;
+				other.size_     = 0;
 				other.capacity_ = 0;
 			}
 			return *this;

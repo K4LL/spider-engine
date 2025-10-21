@@ -22,4 +22,10 @@ namespace spider_engine {
 
 	template <typename FirstTy, typename SecondTy>
 	concept DifferentFrom = std::is_same_v<FirstTy, SecondTy> == false;
+
+	template <typename Ty>
+	concept Callable = std::is_invocable_v<Ty>;
+
+	template <typename F, typename R, typename... Args>
+	concept CallableAs = std::is_invocable_r_v<R, F, Args...>;
 }

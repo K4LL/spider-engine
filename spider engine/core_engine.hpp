@@ -109,7 +109,6 @@ namespace spider_engine::core_engine {
 			compiler_ = std::make_unique<d3dx12::DX12Compiler>(&world_, *renderer_);
 
 			camera_ = std::make_unique<spider_engine::rendering::Camera>(window_->width_, window_->height_);
-			std::cout << "HEw";
 		}
 		void initializeDebugSystems(const bool enableLogs     = true,
 									const bool enableWarnings = true,
