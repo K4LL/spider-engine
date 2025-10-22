@@ -1,10 +1,3 @@
-#pragma once
-#include <print>
-#include <cassert>
-#include <windows.h>
-#include <d3d12.h>
-#include <dxgi1_6.h>
-#include <d3dcompiler.h>
 #include <DirectXMath.h>
 #include <DirectXColors.h>
 #include <wrl/client.h>
@@ -55,11 +48,14 @@ namespace std {
 			return std::hash<std::string>()(k.first) ^ (std::hash<uint8_t>()(static_cast<uint8_t>(k.second)) << 1);
 		}
 	};
-} 
+}
 
 #include "flat_hash_map.hpp"
 
 namespace spider_engine::d3dx12 {
+	class DX12Renderer;
+	class DX12Compiler;
+
 	struct Vertex {
 		DirectX::XMFLOAT3 position;
 		DirectX::XMFLOAT3 normal;
@@ -136,123 +132,39 @@ namespace spider_engine::d3dx12 {
 	};
 
 	class ShaderDescription {
-	private:
-		std::shared_ptr<std::vector<std::vector<uint8_t>>> shaderResourceViewData_;
-		std::shared_ptr<std::vector<Texture2D>>            shaderResourceViewTextures_;
-
 	public:
 		std::wstring pathOrSource;
 		ShaderStage  stage;
 
 		ShaderDescription() :
-			shaderResourceViewData_(std::make_shared<std::vector<std::vector<uint8_t>>>()),
-			shaderResourceViewTextures_(std::make_shared<std::vector<Texture2D>>()),
 			stage(ShaderStage::STAGE_ALL)
 		{}
 
 		ShaderDescription(const std::wstring& pathOrSource,
 						  const ShaderStage   shaderStage) :
 			pathOrSource(pathOrSource),
-			shaderResourceViewData_(std::make_shared<std::vector<std::vector<uint8_t>>>()),
-			shaderResourceViewTextures_(std::make_shared<std::vector<Texture2D>>()),
 			stage(shaderStage)
 		{}
-		ShaderDescription(const std::wstring&				       pathOrSource,
-						  const ShaderStage				           stage,
-					      const std::vector<std::vector<uint8_t>>& shaderResourceViewData) :
-			pathOrSource(pathOrSource),
-			shaderResourceViewData_(std::make_shared<std::vector<std::vector<uint8_t>>>(shaderResourceViewData)),
-			stage(stage)
-		{}
-		ShaderDescription(const std::wstring&         pathOrSource,
-						  const ShaderStage	          stage,
-						  const std::vector<Texture2D>& textures) :
-			pathOrSource(pathOrSource),
-			shaderResourceViewTextures_(std::make_shared<std::vector<Texture2D>>(textures)),
-			stage(stage)
-		{}
-		ShaderDescription(std::wstring		     pathOrSource,
-						  ShaderStage		     stage,
-						  std::vector<Texture2D>&& textures) :
-			pathOrSource(pathOrSource),
-			shaderResourceViewTextures_(std::make_shared<std::vector<Texture2D>>(textures)),
-			stage(stage)
-		{}
 		ShaderDescription(const ShaderDescription& other) :
-			shaderResourceViewData_(other.shaderResourceViewData_),
-			shaderResourceViewTextures_(other.shaderResourceViewTextures_),
 			pathOrSource(other.pathOrSource),
 			stage(other.stage)
 		{}
 		ShaderDescription(ShaderDescription&& other) noexcept :
-			shaderResourceViewData_(std::move(other.shaderResourceViewData_)),
-			shaderResourceViewTextures_(std::move(other.shaderResourceViewTextures_)),
-			pathOrSource(std::move(other.pathOrSource)),
+			pathOrSource(other.pathOrSource),
 			stage(other.stage)
 		{}
 
-		template <typename Ty>
-		void setShaderResourceViewData(const std::vector<std::vector<Ty>>& data) {
-			shaderResourceViewData_ = data;
-		}
-
-		template <typename Ty>
-		void setShaderResourceViewData(std::vector<std::vector<Ty>>&& data) {
-			shaderResourceViewData_ = data;
-		}
-		template <typename Ty>
-		void addShaderResourceViewData(std::vector<Ty>& data) {
-			shaderResourceViewData_->push_back(data);
-		}
-		template <typename Ty>
-		void addShaderResourceViewData(std::vector<Ty>&& data) {
-			shaderResourceViewData_->push_back(std::move(data));
-		}
-
-		void setShaderResourceViewTextures(const std::vector<Texture2D>& textures) {
-			*shaderResourceViewTextures_ = textures;
-		}
-
-		void setShaderResourceViewTextures(std::vector<Texture2D>&& textures) {
-			*shaderResourceViewTextures_ = std::move(textures);
-		}
-		void addShaderResourceViewTexture(const Texture2D& texture) {
-			shaderResourceViewTextures_->push_back(texture);
-		}
-		void addShaderResourceViewTexture(Texture2D&& texture) {
-			shaderResourceViewTextures_->push_back(std::move(texture));
-		}
-
-		template <typename Ty>
-		std::vector<std::vector<Ty>> getShaderResourceViewData() {
-			return std::vector<std::vector<Ty>>(shaderResourceViewData_);
-		}
-		std::vector<std::vector<uint8_t>>* getShaderResourceViewRawData() {
-			return shaderResourceViewData_.get();
-		}
-		const std::vector<std::vector<uint8_t>> getConstShaderResourceViewRawData() const {
-			return *shaderResourceViewData_.get();
-		}
-
-		std::vector<Texture2D>* getShaderResourceViewTextures() {
-			return shaderResourceViewTextures_.get();
-		}
-
 		ShaderDescription& operator=(const ShaderDescription& other) {
 			if (this != &other) {
-				shaderResourceViewData_     = other.shaderResourceViewData_;
-				shaderResourceViewTextures_ = other.shaderResourceViewTextures_;
-				pathOrSource                = other.pathOrSource;
-				stage                       = other.stage;
+				pathOrSource = other.pathOrSource;
+				stage        = other.stage;
 			}
 			return *this;
 		}
 		ShaderDescription& operator=(ShaderDescription&& other) noexcept {
 			if (this != &other) {
-				shaderResourceViewData_     = std::move(other.shaderResourceViewData_);
-				shaderResourceViewTextures_ = std::move(other.shaderResourceViewTextures_);
-				pathOrSource                = std::move(other.pathOrSource);
-				stage                       = other.stage;
+				pathOrSource = std::move(other.pathOrSource);
+				stage        = other.stage;
 			}
 			return *this;
 		}
@@ -452,8 +364,8 @@ namespace spider_engine::d3dx12 {
 		Microsoft::WRL::ComPtr<ID3D12ShaderReflection> rawReflection;
 		std::vector<ConstantBufferData>				   constantBuffers;
 		std::vector<ShaderResourceViewData>		       shaderResourceViews;
-		std::vector<SamplerData>					       samplers;
-		std::vector<ResourceBindingData>                 shaderResourceBindingData;
+		std::vector<SamplerData>					   samplers;
+		std::vector<ResourceBindingData>               shaderResourceBindingData;
 	};
 
 	struct Mesh {
@@ -474,75 +386,6 @@ namespace spider_engine::d3dx12 {
 
 		ShaderStage stage;
 		ShaderData  data;
-	};
-	class RenderPipeline {
-	private:
-		DX12Renderer* renderer_;
-
-		std::vector<Shader> shaders_;
-
-		ska::flat_hash_map<std::pair<std::string, ShaderStage>, ConstantBuffer>     requiredConstantBuffers_;
-		ska::flat_hash_map<std::pair<std::string, ShaderStage>, ShaderResourceView> requiredShaderResourceViews_;
-		ska::flat_hash_map<std::pair<std::string, ShaderStage>, Sampler>            requiredSamplers_;
-
-		Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState_;
-		Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature_;
-		D3D12_RESOURCE_BARRIER                      barrier_;
-
-	public:
-		friend class DX12Renderer;
-		friend class DX12Compiler;
-
-		std::vector<std::tuple<std::string, ShaderStage, size_t>> getRequirements() {
-			std::vector<std::tuple<std::string, ShaderStage, size_t>> result;
-
-			for (auto& [key, constantBuffer] : requiredConstantBuffers_) {
-				result.emplace_back(std::make_tuple(
-					constantBuffer.getName(),
-					constantBuffer.getStage(),
-					constantBuffer.getSizeInBytes()
-				));
-			}
-
-			return result;
-		}
-		template <typename Ty, typename Policy = DefaultPolicy>
-			requires (SameAs<Policy, DefaultPolicy>)
-		void bindBuffer(const std::string& name, const ShaderStage stage, Ty&& data) {
-			auto it = requiredConstantBuffers_.find(std::make_pair(name, stage));
-			if (it == requiredConstantBuffers_.end()) {
-				throw std::runtime_error("Could not find buffer");
-				return;
-			}
-
-			it->second.copy(std::forward<Ty>(data));
-		}
-		template <typename Ty, typename Policy = DefaultPolicy>
-			requires (SameAs<Policy, NoThrowPolicy>)
-		void bindBuffer(const std::string& name, const ShaderStage stage, Ty&& data) noexcept {
-			auto it = requiredConstantBuffers_.find(std::make_pair(name, stage));
-			if (it == requiredConstantBuffers_.end()) return;
-
-			it->second.copy(std::forward<Ty>(data));
-		}
-		template <typename Policy = DefaultPolicy>
-			requires (SameAs<Policy, DefaultPolicy>)
-		ConstantBuffer* getBufferPtr(const std::string& name, const ShaderStage stage) noexcept {
-			auto it = requiredConstantBuffers_.find(std::make_pair(name, stage));
-			if (it == requiredConstantBuffers_.end()) {
-				throw std::runtime_error("Could not find buffer");
-				return nullptr;
-			}
-			return &it->second;
-		}
-		template <typename Policy = DefaultPolicy>
-			requires (SameAs<Policy, NoThrowPolicy>)
-		ConstantBuffer* getBufferPtr(const std::string& name, const ShaderStage stage) noexcept {
-			auto it = requiredConstantBuffers_.find(std::make_pair(name, stage));
-			if (it == requiredConstantBuffers_.end()) return nullptr;
-
-			return &it->second;
-		}
 	};
 
 	/**
@@ -704,14 +547,14 @@ namespace spider_engine::d3dx12 {
 		HeapAllocator(Microsoft::WRL::ComPtr<ID3D12Device> device,
 					  const size_t defaultDescriptorHeapSize) :
 			device_(device),
-			defaultDescriptorHeapSize_(defaultDescriptorHeapSize) 
+			defaultDescriptorHeapSize_(defaultDescriptorHeapSize)
 		{}
 		HeapAllocator(const HeapAllocator&)     = delete;
 		HeapAllocator(HeapAllocator&&) noexcept = default;
 
-		DescriptorHeap* createDescriptorHeap(const std::string&				   descriptorHeapName,
+		DescriptorHeap* createDescriptorHeap(const std::string& descriptorHeapName,
 											 const D3D12_DESCRIPTOR_HEAP_TYPE  descriptorHeapType,
-											 const D3D12_DESCRIPTOR_HEAP_FLAGS descriptorHeapFlags) 
+											 const D3D12_DESCRIPTOR_HEAP_FLAGS descriptorHeapFlags)
 		{
 			DescriptorHeap descriptorHeap;
 			descriptorHeap.capacity					     = defaultDescriptorHeapSize_;
@@ -726,7 +569,7 @@ namespace spider_engine::d3dx12 {
 			descriptorHeapDesc.Flags                      = descriptorHeapFlags;
 			SPIDER_DX12_ERROR_CHECK(
 				device_->CreateDescriptorHeap(
-					&descriptorHeapDesc, 
+					&descriptorHeapDesc,
 					IID_PPV_ARGS(&descriptorHeap.heap)
 				)
 			);
@@ -735,14 +578,14 @@ namespace spider_engine::d3dx12 {
 			descriptorHeap.gpuHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(descriptorHeap.heap->GetGPUDescriptorHandleForHeapStart());
 
 			return descriptorHeaps_.emplace(
-				descriptorHeapName, 
+				descriptorHeapName,
 				std::make_unique<DescriptorHeap>(descriptorHeap)
 			).first->second.get();
 		}
-		DescriptorHeap* createDescriptorHeap(const std::string&                descriptorHeapName,
-							 				 const size_t					   descriptorHeapSize, 
-							 				 const D3D12_DESCRIPTOR_HEAP_TYPE  descriptorHeapType,
-							 				 const D3D12_DESCRIPTOR_HEAP_FLAGS descriptorHeapFlags)
+		DescriptorHeap* createDescriptorHeap(const std::string& descriptorHeapName,
+											 const size_t					   descriptorHeapSize,
+											 const D3D12_DESCRIPTOR_HEAP_TYPE  descriptorHeapType,
+											 const D3D12_DESCRIPTOR_HEAP_FLAGS descriptorHeapFlags)
 		{
 			DescriptorHeap descriptorHeap;
 			descriptorHeap.capacity						 = descriptorHeapSize;
@@ -766,17 +609,17 @@ namespace spider_engine::d3dx12 {
 			descriptorHeap.gpuHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(descriptorHeap.heap->GetGPUDescriptorHandleForHeapStart());
 
 			return descriptorHeaps_.emplace(
-				descriptorHeapName, 
+				descriptorHeapName,
 				std::make_unique<DescriptorHeap>(descriptorHeap)
 			).first->second.get();
 		}
 
 		template <typename Fn, typename... Args>
-		requires (CallableAs<Fn, void, DescriptorHeap*, Args...>)
-		void writeOnDescriptorHeap(const std::string& id, 
-								   size_t			  operationCount, 
-								   Fn&&				  fn, 
-								   Args&&...		  args) 
+			requires (CallableAs<Fn, void, DescriptorHeap*, Args...>)
+		void writeOnDescriptorHeap(const std::string& id,
+								   size_t			  operationCount,
+								   Fn&& fn,
+								   Args&&...		  args)
 		{
 			auto it = descriptorHeaps_.find(id);
 			if (it == descriptorHeaps_.end()) throw std::runtime_error("Descriptor Heap not found");
@@ -786,7 +629,7 @@ namespace spider_engine::d3dx12 {
 			descriptorHeap->size += operationCount;
 			if (descriptorHeap->size > descriptorHeap->capacity) {
 				reallocateDescriptorHeap(
-					descriptorHeap, 
+					descriptorHeap,
 					std::max(descriptorHeap->capacity * 2, descriptorHeap->size)
 				);
 			}
@@ -798,16 +641,16 @@ namespace spider_engine::d3dx12 {
 			}
 		}
 		template <typename Fn, typename... Args>
-		requires (CallableAs<Fn, void, DescriptorHeap*, Args...>)
-		void writeOnDescriptorHeap(DescriptorHeap* descriptorHeap, 
-								   size_t		   operationCount, 
-								   Fn&&			   fn, 
-								   Args&&...	   args) 
+			requires (CallableAs<Fn, void, DescriptorHeap*, Args...>)
+		void writeOnDescriptorHeap(DescriptorHeap* descriptorHeap,
+								   size_t		   operationCount,
+								   Fn&& fn,
+								   Args&&...	   args)
 		{
 			descriptorHeap->size += operationCount;
 			if (descriptorHeap->size > descriptorHeap->capacity) {
 				reallocateDescriptorHeap(
-					descriptorHeap, 
+					descriptorHeap,
 					std::max(descriptorHeap->capacity * 2, descriptorHeap->size)
 				);
 			}
@@ -829,5 +672,176 @@ namespace spider_engine::d3dx12 {
 
 		HeapAllocator& operator=(const HeapAllocator&)     = delete;
 		HeapAllocator& operator=(HeapAllocator&&) noexcept = default;
+	};
+
+	struct RenderPipelineRequirements {
+		std::vector<std::string_view> name;
+		std::vector<ShaderStage>      stage;
+		std::vector<std::size_t>      size;
+	};
+
+	class RenderPipeline {
+	private:
+		DX12Renderer* renderer_;
+
+		ShaderResourceView(DX12Renderer::* createShaderResourceViewForStructuredDataFunction_)(
+			const std::string& name,
+			const std::vector<uint8_t>& data,
+			const ShaderStage stage
+		);
+		ShaderResourceView(DX12Renderer::* createShaderResourceViewForTexture2DFunction_)(
+			const std::string& name,
+			Texture2D& data,
+			const ShaderStage stage);
+
+		std::vector<Shader> shaders_;
+
+		ska::flat_hash_map<std::pair<std::string, ShaderStage>, ConstantBuffer>     requiredConstantBuffers_;
+		ska::flat_hash_map<std::pair<std::string, ShaderStage>, ShaderResourceView> requiredShaderResourceViews_;
+		ska::flat_hash_map<std::pair<std::string, ShaderStage>, Sampler>            requiredSamplers_;
+
+		Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState_;
+		Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature_;
+		D3D12_RESOURCE_BARRIER                      barrier_;
+
+	public:
+		friend class DX12Renderer;
+		friend class DX12Compiler;
+
+		std::vector<std::tuple<std::string, ShaderStage, size_t>> getRequirements() {
+			std::vector<std::tuple<std::string, ShaderStage, size_t>> result;
+
+			for (auto& [key, constantBuffer] : requiredConstantBuffers_) {
+				result.emplace_back(std::make_tuple(
+					constantBuffer.getName(),
+					constantBuffer.getStage(),
+					constantBuffer.getSizeInBytes()
+				));
+			}
+
+			return result;
+		}
+
+		template <typename Ty, typename Policy = DefaultPolicy>
+		requires (SameAs<Policy, DefaultPolicy>)
+		void bindBuffer(const std::string& name,
+						const ShaderStage  stage,
+						Ty&& data)
+		{
+			auto it = requiredConstantBuffers_.find(std::make_pair(name, stage));
+			if (it == requiredConstantBuffers_.end()) {
+				throw std::runtime_error("Could not find buffer");
+				return;
+			}
+
+			it->second.copy(std::forward<Ty>(data));
+		}
+		template <typename Ty, typename Policy = DefaultPolicy>
+		requires (SameAs<Policy, NoThrowPolicy>)
+		void bindBuffer(const std::string& name,
+						const ShaderStage  stage,
+						Ty&& data) noexcept
+		{
+			auto it = requiredConstantBuffers_.find(std::make_pair(name, stage));
+			if (it == requiredConstantBuffers_.end()) return;
+
+			it->second.copy(std::forward<Ty>(data));
+		}
+		template <typename Policy = DefaultPolicy>
+		requires (SameAs<Policy, DefaultPolicy>)
+		ConstantBuffer* getBufferPtr(const std::string& name,
+									 const ShaderStage  stage) noexcept
+		{
+			auto it = requiredConstantBuffers_.find(std::make_pair(name, stage));
+			if (it == requiredConstantBuffers_.end()) {
+				throw std::runtime_error("Could not find buffer");
+				return nullptr;
+			}
+			return &it->second;
+		}
+		template <typename Policy = DefaultPolicy>
+		requires (SameAs<Policy, NoThrowPolicy>)
+		ConstantBuffer* getBufferPtr(const std::string& name,
+									 const ShaderStage  stage) noexcept
+		{
+			auto it = requiredConstantBuffers_.find(std::make_pair(name, stage));
+			if (it == requiredConstantBuffers_.end()) return nullptr;
+
+			return &it->second;
+		}
+
+		template <typename Ty, typename Policy = DefaultPolicy>
+		requires (SameAs<Policy, DefaultPolicy>)
+		void bindShaderResource(const std::string& name,
+								const ShaderStage  stage,
+								Ty&&               data)
+		{
+			auto it = requiredShaderResourceViews_.find(std::make_pair(name, stage));
+			if (it == requiredShaderResourceViews_.end()) {
+				throw std::runtime_error("Could not find shader resource");
+				return;
+			}
+
+			it->second = (renderer_->*createShaderResourceViewForStructuredDataFunction_)(name, data, stage);
+		}
+		template <typename Ty, typename Policy = DefaultPolicy>
+		requires (SameAs<Policy, NoThrowPolicy>)
+		void bindShaderResource(const std::string& name,
+								const ShaderStage  stage,
+								Ty&&			   data) noexcept
+		{
+			auto it = requiredShaderResourceViews_.find(std::make_pair(name, stage));
+			if (it == requiredShaderResourceViews_.end()) return;
+
+			it->second = (renderer_->*createShaderResourceViewForStructuredDataFunction_)(name, data, stage);
+		}
+		template <typename Policy = DefaultPolicy>
+		requires (SameAs<Policy, DefaultPolicy>)
+		void bindShaderResourceForTexture2D(const std::string& name,
+								            const ShaderStage  stage,
+								            Texture2D&         data)
+		{
+			auto it = requiredShaderResourceViews_.find(std::make_pair(name, stage));
+			if (it == requiredShaderResourceViews_.end()) {
+				throw std::runtime_error("Could not find shader resource");
+				return;
+			}
+
+			it->second = (renderer_->*createShaderResourceViewForTexture2DFunction_)(name, data, stage);
+		}
+		template <typename Policy = DefaultPolicy>
+		requires (SameAs<Policy, NoThrowPolicy>)
+		void bindShaderResourceForTexture2D(const std::string& name,
+											const ShaderStage  stage,
+											Texture2D&         data)
+		{
+			auto it = requiredShaderResourceViews_.find(std::make_pair(name, stage));
+			if (it == requiredShaderResourceViews_.end()) return;
+
+			it->second = (renderer_->*createShaderResourceViewForTexture2DFunction_)(name, data, stage);
+		}
+
+		template <typename Policy = DefaultPolicy>
+		requires (SameAs<Policy, DefaultPolicy>)
+		ShaderResourceView* getShaderResourcePtr(const std::string& name,
+												 const ShaderStage  stage) noexcept
+		{
+			auto it = requiredShaderResourceViews_.find(std::make_pair(name, stage));
+			if (it == requiredShaderResourceViews_.end()) {
+				throw std::runtime_error("Could not find shader resource");
+				return nullptr;
+			}
+			return &it->second;
+		}
+		template <typename Policy = DefaultPolicy>
+		requires (SameAs<Policy, NoThrowPolicy>)
+		ShaderResourceView* getShaderResourcePtr(const std::string& name,
+												 const ShaderStage  stage) noexcept
+		{
+			auto it = requiredShaderResourceViews_.find(std::make_pair(name, stage));
+			if (it == requiredShaderResourceViews_.end()) return nullptr;
+
+			return &it->second;
+		}
 	};
 }

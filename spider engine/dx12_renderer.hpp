@@ -1051,9 +1051,9 @@ namespace spider_engine::d3dx12 {
 
 			return shaderResourceView;
 		}
-		ShaderResourceView createShaderResourceView(const std::string& name,
-													Texture2D&         data,
-													const ShaderStage  stage) 
+		ShaderResourceView createShaderResourceViewForTexture2D(const std::string& name,
+															    Texture2D&         data,
+															    const ShaderStage  stage) 
 		{
 			ShaderResourceView shaderResourceView;
 
@@ -1068,9 +1068,10 @@ namespace spider_engine::d3dx12 {
 				shaderResourceView.cpuHandle_   = descriptorHeap->cpuHandle;
 				shaderResourceView.gpuHandle_   = descriptorHeap->gpuHandle;
 				shaderResourceView.index_       = 0;
+				shaderResourceView.resource_    = data.resource;
 
 				// Copy data to the resource
-				UINT8* dataBegin = nullptr;
+				UINT8*        dataBegin = nullptr;
 				CD3DX12_RANGE readRange(0, 0);
 
 				D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescription = {};
@@ -1182,9 +1183,9 @@ namespace spider_engine::d3dx12 {
 
 			return shaderResourceViews;
 		}
-		ShaderResourceViews createShaderResourceViews(std::vector<std::string>& names,
-													  std::vector<Texture2D>&   data,
-													  const ShaderStage         stage) 
+		ShaderResourceViews createShaderResourceViewsForTexture2D(std::vector<std::string>& names,
+																  std::vector<Texture2D>&   data,
+																  const ShaderStage         stage) 
 		{
 			const size_t count = data.size();
 			if (count == 0) return ShaderResourceViews{};
@@ -2044,25 +2045,6 @@ namespace spider_engine::d3dx12 {
 			}
 		}
 
-		std::vector<D3D12_ROOT_PARAMETER> createRootParameters(ShaderData& shaderData) {
-			// Create references to constant buffers and resource bindings
-			auto& cbuffers = shaderData.constantBuffers;
-			auto& bindings = shaderData.shaderResourceBindingData;
-
-			std::vector<D3D12_ROOT_PARAMETER> rootParameters;
-			
-			// Populate root parameters with resource bindings
-			for (auto binding = bindings.begin(); binding != bindings.end(); ++binding) {
-				D3D12_ROOT_PARAMETER rootParameter = {};
-				rootParameter.ParameterType		   = mapResourceTypeToRootParameterType(binding->type);
-				rootParameter.Descriptor		   = { binding->bindPoint, binding->space };
-				rootParameter.ShaderVisibility     = static_cast<D3D12_SHADER_VISIBILITY>(binding->stage);
-				rootParameters.push_back(std::move(rootParameter));
-			}
-
-			return rootParameters;
-		}
-
 	public:
 		DX12Compiler(flecs::world* world,
 					 DX12Renderer& renderer) : 
@@ -2081,8 +2063,10 @@ namespace spider_engine::d3dx12 {
 		RenderPipeline createRenderPipeline(std::vector<ShaderDescription>& descriptions) {
 			HRESULT hr = 0;
 
-			RenderPipeline renderPipeline = {};
-			renderPipeline.renderer_      = renderer_;
+			RenderPipeline renderPipeline									  = {};
+			renderPipeline.renderer_										  = renderer_;
+			renderPipeline.createShaderResourceViewForStructuredDataFunction_ = &DX12Renderer::createShaderResourceView;
+			renderPipeline.createShaderResourceViewForTexture2DFunction_      = &DX12Renderer::createShaderResourceViewForTexture2D;
 
 			// Create Pipeline State Object (PSO) description
 			D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
@@ -2101,9 +2085,9 @@ namespace spider_engine::d3dx12 {
 			psoDesc.RTVFormats[0]					   = DXGI_FORMAT_R8G8B8A8_UNORM;
 			psoDesc.SampleDesc.Count		           = 1;
 
-			std::vector<size_t> cbvIndices;
-			std::vector<size_t> srvIndices;
-			std::vector<size_t> samplerIndices;
+			size_t cbvCount		= 0;
+			size_t srvCount		= 0;
+			size_t samplerCount = 0;
 
 			// Iterate over all shader descriptions, compile and reflect them, create root parameters and populate the PSO description
 			std::vector<D3D12_ROOT_PARAMETER> parameters;
@@ -2115,56 +2099,61 @@ namespace spider_engine::d3dx12 {
 				shader.pathOrSource = it->pathOrSource;
 				shader.stage        = it->stage;
 				shader.data         = reflect(shader.shader.Get(), it->stage);
-				
+
 				// Create root parameters
-				
 				std::vector<D3D12_ROOT_PARAMETER> parameters;
 				parameters.reserve(shader.data.shaderResourceBindingData.size());
-
 				for (size_t i = 0; i < shader.data.shaderResourceBindingData.size(); ++i) {
 					auto& binding = shader.data.shaderResourceBindingData[i];
+					rootIndexMap.emplace(std::make_pair(binding.name, binding.stage), binding.bindPoint);
 					switch (binding.type) {
-						case D3D12_DESCRIPTOR_RANGE_TYPE_CBV:      cbvIndices.push_back(i); break;
-						case D3D12_DESCRIPTOR_RANGE_TYPE_SRV:      srvIndices.push_back(i); break;
-						case D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER:  samplerIndices.push_back(i); break;
+						case D3D12_DESCRIPTOR_RANGE_TYPE_CBV:
+							++cbvCount;
+							break;
+						case D3D12_DESCRIPTOR_RANGE_TYPE_SRV:
+							++srvCount;
+							break;
+						case D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER:
+							++samplerCount;
+							break;
 					}
 				}
 
 				switch (it->stage)
 				{
-				case ShaderStage::STAGE_ALL:
-					throw std::runtime_error("Impossible to create shader to all stages at once.");
-					break;
-				case ShaderStage::STAGE_VERTEX:
-					psoDesc.VS = { shader.shader->GetBufferPointer(), shader.shader->GetBufferSize() };
-					break;
-				case ShaderStage::STAGE_HULL:
-					break;
-				case ShaderStage::STAGE_DOMAIN:
-					break;
-				case ShaderStage::STAGE_GEOMETRY:
-					break;
-				case ShaderStage::STAGE_PIXEL:
-					psoDesc.PS = { shader.shader->GetBufferPointer(), shader.shader->GetBufferSize() };
-					break;
-				case ShaderStage::STAGE_AMPLIFICATION:
-					break;
-				case ShaderStage::STAGE_MESH:
-					break;
-				default:
-					break;
+					case ShaderStage::STAGE_ALL:
+						throw std::runtime_error("Impossible to create shader to all stages at once.");
+						break;
+					case ShaderStage::STAGE_VERTEX:
+						psoDesc.VS = { shader.shader->GetBufferPointer(), shader.shader->GetBufferSize() };
+						break;
+					case ShaderStage::STAGE_HULL:
+						break;
+					case ShaderStage::STAGE_DOMAIN:
+						break;
+					case ShaderStage::STAGE_GEOMETRY:
+						break;
+					case ShaderStage::STAGE_PIXEL:
+						psoDesc.PS = { shader.shader->GetBufferPointer(), shader.shader->GetBufferSize() };
+						break;
+					case ShaderStage::STAGE_AMPLIFICATION:
+						break;
+					case ShaderStage::STAGE_MESH:
+						break;
+					default:
+						break;
 				}
 				renderPipeline.shaders_.push_back(std::move(shader));
 			}
 
 			CD3DX12_DESCRIPTOR_RANGE ranges[2];
 
-			ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, cbvIndices.size(), 0, 0);
+			ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, cbvCount, 0, 0);
 
-			ranges[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, srvIndices.size(), 0, 0);
+			ranges[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, srvCount, 0, 0);
 
 			CD3DX12_DESCRIPTOR_RANGE samplerRange;
-			samplerRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER, samplerIndices.size(), 0);
+			samplerRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER, srvCount, 0);
 
 			CD3DX12_ROOT_PARAMETER rootParameters[2];
 			rootParameters[0].InitAsDescriptorTable(_countof(ranges), ranges, D3D12_SHADER_VISIBILITY_ALL);
@@ -2173,12 +2162,13 @@ namespace spider_engine::d3dx12 {
 			CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(
 				_countof(rootParameters),
 				rootParameters,
-				0, nullptr,
+				0,
+				nullptr,
 				D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
 			);
 
 			ComPtr<ID3DBlob> serializedRootSig = nullptr;
-			ComPtr<ID3DBlob> errorBlob = nullptr;
+			ComPtr<ID3DBlob> errorBlob         = nullptr;
 
 			HRESULT serializeHr = D3D12SerializeRootSignature(
 				&rootSigDesc,
@@ -2213,12 +2203,13 @@ namespace spider_engine::d3dx12 {
 
 			// Finalize PSO description
 			psoDesc.pRootSignature = renderPipeline.rootSignature_.Get();
-			
+
 			// Create references to Shaders
 			auto& shaders = renderPipeline.shaders_;
 
 			// Create references to  Constant Buffers
 			auto& requiredConstantBuffers = renderPipeline.requiredConstantBuffers_;
+			std::cout << requiredConstantBuffers.size() << std::endl;
 
 			// Required variables for creating constant buffers
 			std::vector<std::string>     constantBufferNames;
@@ -2262,7 +2253,8 @@ namespace spider_engine::d3dx12 {
 					auto rootIt = rootIndexMap.find(key);
 					if (rootIt != rootIndexMap.end()) {
 						constantBuffer->index_ = rootIt->second;
-					} else {
+					}
+					else {
 						constantBuffer->index_ = index;
 					}
 					requiredConstantBuffers.emplace(
@@ -2277,9 +2269,7 @@ namespace spider_engine::d3dx12 {
 			auto& requiredShaderResourceViews = renderPipeline.requiredShaderResourceViews_;
 
 			// Required variables for creating shader resource views
-			std::vector<std::string>         shaderResourceViewNames;
-			std::vector<ShaderStage>         shaderResourceViewStages;
-			std::vector<ShaderResourceViews> shaderResourceViewArray;
+			std::vector<ShaderResourceView> shaderResourceViewArray;
 
 			// Create Shader Resource Views
 			for (size_t i = 0; i < renderPipeline.shaders_.size(); ++i) {
@@ -2287,64 +2277,30 @@ namespace spider_engine::d3dx12 {
 				auto  shaderResourceViewsSize = shaderResourceViews.size();
 				if (shaderResourceViewsSize == 0) continue;
 
-				// Create an array for names, sizes and stages
-				shaderResourceViewNames.reserve(shaderResourceViewsSize);
-				shaderResourceViewStages.reserve(shaderResourceViewsSize);
-
 				// Populate names, sizes and stages arrays
 				for (uint32_t j = 0; j < shaderResourceViewsSize; ++j) {
 					auto& shaderResourceViewData = shaderResourceViews[j];
 
-					shaderResourceViewNames.push_back(shaderResourceViewData.name);
-					shaderResourceViewStages.push_back(shaders[i].stage);
-				}
-
-				// Get shader resource view required data
-				std::vector<std::vector<uint8_t>> shaderResourceViewRawDataArray;
-				if (descriptions[i].getShaderResourceViewRawData()) {
-					shaderResourceViewRawDataArray = *descriptions[i].getShaderResourceViewRawData();
-				}
-
-				// Get shader resource view required textures
-				std::vector<Texture2D> shaderResourceViewTexturesArray;
-				if (descriptions[i].getShaderResourceViewTextures()) {
-					shaderResourceViewTexturesArray = *descriptions[i].getShaderResourceViewTextures();
-				}
-
-				if (!shaderResourceViewRawDataArray.empty()) {
-					shaderResourceViewArray.push_back(renderer_->createShaderResourceViews(
-						shaderResourceViewNames,
-						shaderResourceViewRawDataArray,
-						renderPipeline.shaders_[i].stage
-					));
-				}
-				if (!shaderResourceViewTexturesArray.empty()) {
-					shaderResourceViewArray.push_back(renderer_->createShaderResourceViews(
-						shaderResourceViewNames,
-						shaderResourceViewTexturesArray,
-						renderPipeline.shaders_[i].stage
-					));
+					ShaderResourceView emptySrv = {};
+					emptySrv.stage_			    = shaders[i].stage;
+					emptySrv.name_				= shaderResourceViewData.name;
+					shaderResourceViewArray.push_back(emptySrv);
 				}
 			}
 			// Finish the shader resource view creation, populating the required Constant Buffers Map
-			for (auto it = shaderResourceViewArray.begin(); it != shaderResourceViewArray.end(); ++it) {
+			for (auto shaderResourceView = shaderResourceViewArray.begin(); shaderResourceView != shaderResourceViewArray.end(); ++shaderResourceView) {
 				size_t index = 0;
-				for (auto shaderResourceView = it->begin; shaderResourceView != it->end; ++shaderResourceView) {
-					// Try to find root parameter index for this shader resource view using its name and stage
-					auto key    = std::make_pair(shaderResourceView->name_, shaderResourceView->stage_);
-					auto rootIt = rootIndexMap.find(key);
-					if (rootIt != rootIndexMap.end()) {
-						shaderResourceView->index_ = rootIt->second;
-					}
-					else {
-						shaderResourceView->index_ = index;
-					}
-					requiredShaderResourceViews.emplace(
-						std::make_pair(shaderResourceView->name_, shaderResourceView->stage_),
-						*shaderResourceView
-					);
-					++index;
+				// Try to find root parameter index for this shader resource view using its name and stage
+				auto key    = std::make_pair(shaderResourceView->name_, shaderResourceView->stage_);
+				auto rootIt = rootIndexMap.find(key);
+				if (rootIt != rootIndexMap.end()) {
+					shaderResourceView->index_ = rootIt->second;
 				}
+				requiredShaderResourceViews.emplace(
+					std::make_pair(shaderResourceView->name_, shaderResourceView->stage_),
+					*shaderResourceView
+				);
+				++index;
 			}
 
 			// Create references to Samplers

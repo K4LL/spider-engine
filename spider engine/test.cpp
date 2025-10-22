@@ -106,12 +106,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
 
     ShaderDescription vertex(vertexShaderSrc, ShaderStage::STAGE_VERTEX);
     ShaderDescription pixel(pixelShaderSrc, ShaderStage::STAGE_PIXEL);
-    pixel.addShaderResourceViewTexture(texture);
 
     descriptions.push_back(std::move(vertex));
     descriptions.push_back(std::move(pixel));
 
 	RenderPipeline pipeline = compiler.createRenderPipeline<UseSourcePolicy>(descriptions);
+
+    pipeline.bindShaderResourceForTexture2D<DefaultPolicy>("myTexture", ShaderStage::STAGE_PIXEL, texture);
 
     Renderizable renderizable = renderer.createRenderizable(cubeVertices, indices);
 	flecs::entity entity      = coreEngine.createEntity("Cube");
