@@ -33,6 +33,12 @@ namespace spider_engine::d3dx12 {
 		TEXTURE_3D   = 3,
 		TEXTURE_CUBE = 4
 	};
+
+	enum class BindingType : uint8_t {
+		CONSTANT_BUFFER = 0,
+		SHADER_RESOURCE = 1,
+		SAMPLER         = 2,
+	};
 }
 
 namespace std {
@@ -45,6 +51,12 @@ namespace std {
 	template<>
 	struct hash<std::pair<std::string, spider_engine::d3dx12::TextureDimension>> {
 		std::size_t operator()(const std::pair<std::string, spider_engine::d3dx12::TextureDimension>& k) const {
+			return std::hash<std::string>()(k.first) ^ (std::hash<uint8_t>()(static_cast<uint8_t>(k.second)) << 1);
+		}
+	};
+	template<>
+	struct hash<std::pair<std::string, spider_engine::d3dx12::BindingType>> {
+		std::size_t operator()(const std::pair<std::string, spider_engine::d3dx12::BindingType>& k) const {
 			return std::hash<std::string>()(k.first) ^ (std::hash<uint8_t>()(static_cast<uint8_t>(k.second)) << 1);
 		}
 	};
@@ -499,7 +511,9 @@ namespace spider_engine::d3dx12 {
 
 		size_t defaultDescriptorHeapSize_;
 
-		void reallocateDescriptorHeap(DescriptorHeap* descriptorHeap, size_t newCapacity) {
+		void reallocateDescriptorHeap(DescriptorHeap* descriptorHeap, 
+									  size_t		  newCapacity) 
+		{
 			DescriptorHeap newDescriptorHeap				= {};
 			newDescriptorHeap.capacity                      = newCapacity;
 			newDescriptorHeap.size                          = descriptorHeap->size;
@@ -509,7 +523,7 @@ namespace spider_engine::d3dx12 {
 
 			D3D12_DESCRIPTOR_HEAP_DESC desc = {};
 			desc.Type						= newDescriptorHeap.descriptorHeapType;
-			desc.NumDescriptors				= static_cast<UINT>(newCapacity);
+			desc.NumDescriptors				= static_cast<uint_t>(newCapacity);
 			desc.Flags						= newDescriptorHeap.descriptorHeapFlags;
 
 			SPIDER_DX12_ERROR_CHECK(device_->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&newDescriptorHeap.heap)));
@@ -615,7 +629,7 @@ namespace spider_engine::d3dx12 {
 		}
 
 		template <typename Fn, typename... Args>
-			requires (CallableAs<Fn, void, DescriptorHeap*, Args...>)
+		requires (CallableAs<Fn, void, DescriptorHeap*, Args...>)
 		void writeOnDescriptorHeap(const std::string& id,
 								   size_t			  operationCount,
 								   Fn&& fn,
@@ -663,6 +677,15 @@ namespace spider_engine::d3dx12 {
 			}
 		}
 
+		void destroyDescriptorHeap(const std::string& descriptorHeapName) {
+			auto it = descriptorHeaps_.find(descriptorHeapName);
+			if (it == descriptorHeaps_.end()) return;
+			it->second->heap->Release();
+		}
+		void destroyDescriptorHeap(DescriptorHeap* descriptorHeap) {
+			descriptorHeap->heap->Release();
+		}
+
 		DescriptorHeap* getDescriptorHeap(const std::string& descriptorHeapName) {
 			auto it = descriptorHeaps_.find(descriptorHeapName);
 			if (it != descriptorHeaps_.end()) return it->second.get();
@@ -675,9 +698,12 @@ namespace spider_engine::d3dx12 {
 	};
 
 	struct RenderPipelineRequirements {
-		std::vector<std::string_view> name;
-		std::vector<ShaderStage>      stage;
-		std::vector<std::size_t>      size;
+		std::vector<std::string_view> constantBufferName;
+		std::vector<ShaderStage>      constantBufferStage;
+		std::vector<std::size_t>      constantBufferSize;
+
+		std::vector<std::string_view> shaderResourceName;
+		std::vector<ShaderStage>      shaderResourceStage;
 	};
 
 	class RenderPipeline {
@@ -685,14 +711,14 @@ namespace spider_engine::d3dx12 {
 		DX12Renderer* renderer_;
 
 		ShaderResourceView(DX12Renderer::* createShaderResourceViewForStructuredDataFunction_)(
-			const std::string& name,
+			const std::string&		    name,
 			const std::vector<uint8_t>& data,
-			const ShaderStage stage
+			const ShaderStage			stage
 		);
 		ShaderResourceView(DX12Renderer::* createShaderResourceViewForTexture2DFunction_)(
 			const std::string& name,
-			Texture2D& data,
-			const ShaderStage stage);
+			Texture2D&		   data,
+			const ShaderStage  stage);
 
 		std::vector<Shader> shaders_;
 
@@ -708,18 +734,20 @@ namespace spider_engine::d3dx12 {
 		friend class DX12Renderer;
 		friend class DX12Compiler;
 
-		std::vector<std::tuple<std::string, ShaderStage, size_t>> getRequirements() {
-			std::vector<std::tuple<std::string, ShaderStage, size_t>> result;
+		RenderPipelineRequirements getRequirements() {
+			RenderPipelineRequirements requirements;
 
 			for (auto& [key, constantBuffer] : requiredConstantBuffers_) {
-				result.emplace_back(std::make_tuple(
-					constantBuffer.getName(),
-					constantBuffer.getStage(),
-					constantBuffer.getSizeInBytes()
-				));
+				requirements.constantBufferName.push_back(key.first);
+				requirements.constantBufferStage.push_back(key.second);
+				requirements.constantBufferSize.push_back(constantBuffer.getSizeInBytes());
+			}
+			for (auto& [key, shaderResource] : requiredShaderResourceViews_) {
+				requirements.shaderResourceName.push_back(key.first);
+				requirements.shaderResourceStage.push_back(key.second);
 			}
 
-			return result;
+			return requirements;
 		}
 
 		template <typename Ty, typename Policy = DefaultPolicy>

@@ -76,8 +76,6 @@ namespace spider_engine::d3dx12 {
 		uint32_t                                       threadCount_;
 
 		ComPtr<IDXGISwapChain4>			    swapChain_;
-		ComPtr<ID3D12DescriptorHeap>	    rtvHeap_;
-		ComPtr<ID3D12DescriptorHeap>	    dsvHeap_;
 		std::vector<ComPtr<ID3D12Resource>> backBuffers_;
 		std::vector<ComPtr<ID3D12Resource>> depthBuffers_;
 
@@ -85,13 +83,13 @@ namespace spider_engine::d3dx12 {
 		std::unique_ptr<SynchronizationObject> nonRenderingRelatedSynchronizationObject_;
 
 		std::unique_ptr<HeapAllocator> heapAllocator_;
-		DescriptorHeap*                cbvSrvUavDescriptorHeap_;
-		DescriptorHeap*                samplerDescriptorHeap_;
+
+		DescriptorHeap* rtvDescriptorHeap_;
+		DescriptorHeap* dsvDescriptorHeap_;
+		DescriptorHeap* cbvSrvUavDescriptorHeap_;
+		DescriptorHeap* samplerDescriptorHeap_;
 
 		UINT frameIndex_;
-
-		UINT rtvDescriptorSize_;
-		UINT dsvDescriptorSize_;
 
 		BOOL isFullScreen_;
 		BOOL isVSync_;
@@ -188,25 +186,22 @@ namespace spider_engine::d3dx12 {
 		}
 
 		void createRenderTargetViewsAndDepthStencilViews() {
+			if (rtvDescriptorHeap_) return;
 			// Create descriptor heap for RTV
-			D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-			rtvHeapDesc.NumDescriptors             = bufferCount_;
-			rtvHeapDesc.Type					   = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-			SPIDER_DX12_ERROR_CHECK(device_->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap_)));
-
-			// Get cpu descriptor handle and increment size
-			CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(rtvHeap_->GetCPUDescriptorHandleForHeapStart());
-			rtvDescriptorSize_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+			rtvDescriptorHeap_ = heapAllocator_->createDescriptorHeap(
+				"rtvDescriptorHeap",
+				bufferCount_,
+				D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
+				D3D12_DESCRIPTOR_HEAP_FLAG_NONE
+			);
 
 			// Create back buffers and RTV
-			backBuffers_.reserve(bufferCount_);
-			for (UINT i = 0; i < bufferCount_; ++i) {
+			size_t i = 0;
+			auto rtvFn = [&i, this](DescriptorHeap* descriptorHeap) {
 				backBuffers_.emplace_back();
 
 				SPIDER_DX12_ERROR_CHECK(swapChain_->GetBuffer(i, IID_PPV_ARGS(&backBuffers_[i])));
-				device_->CreateRenderTargetView(backBuffers_[i].Get(), nullptr, rtvHandle);
-
-				rtvHandle.Offset(1, rtvDescriptorSize_);
+				device_->CreateRenderTargetView(backBuffers_[i].Get(), nullptr, rtvDescriptorHeap_->cpuHandle);
 
 				SPIDER_DBG_CODE(
 					backBuffers_[i]->SetName(
@@ -215,69 +210,73 @@ namespace spider_engine::d3dx12 {
 						).c_str()
 					);
 				)
-			}
 
-			// Create descriptor heap for DSV
-			D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
-			dsvHeapDesc.NumDescriptors			   = bufferCount_;
-			dsvHeapDesc.Type					   = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-			SPIDER_DX12_ERROR_CHECK(device_->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&dsvHeap_)));
+				++i;
+			};
+			heapAllocator_->writeOnDescriptorHeap(rtvDescriptorHeap_, bufferCount_, rtvFn);
 
-			// Get cpu descriptor handle and increment size
-			CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(dsvHeap_->GetCPUDescriptorHandleForHeapStart());
-			dsvDescriptorSize_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+			dsvDescriptorHeap_ = heapAllocator_->createDescriptorHeap(
+				"dsvDescriptorHeap",
+				bufferCount_,
+				D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
+				D3D12_DESCRIPTOR_HEAP_FLAG_NONE
+			);
 
 			// Get back buffer description to set depth buffer size
 			D3D12_RESOURCE_DESC backDesc = backBuffers_[frameIndex_]->GetDesc();
 			const float width            = static_cast<float>(backDesc.Width);
 			const float height           = static_cast<float>(backDesc.Height);
 
-			depthBuffers_.reserve(bufferCount_);
-			for (UINT i = 0; i < bufferCount_; ++i) {
+			i = 0;
+			auto dsvFn = [&i, width, height, this](DescriptorHeap* descriptorHeap) {
 				depthBuffers_.emplace_back();
 
-				CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
+				CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_DEFAULT);
+				D3D12_RESOURCE_DESC depthDesc = {};
+				depthDesc.Dimension           = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+				depthDesc.Width               = width;
+				depthDesc.Height              = height;
+				depthDesc.DepthOrArraySize    = 1;
+				depthDesc.MipLevels           = 1;
+				depthDesc.Format              = DXGI_FORMAT_D24_UNORM_S8_UINT;
+				depthDesc.SampleDesc.Count    = 1;
+				depthDesc.SampleDesc.Quality  = 0;
+				depthDesc.Layout              = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+				depthDesc.Flags               = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
-				// Create depth buffer
-				D3D12_RESOURCE_DESC depthStencilDesc = {};
-				depthStencilDesc.Dimension			 = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-				depthStencilDesc.Alignment			 = 0;
-				depthStencilDesc.Width				 = width;
-				depthStencilDesc.Height				 = height;
-				depthStencilDesc.DepthOrArraySize	 = 1;
-				depthStencilDesc.MipLevels			 = 1;
-				depthStencilDesc.Format				 = DXGI_FORMAT_D32_FLOAT;
-				depthStencilDesc.SampleDesc.Count	 = 1;
-				depthStencilDesc.SampleDesc.Quality	 = 0;
-				depthStencilDesc.Layout				 = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-				depthStencilDesc.Flags				 = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-				D3D12_CLEAR_VALUE clearValue		 = {};
-				clearValue.Format					 = DXGI_FORMAT_D32_FLOAT;
-				clearValue.DepthStencil.Depth		 = 1.0f;
-				clearValue.DepthStencil.Stencil		 = 0;
+				D3D12_CLEAR_VALUE clearValue    = {};
+				clearValue.Format               = DXGI_FORMAT_D24_UNORM_S8_UINT;
+				clearValue.DepthStencil.Depth   = 1.0f;
+				clearValue.DepthStencil.Stencil = 0;
+
 				SPIDER_DX12_ERROR_CHECK(
 					device_->CreateCommittedResource(
-						&heapProperties,
+						&heapProps,
 						D3D12_HEAP_FLAG_NONE,
-						&depthStencilDesc,
+						&depthDesc,
 						D3D12_RESOURCE_STATE_DEPTH_WRITE,
 						&clearValue,
 						IID_PPV_ARGS(depthBuffers_[i].GetAddressOf())
 					)
 				);
 
-				// Create Depth Stencil View
-				device_->CreateDepthStencilView(depthBuffers_[i].Get(), nullptr, dsvHandle);
-				dsvHandle.Offset(1, dsvDescriptorSize_);
+				// Create the DSV
+				D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+				dsvDesc.Format						  = DXGI_FORMAT_D24_UNORM_S8_UINT;
+				dsvDesc.ViewDimension				  = D3D12_DSV_DIMENSION_TEXTURE2D;
+				dsvDesc.Flags						  = D3D12_DSV_FLAG_NONE;
+
+				device_->CreateDepthStencilView(depthBuffers_[i].Get(), &dsvDesc, dsvDescriptorHeap_->cpuHandle);
 
 				SPIDER_DBG_CODE(
 					depthBuffers_[i]->SetName(
-						std::wstring(
-							L"DepthBuffer_" + std::to_wstring(i)
-						).c_str()
+						std::wstring(L"DepthStencil_" + std::to_wstring(i)).c_str()
 					);
 				)
-			}
+
+				++i;
+			};
+			heapAllocator_->writeOnDescriptorHeap(dsvDescriptorHeap_, bufferCount_, dsvFn);
 		}
 
 		VertexArrayBuffer createVertexBuffer(const std::vector<Vertex>& vertices) {
@@ -303,7 +302,7 @@ namespace spider_engine::d3dx12 {
 			);
 
 			// Copy vertex data to the vertex array buffer
-			UINT8*		  vertexDataBegin;
+			uint8_t*      vertexDataBegin;
 			CD3DX12_RANGE readRange(0, 0);
 			vertexArrayBuffer.vertexArrayBuffer->Map(0, &readRange, reinterpret_cast<void**>(&vertexDataBegin));
 			memcpy(vertexDataBegin, vertices.data(), bufferSize);
@@ -528,15 +527,11 @@ namespace spider_engine::d3dx12 {
 			nonRenderingRelatedCommandLists_(other.nonRenderingRelatedCommandLists_),
 			threadCount_(other.threadCount_),
 			swapChain_(std::move(other.swapChain_)),
-			rtvHeap_(std::move(other.rtvHeap_)),
-			dsvHeap_(std::move(other.dsvHeap_)),
 			backBuffers_(other.backBuffers_),
 			depthBuffers_(other.depthBuffers_),
 			synchronizationObject_(std::move(other.synchronizationObject_)),
 			nonRenderingRelatedSynchronizationObject_(std::move(other.nonRenderingRelatedSynchronizationObject_)),
 			frameIndex_(other.frameIndex_),
-			rtvDescriptorSize_(other.rtvDescriptorSize_),
-			dsvDescriptorSize_(other.dsvDescriptorSize_),
 			isFullScreen_(other.isFullScreen_),
 			isVSync_(other.isVSync_),
 			bufferCount_(other.bufferCount_)
@@ -1471,14 +1466,14 @@ namespace spider_engine::d3dx12 {
 
 			// Get the cpu descriptor handle for the current back buffer
 			CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(
-				rtvHeap_->GetCPUDescriptorHandleForHeapStart(),
+				rtvDescriptorHeap_->heap->GetCPUDescriptorHandleForHeapStart(),
 				frameIndex_,
-				rtvDescriptorSize_
+				rtvDescriptorHeap_->descriptorHandleIncrementSize
 			);
 			CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(
-				dsvHeap_->GetCPUDescriptorHandleForHeapStart(),
+				dsvDescriptorHeap_->heap->GetCPUDescriptorHandleForHeapStart(),
 				frameIndex_,
-				dsvDescriptorSize_
+				dsvDescriptorHeap_->descriptorHandleIncrementSize
 			);
 
 			// Set render target and clear
@@ -1601,12 +1596,8 @@ namespace spider_engine::d3dx12 {
 				commandLists_						  = std::move(other.commandLists_);
 				nonRenderingRelatedCommandAllocators_ = std::move(other.nonRenderingRelatedCommandAllocators_);
 				nonRenderingRelatedCommandLists_	  = std::move(other.nonRenderingRelatedCommandLists_);
-				rtvHeap_							  = std::move(other.rtvHeap_);
-				dsvHeap_							  = std::move(other.dsvHeap_);
 				backBuffers_						  = std::move(other.backBuffers_);
 				depthBuffers_						  = std::move(other.depthBuffers_);
-				rtvDescriptorSize_					  = std::move(other.rtvDescriptorSize_);
-				dsvDescriptorSize_					  = std::move(other.dsvDescriptorSize_);
 				synchronizationObject_				  = std::move(other.synchronizationObject_);
 				frameIndex_							  = std::move(other.frameIndex_);
 				isFullScreen_						  = std::move(other.isFullScreen_);
@@ -2209,7 +2200,6 @@ namespace spider_engine::d3dx12 {
 
 			// Create references to  Constant Buffers
 			auto& requiredConstantBuffers = renderPipeline.requiredConstantBuffers_;
-			std::cout << requiredConstantBuffers.size() << std::endl;
 
 			// Required variables for creating constant buffers
 			std::vector<std::string>     constantBufferNames;
@@ -2270,6 +2260,7 @@ namespace spider_engine::d3dx12 {
 
 			// Required variables for creating shader resource views
 			std::vector<ShaderResourceView> shaderResourceViewArray;
+			std::vector<size_t>             shaderResourceViewSize;
 
 			// Create Shader Resource Views
 			for (size_t i = 0; i < renderPipeline.shaders_.size(); ++i) {
@@ -2281,6 +2272,8 @@ namespace spider_engine::d3dx12 {
 				for (uint32_t j = 0; j < shaderResourceViewsSize; ++j) {
 					auto& shaderResourceViewData = shaderResourceViews[j];
 
+					shaderResourceViewSize.push_back(shaderResourceViewData.size);
+
 					ShaderResourceView emptySrv = {};
 					emptySrv.stage_			    = shaders[i].stage;
 					emptySrv.name_				= shaderResourceViewData.name;
@@ -2289,7 +2282,6 @@ namespace spider_engine::d3dx12 {
 			}
 			// Finish the shader resource view creation, populating the required Constant Buffers Map
 			for (auto shaderResourceView = shaderResourceViewArray.begin(); shaderResourceView != shaderResourceViewArray.end(); ++shaderResourceView) {
-				size_t index = 0;
 				// Try to find root parameter index for this shader resource view using its name and stage
 				auto key    = std::make_pair(shaderResourceView->name_, shaderResourceView->stage_);
 				auto rootIt = rootIndexMap.find(key);
@@ -2300,7 +2292,6 @@ namespace spider_engine::d3dx12 {
 					std::make_pair(shaderResourceView->name_, shaderResourceView->stage_),
 					*shaderResourceView
 				);
-				++index;
 			}
 
 			// Create references to Samplers
