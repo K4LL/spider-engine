@@ -1,10 +1,11 @@
-#pragma once
-#include <print>
-#include <cassert>
-#include <windows.h>
-#include <d3d12.h>
-#include <dxgi1_6.h>
-#include <d3dcompiler.h>
+/**
+ * @file dx12_types.hpp
+ *
+ * @brief Defines types for managing DirectX 12.
+ *
+ * @version 0.2
+ */
+
 #include <DirectXMath.h>
 #include <DirectXColors.h>
 #include <wrl/client.h>
@@ -32,6 +33,20 @@ namespace spider_engine::d3dx12 {
 		STAGE_AMPLIFICATION = 6,
 		STAGE_MESH          = 7,
 	};
+
+	enum class TextureDimension : uint8_t {
+		NONE         = 0,
+		TEXTURE_1D   = 1,
+		TEXTURE_2D   = 2,
+		TEXTURE_3D   = 3,
+		TEXTURE_CUBE = 4
+	};
+
+	enum class BindingType : uint8_t {
+		CONSTANT_BUFFER = 0,
+		SHADER_RESOURCE = 1,
+		SAMPLER         = 2,
+	};
 }
 
 namespace std {
@@ -41,27 +56,39 @@ namespace std {
 			return std::hash<std::string>()(k.first) ^ (std::hash<uint8_t>()(static_cast<uint8_t>(k.second)) << 1);
 		}
 	};
-} 
+	template<>
+	struct hash<std::pair<std::string, spider_engine::d3dx12::TextureDimension>> {
+		std::size_t operator()(const std::pair<std::string, spider_engine::d3dx12::TextureDimension>& k) const {
+			return std::hash<std::string>()(k.first) ^ (std::hash<uint8_t>()(static_cast<uint8_t>(k.second)) << 1);
+		}
+	};
+	template<>
+	struct hash<std::pair<std::string, spider_engine::d3dx12::BindingType>> {
+		std::size_t operator()(const std::pair<std::string, spider_engine::d3dx12::BindingType>& k) const {
+			return std::hash<std::string>()(k.first) ^ (std::hash<uint8_t>()(static_cast<uint8_t>(k.second)) << 1);
+		}
+	};
+}
 
 #include "flat_hash_map.hpp"
 
 namespace spider_engine::d3dx12 {
+	class DX12Renderer;
+	class DX12Compiler;
+
+	/// @struct Vertex
+	/// @brief Vertex struct.
+	/// @details Stores posion, normal and uv.
 	struct Vertex {
 		DirectX::XMFLOAT3 position;
-		DirectX::XMFLOAT4 color;
+		DirectX::XMFLOAT3 normal;
+		DirectX::XMFLOAT2 uv;
 	};
 
 	const D3D12_INPUT_ELEMENT_DESC psInputLayout[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex, position), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, offsetof(Vertex, color), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-	};
-
-	class DescriptorHeap {
-	private:
-		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> heap_;
-		CD3DX12_CPU_DESCRIPTOR_HANDLE				 cpuHandle_;
-		CD3DX12_GPU_DESCRIPTOR_HANDLE				 gpuHandle_;
-		const size_t								 capacity_;
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex, normal), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex, uv), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
 	};
 
 	struct VertexArrayBuffer {
@@ -77,6 +104,8 @@ namespace spider_engine::d3dx12 {
 		size_t size;
 	};
 
+	/// @struct Texture 2D
+	///  @brief Texture 2D struct.
 	struct Texture2D {
 		Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 		Microsoft::WRL::ComPtr<ID3D12Resource> uploadResource;
@@ -102,7 +131,7 @@ namespace spider_engine::d3dx12 {
 
 		ShaderStage stage;
 
-		FastArray<ConstantBufferVariable> variables;
+		std::vector<ConstantBufferVariable> variables;
 	};
 
 	struct ShaderResourceViewData {
@@ -111,6 +140,8 @@ namespace spider_engine::d3dx12 {
 
 		uint32_t bindPoint;
 		uint32_t space;
+
+		bool isTexture;
 
 		ShaderStage stage;
 	};
@@ -125,47 +156,51 @@ namespace spider_engine::d3dx12 {
 		ShaderStage stage;
 	};
 
+	/// @class ShaderDescription
+	/// @brief Describes a shader for creation.
+	/// @details Stores shader path or source and shader stage (vertex, pixel etc...).
 	class ShaderDescription {
-	private:
-		FastArray<FastArray<uint8_t>> shaderResourceViewData_;
-
 	public:
 		std::wstring pathOrSource;
 		ShaderStage  stage;
 
-		ShaderDescription() = default;
-		ShaderDescription(std::wstring pathOrSource, 
-						  ShaderStage  stage) : 
-			pathOrSource(pathOrSource), stage(stage) 
+		ShaderDescription() :
+			stage(ShaderStage::STAGE_ALL)
 		{}
-		ShaderDescription(FastArray<FastArray<uint8_t>> shaderResourceViewData, 
-						  ShaderStage				    stage) : 
-			shaderResourceViewData_(shaderResourceViewData), stage(stage) 
+
+		ShaderDescription(const std::wstring& pathOrSource,
+						  const ShaderStage   shaderStage) :
+			pathOrSource(pathOrSource),
+			stage(shaderStage)
 		{}
-		ShaderDescription(const ShaderDescription&)     = default;
-		ShaderDescription(ShaderDescription&&) noexcept = default;
+		ShaderDescription(const ShaderDescription& other) :
+			pathOrSource(other.pathOrSource),
+			stage(other.stage)
+		{}
+		ShaderDescription(ShaderDescription&& other) noexcept :
+			pathOrSource(other.pathOrSource),
+			stage(other.stage)
+		{}
 
-		template <typename Ty>
-		void setShaderResourceViewData(FastArray<FastArray<Ty>>& data) {
-			shaderResourceViewData_ = data;
+		ShaderDescription& operator=(const ShaderDescription& other) {
+			if (this != &other) {
+				pathOrSource = other.pathOrSource;
+				stage        = other.stage;
+			}
+			return *this;
 		}
-		template <typename Ty>
-		void addShaderResourceViewData(FastArray<Ty>& data) {
-			shaderResourceViewData_.pushBack(data);
-		}
-
-		template <typename Ty>
-		FastArray<FastArray<Ty>> getShaderResourceViewData() {
-			return FastArray<FastArray<Ty>>(shaderResourceViewData_);
-		}
-		FastArray<FastArray<uint8_t>>& getShaderResourceViewRawData() {
-			return shaderResourceViewData_;
-		}
-		const FastArray<FastArray<uint8_t>>& getConstShaderResourceViewRawData() const {
-			return shaderResourceViewData_;
+		ShaderDescription& operator=(ShaderDescription&& other) noexcept {
+			if (this != &other) {
+				pathOrSource = std::move(other.pathOrSource);
+				stage        = other.stage;
+			}
+			return *this;
 		}
 	};
 
+	/// @struct ConstantBuffer
+	/// @brief Main way to pass data to shaders at runtime.
+	/// @details Main way to pass data to shaders at runtime, by enabling to copy data to the GPU.
 	class ConstantBuffer {
 	private:
 		std::string name_;
@@ -173,7 +208,7 @@ namespace spider_engine::d3dx12 {
 
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> heap_;
 		Microsoft::WRL::ComPtr<ID3D12Resource>       resource_;
-		
+
 		CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle_;
 		CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle_;
 
@@ -186,43 +221,55 @@ namespace spider_engine::d3dx12 {
 		friend class DX12Renderer;
 		friend class DX12Compiler;
 
-		ConstantBuffer()                          = default;
-		ConstantBuffer(const ConstantBuffer&)     = default;
+		ConstantBuffer() = default;
+		ConstantBuffer(const ConstantBuffer&) = default;
 		ConstantBuffer(ConstantBuffer&&) noexcept = default;
 
+		/// @brief Open buffer for mapping.
+		/// @note This is usually done automatically.
 		void open() {
 			resource_->Map(0, nullptr, &mappedData_);
 			mappedData_ = reinterpret_cast<uint8_t*>(mappedData_) + (index_ * sizeInBytes_);
 		}
+		/// @brief Copy data to the buffer
+		/// @param data	Data to be copied
 		template <typename Ty>
 		void copy(const Ty& data) {
 			memcpy(mappedData_, &data, sizeof(Ty));
 		}
+		/// @brief Close buffer for mapping.
 		void unmap() {
 			resource_->Unmap(0, nullptr);
 		}
 
+		/// @brief Get buffer name.
 		std::string_view getName() {
 			return this->name_;
 		}
+		/// @brief Get size in bytes.
 		size_t getSizeInBytes() {
 			return this->sizeInBytes_;
 		}
+		/// @brief Get buffer stage (vertex, pixel etc...)
 		ShaderStage getStage() {
 			return this->stage_;
 		}
+		/// @brief Get a pointer to the mapped data.
 		template <typename Type>
 		Type* getPtr() {
 			return reinterpret_cast<Type*>(mappedData_);
 		}
+		/// @brief Get GPU virtual address.
 		D3D12_GPU_VIRTUAL_ADDRESS getGPUVirtualAddress() const {
 			return resource_->GetGPUVirtualAddress();
 		}
+		/// @brief Get buffer index
+		/// @note The index isn't directly related to the bind point(b0, b1 b2...)
 		uint32_t getIndex() const {
 			return this->index_;
 		}
 
-		ConstantBuffer& operator=(const ConstantBuffer& other)     = default;
+		ConstantBuffer& operator=(const ConstantBuffer& other) = default;
 		ConstantBuffer& operator=(ConstantBuffer&& other) noexcept = default;
 	};
 	struct ConstantBuffers {
@@ -234,6 +281,8 @@ namespace spider_engine::d3dx12 {
 		}
 	};
 
+	/// @brief Shader resource view class. 
+	/// @details Mainly used for texturing. This class is not mutable.
 	class ShaderResourceView {
 	private:
 		std::string name_;
@@ -241,7 +290,7 @@ namespace spider_engine::d3dx12 {
 
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> heap_;
 		Microsoft::WRL::ComPtr<ID3D12Resource>       resource_;
-		
+
 		CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle_;
 		CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle_;
 
@@ -253,34 +302,41 @@ namespace spider_engine::d3dx12 {
 		friend class DX12Compiler;
 		friend class RenderPipeline;
 
-		ShaderResourceView() : 
-			name_(""), 
-			sizeInBytes_(0), 
-			stage_(ShaderStage::STAGE_ALL), 
-			index_(0), 
+		ShaderResourceView() :
+			name_(""),
+			sizeInBytes_(0),
+			stage_(ShaderStage::STAGE_ALL),
+			index_(0),
 			cpuHandle_(D3D12_CPU_DESCRIPTOR_HANDLE(NULL)),
 			gpuHandle_(D3D12_GPU_DESCRIPTOR_HANDLE(NULL))
 		{}
 		ShaderResourceView(const ShaderResourceView&)     = default;
 		ShaderResourceView(ShaderResourceView&&) noexcept = default;
 
+		/// @brief Get shader resource name.
 		std::string_view getName() {
 			return this->name_;
 		}
+		/// @brief Get shader resource size in bytes.
+		/// @warning Size is not initalized. Tryng to read this will return always 0.
 		size_t getSizeInBytes() {
 			return this->sizeInBytes_;
 		}
+		/// @brief Get shader resource stage(vertex, pixel etc...)
 		ShaderStage getStage() {
 			return this->stage_;
 		}
+		/// @brief Get GPU virtual address.
 		D3D12_GPU_VIRTUAL_ADDRESS getGPUVirtualAddress() const {
 			return resource_->GetGPUVirtualAddress();
 		}
+		/// @brief Get shader resource index.
+		/// @note The index isn't directly related to the bind point(b0, b1 b2...)
 		uint32_t getIndex() const {
 			return this->index_;
 		}
 
-		ShaderResourceView& operator=(const ShaderResourceView& other)     = default;
+		ShaderResourceView& operator=(const ShaderResourceView& other) = default;
 		ShaderResourceView& operator=(ShaderResourceView&& other) noexcept = default;
 	};
 	struct ShaderResourceViews {
@@ -312,7 +368,7 @@ namespace spider_engine::d3dx12 {
 			stage_(ShaderStage::STAGE_ALL),
 			index_(0)
 		{}
-		Sampler(const Sampler&)     = default;
+		Sampler(const Sampler&) = default;
 		Sampler(Sampler&&) noexcept = default;
 
 		std::string_view getName() {
@@ -334,7 +390,7 @@ namespace spider_engine::d3dx12 {
 			return this->index_;
 		}
 
-		Sampler& operator=(const Sampler& other)     = default;
+		Sampler& operator=(const Sampler& other) = default;
 		Sampler& operator=(Sampler&& other) noexcept = default;
 	};
 	struct Samplers {
@@ -358,23 +414,27 @@ namespace spider_engine::d3dx12 {
 
 	struct ShaderData {
 		Microsoft::WRL::ComPtr<ID3D12ShaderReflection> rawReflection;
-		FastArray<ConstantBufferData>				   constantBuffers;
-		FastArray<ShaderResourceViewData>		       shaderResourceViews;
-		FastArray<SamplerData>					       samplers;
-		FastArray<ResourceBindingData>                 shaderResourceBindingData;
+		std::vector<ConstantBufferData>				   constantBuffers;
+		std::vector<ShaderResourceViewData>		       shaderResourceViews;
+		std::vector<SamplerData>					   samplers;
+		std::vector<ResourceBindingData>               shaderResourceBindingData;
 	};
 
+	/// @brief Mesh struct used on Renderizables.
 	struct Mesh {
 		std::unique_ptr<VertexArrayBuffer> vertexArrayBuffer;
 		std::unique_ptr<IndexArrayBuffer>  indexArrayBuffer;
 	};
 
+	/// @brief Only way to render anything.
 	struct Renderizable {
 		Mesh				 mesh;
 		Texture2D			 texture;
 		rendering::Transform transform;
 	};
 
+	/// @brief Shader class.
+	/// @details Stores shader's path or source, shader blob, stage and data.
 	struct Shader {
 		std::wstring pathOrSource;
 
@@ -383,11 +443,328 @@ namespace spider_engine::d3dx12 {
 		ShaderStage stage;
 		ShaderData  data;
 	};
+
+	/// @class SynchronizationObject
+	/// @brief Object used for GPU synchronization.
+	/// @details This class manages DirectX12 fences and events to synchronize GPU operations.
+	class SynchronizationObject {
+	public:
+		Microsoft::WRL::ComPtr<ID3D12Fence> fence_;
+		std::vector<uint64_t>				values_;
+		uint64_t							currentValue_;
+
+		std::vector<HANDLE> handles_;
+
+		size_t bufferCount_;
+
+		SynchronizationObject() = default;
+		SynchronizationObject(ID3D12Device* device,
+							  const size_t  bufferCount) :
+			currentValue_(0),
+			bufferCount_(bufferCount)
+		{
+			device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence_));
+
+			// Set values and its handles
+			values_.reserve(bufferCount_);
+			handles_.reserve(bufferCount_);
+
+			// Populate handles
+			for (size_t i = 0; i < bufferCount_; ++i) {
+				values_.emplace_back();
+
+				handles_.emplace_back();
+				auto& handle = handles_.back();
+
+				handle = CreateEventW(nullptr, FALSE, FALSE, nullptr);
+				if (handle == INVALID_HANDLE_VALUE) throw std::runtime_error("Failed to create handle");
+			}
+		}
+		SynchronizationObject(const SynchronizationObject& other) = delete;
+		SynchronizationObject(SynchronizationObject&& other) noexcept :
+			fence_(std::move(other.fence_)),
+			values_(other.values_),
+			currentValue_(other.currentValue_),
+			handles_(other.handles_),
+			bufferCount_(other.bufferCount_)
+		{}
+
+		~SynchronizationObject() {
+			// Iterate over handles and close them
+			for (size_t i = 0; i < bufferCount_; ++i) {
+				if (handles_[i]) CloseHandle(handles_[i]);
+			}
+		}
+
+		void wait(size_t index) {
+			assert(index < bufferCount_);
+
+			// Wait until the fence has been signaled
+			if (fence_->GetCompletedValue() < values_[index]) {
+				HANDLE& handle = this->handles_[index];
+				fence_->SetEventOnCompletion(values_[index], handle);
+				WaitForSingleObject(handle, INFINITE);
+			}
+		}
+
+		void signal(ID3D12CommandQueue* queue, size_t index) {
+			assert(index < bufferCount_);
+
+			// Signal the fence
+			currentValue_++;
+			values_[index] = currentValue_;
+			queue->Signal(fence_.Get(), currentValue_);
+		}
+
+		SynchronizationObject(SynchronizationObject&) = delete;
+		SynchronizationObject& operator=(SynchronizationObject&& other) noexcept {
+			if (this != &other) {
+				fence_ = std::move(other.fence_);
+				values_		  = other.values_;
+				currentValue_ = other.currentValue_;
+				handles_	  = other.handles_;
+				bufferCount_  = other.bufferCount_;
+			}
+			return *this;
+		}
+	};
+
+	struct DescriptorHeap {
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> heap;
+		CD3DX12_CPU_DESCRIPTOR_HANDLE				 cpuHandle;
+		CD3DX12_GPU_DESCRIPTOR_HANDLE				 gpuHandle;
+
+		D3D12_DESCRIPTOR_HEAP_TYPE  descriptorHeapType;
+		D3D12_DESCRIPTOR_HEAP_FLAGS descriptorHeapFlags;
+
+		uint_t descriptorHandleIncrementSize;
+
+		size_t size;
+		size_t capacity;
+	};
+
+	class HeapAllocator {
+	private:
+		Microsoft::WRL::ComPtr<ID3D12Device> device_;
+
+		ska::flat_hash_map<std::string, std::unique_ptr<DescriptorHeap>> descriptorHeaps_;
+
+		size_t defaultDescriptorHeapSize_;
+
+		void reallocateDescriptorHeap(DescriptorHeap* descriptorHeap, 
+									  size_t		  newCapacity) 
+		{
+			DescriptorHeap newDescriptorHeap				= {};
+			newDescriptorHeap.capacity                      = newCapacity;
+			newDescriptorHeap.size                          = descriptorHeap->size;
+			newDescriptorHeap.descriptorHeapType            = descriptorHeap->descriptorHeapType;
+			newDescriptorHeap.descriptorHeapFlags           = descriptorHeap->descriptorHeapFlags;
+			newDescriptorHeap.descriptorHandleIncrementSize = device_->GetDescriptorHandleIncrementSize(newDescriptorHeap.descriptorHeapType);
+
+			D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+			desc.Type						= newDescriptorHeap.descriptorHeapType;
+			desc.NumDescriptors				= static_cast<uint_t>(newCapacity);
+			desc.Flags						= newDescriptorHeap.descriptorHeapFlags;
+
+			SPIDER_DX12_ERROR_CHECK(device_->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&newDescriptorHeap.heap)));
+
+			const size_t copyCount = std::min(descriptorHeap->size, newCapacity);
+			if (copyCount) {
+				device_->CopyDescriptorsSimple(
+					static_cast<UINT>(copyCount),
+					newDescriptorHeap.heap->GetCPUDescriptorHandleForHeapStart(),
+					descriptorHeap->heap->GetCPUDescriptorHandleForHeapStart(),
+					newDescriptorHeap.descriptorHeapType
+				);
+			}
+
+			{
+				CD3DX12_CPU_DESCRIPTOR_HANDLE cpu(newDescriptorHeap.heap->GetCPUDescriptorHandleForHeapStart());
+				cpu.Offset(static_cast<INT>(copyCount), newDescriptorHeap.descriptorHandleIncrementSize);
+				newDescriptorHeap.cpuHandle = cpu;
+
+				CD3DX12_GPU_DESCRIPTOR_HANDLE gpu(newDescriptorHeap.heap->GetGPUDescriptorHandleForHeapStart());
+				gpu.Offset(static_cast<INT>(copyCount), newDescriptorHeap.descriptorHandleIncrementSize);
+				newDescriptorHeap.gpuHandle = gpu;
+			}
+
+			newDescriptorHeap.size = copyCount;
+
+			*descriptorHeap = std::move(newDescriptorHeap);
+		}
+
+	public:
+		HeapAllocator(Microsoft::WRL::ComPtr<ID3D12Device> device) :
+			device_(device),
+			defaultDescriptorHeapSize_(2048)
+		{}
+		HeapAllocator(Microsoft::WRL::ComPtr<ID3D12Device> device,
+					  const size_t defaultDescriptorHeapSize) :
+			device_(device),
+			defaultDescriptorHeapSize_(defaultDescriptorHeapSize)
+		{}
+		HeapAllocator(const HeapAllocator&)     = delete;
+		HeapAllocator(HeapAllocator&&) noexcept = default;
+
+		DescriptorHeap* createDescriptorHeap(const std::string& descriptorHeapName,
+											 const D3D12_DESCRIPTOR_HEAP_TYPE  descriptorHeapType,
+											 const D3D12_DESCRIPTOR_HEAP_FLAGS descriptorHeapFlags)
+		{
+			DescriptorHeap descriptorHeap;
+			descriptorHeap.capacity					     = defaultDescriptorHeapSize_;
+			descriptorHeap.descriptorHeapType			 = descriptorHeapType;
+			descriptorHeap.descriptorHeapFlags		     = descriptorHeapFlags;
+			descriptorHeap.descriptorHandleIncrementSize = device_->GetDescriptorHandleIncrementSize(descriptorHeapType);
+			descriptorHeap.size                          = 0;
+
+			D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc = {};
+			descriptorHeapDesc.Type						  = descriptorHeapType;
+			descriptorHeapDesc.NumDescriptors             = static_cast<uint_t>(defaultDescriptorHeapSize_);
+			descriptorHeapDesc.Flags                      = descriptorHeapFlags;
+			SPIDER_DX12_ERROR_CHECK(
+				device_->CreateDescriptorHeap(
+					&descriptorHeapDesc,
+					IID_PPV_ARGS(&descriptorHeap.heap)
+				)
+			);
+
+			descriptorHeap.cpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(descriptorHeap.heap->GetCPUDescriptorHandleForHeapStart());
+			descriptorHeap.gpuHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(descriptorHeap.heap->GetGPUDescriptorHandleForHeapStart());
+
+			return descriptorHeaps_.emplace(
+				descriptorHeapName,
+				std::make_unique<DescriptorHeap>(descriptorHeap)
+			).first->second.get();
+		}
+		DescriptorHeap* createDescriptorHeap(const std::string& descriptorHeapName,
+											 const size_t					   descriptorHeapSize,
+											 const D3D12_DESCRIPTOR_HEAP_TYPE  descriptorHeapType,
+											 const D3D12_DESCRIPTOR_HEAP_FLAGS descriptorHeapFlags)
+		{
+			DescriptorHeap descriptorHeap;
+			descriptorHeap.capacity						 = descriptorHeapSize;
+			descriptorHeap.descriptorHeapType			 = descriptorHeapType;
+			descriptorHeap.descriptorHeapFlags			 = descriptorHeapFlags;
+			descriptorHeap.descriptorHandleIncrementSize = device_->GetDescriptorHandleIncrementSize(descriptorHeapType);
+			descriptorHeap.size                          = 0;
+
+			D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc = {};
+			descriptorHeapDesc.Type						  = descriptorHeapType;
+			descriptorHeapDesc.NumDescriptors             = static_cast<uint_t>(descriptorHeapSize);
+			descriptorHeapDesc.Flags                      = descriptorHeapFlags;
+			SPIDER_DX12_ERROR_CHECK(
+				device_->CreateDescriptorHeap(
+					&descriptorHeapDesc,
+					IID_PPV_ARGS(&descriptorHeap.heap)
+				)
+			);
+
+			descriptorHeap.cpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(descriptorHeap.heap->GetCPUDescriptorHandleForHeapStart());
+			descriptorHeap.gpuHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(descriptorHeap.heap->GetGPUDescriptorHandleForHeapStart());
+
+			return descriptorHeaps_.emplace(
+				descriptorHeapName,
+				std::make_unique<DescriptorHeap>(descriptorHeap)
+			).first->second.get();
+		}
+
+		template <typename Fn, typename... Args>
+		requires (CallableAs<Fn, void, DescriptorHeap*, Args...>)
+		void writeOnDescriptorHeap(const std::string& id,
+								   size_t			  operationCount,
+								   Fn&& fn,
+								   Args&&...		  args)
+		{
+			auto it = descriptorHeaps_.find(id);
+			if (it == descriptorHeaps_.end()) throw std::runtime_error("Descriptor Heap not found");
+
+			DescriptorHeap* descriptorHeap = it->second.get();
+
+			descriptorHeap->size += operationCount;
+			if (descriptorHeap->size > descriptorHeap->capacity) {
+				reallocateDescriptorHeap(
+					descriptorHeap,
+					std::max(descriptorHeap->capacity * 2, descriptorHeap->size)
+				);
+			}
+
+			for (size_t i = 0; i < operationCount; ++i) {
+				fn(descriptorHeap, std::forward<Args>(args)...);
+				descriptorHeap->cpuHandle.Offset(1, descriptorHeap->descriptorHandleIncrementSize);
+				descriptorHeap->gpuHandle.Offset(1, descriptorHeap->descriptorHandleIncrementSize);
+			}
+		}
+		template <typename Fn, typename... Args>
+			requires (CallableAs<Fn, void, DescriptorHeap*, Args...>)
+		void writeOnDescriptorHeap(DescriptorHeap* descriptorHeap,
+								   size_t		   operationCount,
+								   Fn&& fn,
+								   Args&&...	   args)
+		{
+			descriptorHeap->size += operationCount;
+			if (descriptorHeap->size > descriptorHeap->capacity) {
+				reallocateDescriptorHeap(
+					descriptorHeap,
+					std::max(descriptorHeap->capacity * 2, descriptorHeap->size)
+				);
+			}
+
+			for (size_t i = 0; i < operationCount; ++i) {
+				fn(descriptorHeap, std::forward<Args>(args)...);
+
+				descriptorHeap->cpuHandle.Offset(1, descriptorHeap->descriptorHandleIncrementSize);
+				descriptorHeap->gpuHandle.Offset(1, descriptorHeap->descriptorHandleIncrementSize);
+			}
+		}
+
+		void destroyDescriptorHeap(const std::string& descriptorHeapName) {
+			auto it = descriptorHeaps_.find(descriptorHeapName);
+			if (it == descriptorHeaps_.end()) return;
+			it->second->heap->Release();
+		}
+		void destroyDescriptorHeap(DescriptorHeap* descriptorHeap) {
+			descriptorHeap->heap->Release();
+		}
+
+		DescriptorHeap* getDescriptorHeap(const std::string& descriptorHeapName) {
+			auto it = descriptorHeaps_.find(descriptorHeapName);
+			if (it != descriptorHeaps_.end()) return it->second.get();
+			throw std::runtime_error("Descriptor Heap not found.");
+			return {};
+		}
+
+		HeapAllocator& operator=(const HeapAllocator&)     = delete;
+		HeapAllocator& operator=(HeapAllocator&&) noexcept = default;
+	};
+
+	/// @struct RenderPipelineRequirements
+	/// @brief Contains the Requirements to bind resources on the Render Pipeline.
+	struct RenderPipelineRequirements {
+		std::vector<std::string_view> constantBufferName;
+		std::vector<ShaderStage>      constantBufferStage;
+		std::vector<std::size_t>      constantBufferSize;
+
+		std::vector<std::string_view> shaderResourceName;
+		std::vector<ShaderStage>      shaderResourceStage;
+	};
+
+	/// @class RenderPipeline
+	/// @brief Provides an interface to interact with shaders and tells the Renderer how to draw.
 	class RenderPipeline {
 	private:
 		DX12Renderer* renderer_;
 
-		FastArray<Shader> shaders_;
+		ShaderResourceView(DX12Renderer::* createShaderResourceViewForStructuredDataFunction_)(
+			const std::string&		    name,
+			const std::vector<uint8_t>& data,
+			const ShaderStage			stage
+		);
+		ShaderResourceView(DX12Renderer::* createShaderResourceViewForTexture2DFunction_)(
+			const std::string& name,
+			Texture2D&		   data,
+			const ShaderStage  stage);
+
+		std::vector<Shader> shaders_;
 
 		ska::flat_hash_map<std::pair<std::string, ShaderStage>, ConstantBuffer>     requiredConstantBuffers_;
 		ska::flat_hash_map<std::pair<std::string, ShaderStage>, ShaderResourceView> requiredShaderResourceViews_;
@@ -401,22 +778,32 @@ namespace spider_engine::d3dx12 {
 		friend class DX12Renderer;
 		friend class DX12Compiler;
 
-		FastArray<std::tuple<std::string, ShaderStage, size_t>> getRequirements() {
-			FastArray<std::tuple<std::string, ShaderStage, size_t>> result;
+		/// @brief Returns the Requirements to bind resources on the Render Pipeline.
+		RenderPipelineRequirements getRequirements() {
+			RenderPipelineRequirements requirements;
 
 			for (auto& [key, constantBuffer] : requiredConstantBuffers_) {
-				result.pushBack(std::make_tuple(
-					constantBuffer.getName(),
-					constantBuffer.getStage(),
-					constantBuffer.getSizeInBytes()
-				));
+				requirements.constantBufferName.push_back(key.first);
+				requirements.constantBufferStage.push_back(key.second);
+				requirements.constantBufferSize.push_back(constantBuffer.getSizeInBytes());
+			}
+			for (auto& [key, shaderResource] : requiredShaderResourceViews_) {
+				requirements.shaderResourceName.push_back(key.first);
+				requirements.shaderResourceStage.push_back(key.second);
 			}
 
-			return result;
+			return requirements;
 		}
-		template <typename Ty, typename Policy = DefaultPolicy>
-		requires (SameAs<Policy, DefaultPolicy>)
-		void bindBuffer(const std::string& name, const ShaderStage stage, Ty&& data) {
+
+		/// @brief Binds a buffer to the Render Pipeline
+		/// @param name Buffer name
+		/// @param stage Buffer stage
+		/// @param data Buffer data
+		template <typename Ty>
+		void bindBuffer(const std::string& name,
+						const ShaderStage  stage,
+						Ty&&			   data)
+		{
 			auto it = requiredConstantBuffers_.find(std::make_pair(name, stage));
 			if (it == requiredConstantBuffers_.end()) {
 				throw std::runtime_error("Could not find buffer");
@@ -425,17 +812,47 @@ namespace spider_engine::d3dx12 {
 
 			it->second.copy(std::forward<Ty>(data));
 		}
-		template <typename Ty, typename Policy = DefaultPolicy>
-		requires (SameAs<Policy, NoThrowPolicy>)
-		void bindBuffer(const std::string& name, const ShaderStage stage, Ty&& data) noexcept {
-			auto it = requiredConstantBuffers_.find(std::make_pair(name, stage));
-			if (it == requiredConstantBuffers_.end()) return;
 
-			it->second.copy(std::forward<Ty>(data));
+		/// @brief Binds a Shader Resource to the pipeline.
+		/// @param name Buffer name.
+		/// @param name Buffer stage.
+		/// @param name Buffer data.
+		template <typename Ty>
+		void bindShaderResource(const std::string& name,
+								const ShaderStage  stage,
+								Ty&&               data)
+		{
+			auto it = requiredShaderResourceViews_.find(std::make_pair(name, stage));
+			if (it == requiredShaderResourceViews_.end()) {
+				throw std::runtime_error("Could not find shader resource");
+				return;
+			}
+
+			it->second = (renderer_->*createShaderResourceViewForStructuredDataFunction_)(name, data, stage);
 		}
-		template <typename Policy = DefaultPolicy>
-		requires (SameAs<Policy, DefaultPolicy>)
-		ConstantBuffer* getBufferPtr(const std::string& name, const ShaderStage stage) noexcept {
+		/// @brief Binds a Shader Resource with a Texture 2D to the pipeline.
+		/// @param name Buffer name.
+		/// @param name Buffer stage.
+		/// @param name Buffer data.
+		void bindShaderResourceForTexture2D(const std::string& name,
+								            const ShaderStage  stage,
+								            Texture2D&         data)
+		{
+			auto it = requiredShaderResourceViews_.find(std::make_pair(name, stage));
+			if (it == requiredShaderResourceViews_.end()) {
+				throw std::runtime_error("Could not find shader resource");
+				return;
+			}
+
+			it->second = (renderer_->*createShaderResourceViewForTexture2DFunction_)(name, data, stage);
+		}
+
+		/// @brief Returns a buffer
+		/// @param Buffer name
+		/// @param Buffer stage
+		ConstantBuffer* getBufferPtr(const std::string& name,
+									 const ShaderStage  stage) noexcept
+		{
 			auto it = requiredConstantBuffers_.find(std::make_pair(name, stage));
 			if (it == requiredConstantBuffers_.end()) {
 				throw std::runtime_error("Could not find buffer");
@@ -443,12 +860,18 @@ namespace spider_engine::d3dx12 {
 			}
 			return &it->second;
 		}
-		template <typename Policy = DefaultPolicy>
-		requires (SameAs<Policy, NoThrowPolicy>)
-		ConstantBuffer* getBufferPtr(const std::string& name, const ShaderStage stage) noexcept {
-			auto it = requiredConstantBuffers_.find(std::make_pair(name, stage));
-			if (it == requiredConstantBuffers_.end()) return nullptr;
 
+		/// @brief Returns a Shader Resource
+		/// @param Buffer name
+		/// @param Buffer stage
+		ShaderResourceView* getShaderResourcePtr(const std::string& name,
+												 const ShaderStage  stage) noexcept
+		{
+			auto it = requiredShaderResourceViews_.find(std::make_pair(name, stage));
+			if (it == requiredShaderResourceViews_.end()) {
+				throw std::runtime_error("Could not find shader resource");
+				return nullptr;
+			}
 			return &it->second;
 		}
 	};
