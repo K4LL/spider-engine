@@ -69,6 +69,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram.cd" />
+    <None Include="..\Doxyfile" />
   </ItemGroup>
 </Project>

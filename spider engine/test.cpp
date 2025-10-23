@@ -112,7 +112,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
 
 	RenderPipeline pipeline = compiler.createRenderPipeline<UseSourcePolicy>(descriptions);
 
-    pipeline.bindShaderResourceForTexture2D<DefaultPolicy>("myTexture", ShaderStage::STAGE_PIXEL, texture);
+    pipeline.bindShaderResourceForTexture2D("myTexture", ShaderStage::STAGE_PIXEL, texture);
 
     Renderizable renderizable = renderer.createRenderizable(cubeVertices, indices);
 	flecs::entity entity      = coreEngine.createEntity("Cube");
