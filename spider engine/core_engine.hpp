@@ -65,14 +65,11 @@ namespace spider_engine::core_engine {
 			world_.component<d3dx12::ConstantBufferVariable>();
 			world_.component<d3dx12::ConstantBufferData>();
 			world_.component<d3dx12::ShaderResourceView>();
-			world_.component<d3dx12::ShaderResourceViews>();
 			world_.component<d3dx12::ShaderResourceViewData>();
 			world_.component<d3dx12::Sampler>();
-			world_.component<d3dx12::Samplers>();
 			world_.component<d3dx12::SamplerData>();
 			world_.component<d3dx12::ShaderDescription>();
 			world_.component<d3dx12::ConstantBuffer>();
-			world_.component<d3dx12::ConstantBuffers>();
 			world_.component<d3dx12::ResourceBindingData>();
 			world_.component<d3dx12::ShaderData>();
 			world_.component<d3dx12::Mesh>();

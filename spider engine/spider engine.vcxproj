@@ -89,13 +89,13 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\distr;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\DirectXTex;$(ProjectDir)dependencies\dxc\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\assimp-6.0.2\build_x86\include\;$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\distr;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\DirectXTex;$(ProjectDir)dependencies\dxc\inc;$(ProjectDir)dependencies\assimp-6.0.2\include\</AdditionalIncludeDirectories>
       <AdditionalOptions>-DNOMINMAX %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(ProjectDir)dependencies\dxc\lib\x86\dxcompiler.lib;$(ProjectDir)dependencies\dxc\lib\x86\dxil.lib;$(ProjectDir)dependencies\DirectXTex\DirectXTex\Bin\Windows10_2022\x86\Debug\DirectXTex.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)dependencies\dxc\lib\x86\dxcompiler.lib;$(ProjectDir)dependencies\dxc\lib\x86\dxil.lib;$(ProjectDir)dependencies\DirectXTex\DirectXTex\Bin\Windows10_2022\x86\Debug\DirectXTex.lib;$(ProjectDir)dependencies\assimp-6.0.2\build_x86\lib\Debug\assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -107,7 +107,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\distr;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\DirectXTex;$(ProjectDir)dependencies\dxc\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\assimp-6.0.2\build_x86\include\;$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\distr;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\DirectXTex;$(ProjectDir)dependencies\dxc\inc;$(ProjectDir)dependencies\assimp-6.0.2\include\</AdditionalIncludeDirectories>
       <AdditionalOptions>-DNOMINMAX %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -115,7 +115,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(ProjectDir)dependencies\dxc\lib\x86\dxcompiler.lib;$(ProjectDir)dependencies\dxc\lib\x86\dxil.lib;$(ProjectDir)dependencies\DirectXTex\DirectXTex\Bin\Windows10_2022\x86\Release\DirectXTex.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)dependencies\dxc\lib\x86\dxcompiler.lib;$(ProjectDir)dependencies\dxc\lib\x86\dxil.lib;$(ProjectDir)dependencies\DirectXTex\DirectXTex\Bin\Windows10_2022\x86\Release\DirectXTex.lib;$(ProjectDir)dependencies\assimp-6.0.2\build_x86\lib\Release\assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -125,13 +125,13 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\distr;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\DirectXTex;$(ProjectDir)dependencies\dxc\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\assimp-6.0.2\build_x64\include\;$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\distr;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\DirectXTex;$(ProjectDir)dependencies\dxc\inc;$(ProjectDir)dependencies\assimp-6.0.2\include\</AdditionalIncludeDirectories>
       <AdditionalOptions>-DNOMINMAX %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(ProjectDir)dependencies\dxc\lib\x64\dxcompiler.lib;$(ProjectDir)dependencies\dxc\lib\x64\dxil.lib;$(ProjectDir)dependencies\DirectXTex\DirectXTex\Bin\Windows10_2022\x64\Debug\DirectXTex.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)dependencies\dxc\lib\x64\dxcompiler.lib;$(ProjectDir)dependencies\dxc\lib\x64\dxil.lib;$(ProjectDir)dependencies\DirectXTex\DirectXTex\Bin\Windows10_2022\x64\Debug\DirectXTex.lib;$(ProjectDir)dependencies\assimp-6.0.2\build_x64\lib\Debug\assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -143,7 +143,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\distr;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\DirectXTex;$(ProjectDir)dependencies\dxc\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\assimp-6.0.2\build_x64\include\;$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\distr;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\DirectXTex;$(ProjectDir)dependencies\dxc\inc;$(ProjectDir)dependencies\assimp-6.0.2\include\</AdditionalIncludeDirectories>
       <AdditionalOptions>-DNOMINMAX %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -151,7 +151,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(ProjectDir)dependencies\dxc\lib\x64\dxcompiler.lib;$(ProjectDir)dependencies\dxc\lib\x64\dxil.lib;$(ProjectDir)dependencies\DirectXTex\DirectXTex\Bin\Windows10_2022\x64\Release\DirectXTex.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)dependencies\dxc\lib\x64\dxcompiler.lib;$(ProjectDir)dependencies\dxc\lib\x64\dxil.lib;$(ProjectDir)dependencies\DirectXTex\DirectXTex\Bin\Windows10_2022\x64\Release\DirectXTex.lib;$(ProjectDir)dependencies\assimp-6.0.2\build_x64\lib\Release\assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

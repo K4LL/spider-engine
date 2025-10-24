@@ -34,3 +34,13 @@
 #define SPIDER_RAW_BITCAST(Target, origin) (*reinterpret_cast<Target*>(reinterpret_cast<void*>(&origin)))
 
 using uint_t = unsigned int;
+
+bool isButtonDown(int vkey) {
+    bool prev[256] = {};
+
+    bool down = (GetAsyncKeyState(vkey) & 0x8000) != 0;
+    bool pressed = down && !prev[vkey];
+
+    prev[vkey] = down;
+    return pressed;
+}

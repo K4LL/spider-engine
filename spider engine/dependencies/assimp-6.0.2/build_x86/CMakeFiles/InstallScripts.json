@@ -1,0 +1,11 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/Users/gupue/source/repos/spider engine/spider engine/dependencies/assimp-6.0.2/build_x86/cmake_install.cmake",
+		"C:/Users/gupue/source/repos/spider engine/spider engine/dependencies/assimp-6.0.2/build_x86/contrib/zlib/cmake_install.cmake",
+		"C:/Users/gupue/source/repos/spider engine/spider engine/dependencies/assimp-6.0.2/build_x86/code/cmake_install.cmake",
+		"C:/Users/gupue/source/repos/spider engine/spider engine/dependencies/assimp-6.0.2/build_x86/test/cmake_install.cmake",
+		"C:/Users/gupue/source/repos/spider engine/spider engine/dependencies/assimp-6.0.2/build_x86/test/headercheck/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

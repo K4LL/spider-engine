@@ -16,7 +16,6 @@
 #include "d3d12shader.h"
 #include "DirectXTex/DirectXTex.h"
 
-#include "fast_array.hpp"
 #include "definitions.hpp"
 #include "concepts.hpp"
 #include "policies.hpp"
@@ -78,17 +77,30 @@ namespace spider_engine::d3dx12 {
 
 	/// @struct Vertex
 	/// @brief Vertex struct.
-	/// @details Stores posion, normal and uv.
+	/// @details Stores posion, normal, uv and tangent.
 	struct Vertex {
 		DirectX::XMFLOAT3 position;
 		DirectX::XMFLOAT3 normal;
 		DirectX::XMFLOAT2 uv;
+		DirectX::XMFLOAT3 tangent;
 	};
 
-	const D3D12_INPUT_ELEMENT_DESC psInputLayout[] = {
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex, position), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex, normal), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex, uv), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
+	inline constexpr D3D12_INPUT_ELEMENT_DESC psInputLayout[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+		  static_cast<UINT>(offsetof(Vertex, position)),
+		  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+
+		{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+		  static_cast<UINT>(offsetof(Vertex, normal)),
+		  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0,
+		  static_cast<UINT>(offsetof(Vertex, uv)),
+		  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+
+		{ "TANGENT",  0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+		  static_cast<UINT>(offsetof(Vertex, tangent)),
+		  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 	};
 
 	struct VertexArrayBuffer {
@@ -105,7 +117,7 @@ namespace spider_engine::d3dx12 {
 	};
 
 	/// @struct Texture 2D
-	///  @brief Texture 2D struct.
+	/// @brief Texture 2D struct.
 	struct Texture2D {
 		Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 		Microsoft::WRL::ComPtr<ID3D12Resource> uploadResource;
@@ -272,14 +284,6 @@ namespace spider_engine::d3dx12 {
 		ConstantBuffer& operator=(const ConstantBuffer& other) = default;
 		ConstantBuffer& operator=(ConstantBuffer&& other) noexcept = default;
 	};
-	struct ConstantBuffers {
-		ConstantBuffer* begin;
-		ConstantBuffer* end;
-
-		const size_t getSize() const {
-			return static_cast<size_t>(end - begin);
-		}
-	};
 
 	/// @brief Shader resource view class. 
 	/// @details Mainly used for texturing. This class is not mutable.
@@ -339,14 +343,6 @@ namespace spider_engine::d3dx12 {
 		ShaderResourceView& operator=(const ShaderResourceView& other) = default;
 		ShaderResourceView& operator=(ShaderResourceView&& other) noexcept = default;
 	};
-	struct ShaderResourceViews {
-		ShaderResourceView* begin;
-		ShaderResourceView* end;
-
-		const size_t getSize() const {
-			return static_cast<size_t>(end - begin);
-		}
-	};
 
 	class Sampler {
 	private:
@@ -392,14 +388,6 @@ namespace spider_engine::d3dx12 {
 
 		Sampler& operator=(const Sampler& other) = default;
 		Sampler& operator=(Sampler&& other) noexcept = default;
-	};
-	struct Samplers {
-		Sampler* begin;
-		Sampler* end;
-
-		const size_t getSize() const {
-			return static_cast<size_t>(end - begin);
-		}
 	};
 
 	struct ResourceBindingData {
@@ -672,7 +660,7 @@ namespace spider_engine::d3dx12 {
 		requires (CallableAs<Fn, void, DescriptorHeap*, Args...>)
 		void writeOnDescriptorHeap(const std::string& id,
 								   size_t			  operationCount,
-								   Fn&& fn,
+								   Fn&&				  fn,
 								   Args&&...		  args)
 		{
 			auto it = descriptorHeaps_.find(id);
@@ -698,7 +686,7 @@ namespace spider_engine::d3dx12 {
 			requires (CallableAs<Fn, void, DescriptorHeap*, Args...>)
 		void writeOnDescriptorHeap(DescriptorHeap* descriptorHeap,
 								   size_t		   operationCount,
-								   Fn&& fn,
+								   Fn&&			   fn,
 								   Args&&...	   args)
 		{
 			descriptorHeap->size += operationCount;

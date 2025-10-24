@@ -5,16 +5,6 @@
 #include "core_engine.hpp"
 #include "camera.hpp"
 
-bool isButtonDown(int vkey) {
-    static bool prev[256] = {};
-
-    bool down = (GetAsyncKeyState(vkey) & 0x8000) != 0;
-    bool pressed = down && !prev[vkey];
-
-    prev[vkey] = down;
-    return pressed;
-}
-
 // Shader Source Code
 std::wstring vertexShaderSrc = LR"(
 cbuffer frameData : register(b0)
@@ -25,9 +15,10 @@ cbuffer frameData : register(b0)
 };
 
 struct VSInput {
-    float3 pos  : POSITION;
-    float3 norm : NORMAL;
-    float2 uv   : TEXCOORD0;
+    float3 pos      : POSITION;
+    float3 norm     : NORMAL;
+    float2 uv       : TEXCOORD0;
+    float3 tangent  : TANGENT;
 };
 
 struct VSOutput {
@@ -114,16 +105,26 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
 
     pipeline.bindShaderResourceForTexture2D("myTexture", ShaderStage::STAGE_PIXEL, texture);
 
-    Renderizable renderizable = renderer.createRenderizable(cubeVertices, indices);
+    Renderizable  renderizable = renderer.createRenderizable(L"C:\\Users\\gupue\\source\\repos\\spider engine\\Wolf_obj.obj");
 	flecs::entity entity      = coreEngine.createEntity("Cube");
     coreEngine.getWorld().entity(entity).set<Renderizable>(std::move(renderizable));
-
-	Camera& camera = coreEngine.getCamera();
-	camera.transform.position = DirectX::XMVectorSet(0.0f, 0.0f, -2.0f, 1.0f);
+    Camera& camera = coreEngine.getCamera();
+    camera.transform.position = DirectX::XMVectorSet(0.0f, 0.0f, -20.0f, 1.0f);
 
     auto updateLoop = [&]() {
         if (isButtonDown(VK_F11)) {
-            renderer.setFullScreen(!renderer.isFullScreen());
+            //renderer.setFullScreen(!renderer.isFullScreen());
+        }
+
+        if (isButtonDown(VK_F11)) {
+            camera.transform.position = DirectX::XMVectorSubtract(
+                camera.transform.position,
+                DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f)
+            );
+
+            DirectX::XMFLOAT3 c;
+            DirectX::XMStoreFloat3(&c, camera.transform.position);
+            std::cout << "Camera x: " << c.x << "y: " << c.y << "z" << c.z << std::endl;
         }
 
         camera.updateViewMatrix();

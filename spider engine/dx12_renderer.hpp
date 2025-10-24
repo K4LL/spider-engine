@@ -22,6 +22,7 @@
 #include <wrl/client.h>
 #include <comdef.h>
 #include <unordered_map>
+#include <filesystem>
 
 // DirectX Helper includes
 #include "d3dx12.h"
@@ -29,8 +30,12 @@
 #include "d3d12shader.h"
 #include "DirectXTex/DirectXTex.h"
 
+// Asimp
+#include "assimp/Importer.hpp"
+#include "assimp/scene.h"
+#include "assimp/postprocess.h"
+
 // Framework includes
-#include "fast_array.hpp"
 #include "definitions.hpp"
 #include "policies.hpp"
 #include "types.hpp"
@@ -92,6 +97,8 @@ namespace spider_engine::d3dx12 {
 		BOOL isVSync_;
 
 		size_t bufferCount_;
+
+		Assimp::Importer importer;
 
 		void createCommandAllocatorQueueAndList() {
 			// Create command queue
@@ -852,13 +859,13 @@ namespace spider_engine::d3dx12 {
 		/// @param names Constant Buffer names.
 		/// @param sizes Constant Buffer sizes.
 		/// @param stage Constant Buffer stages.
-		ConstantBuffers createConstantBuffers(const std::vector<std::string> names,
+		std::vector<ConstantBuffer> createConstantBuffers(const std::vector<std::string> names,
 											  const std::vector<size_t>      sizes,
 											  const ShaderStage			     stage)
 		{
 			// Calculate count (size)
 			const size_t count = sizes.size();
-			if (count == 0) return ConstantBuffers{};
+			if (count == 0) return std::vector<ConstantBuffer>();
 
 			// Align sizes to 256 bytes
 			std::vector<size_t> alignedSizes;
@@ -883,16 +890,16 @@ namespace spider_engine::d3dx12 {
 			));
 
 			// Create constant buffers
-			ConstantBuffers constantBuffers;
-			constantBuffers.begin = new ConstantBuffer[count];
-			constantBuffers.end   = constantBuffers.begin + count;
+			std::vector<ConstantBuffer> constantBuffers;
 
 			// Create CBVs
 			size_t i        = 0;
 			uint32_t offset = 0;
 			auto fn = [&constantBuffers, &names, &resource, &stage, &offset, &alignedSizes, &i, this](DescriptorHeap* descriptorHeap) {
+				constantBuffers.emplace_back();
+
 				// Create Constant Buffer (struct)
-				ConstantBuffer& buffer = constantBuffers.begin[i];
+				ConstantBuffer& buffer = constantBuffers[i];
 				buffer.name_           = names[i];
 				buffer.heap_           = descriptorHeap->heap;
 				buffer.resource_       = resource;
@@ -1037,12 +1044,12 @@ namespace spider_engine::d3dx12 {
 		/// @param names Shader Resource names.
 		/// @param data Shader Resource data.
 		/// @param stage Shader Resource stage.
-		ShaderResourceViews createShaderResourceViews(const std::vector<std::string>&	       names,
-													  const std::vector<std::vector<uint8_t>>& data,
-													  const ShaderStage                        stage)
+		std::vector<ShaderResourceView> createShaderResourceViews(const std::vector<std::string>&	       names,
+													              const std::vector<std::vector<uint8_t>>& data,
+													              const ShaderStage                        stage)
 		{
 			const size_t count = data.size();
-			if (count <= 0) return ShaderResourceViews{};
+			if (count <= 0) return std::vector<ShaderResourceView>();
 
 			size_t			    totalSizeInBytes = 0;
 			std::vector<size_t> sizes(count);
@@ -1053,7 +1060,7 @@ namespace spider_engine::d3dx12 {
 				totalSizeInBytes += data[i].size();
 			}
 
-			ShaderResourceViews shaderResourceViews;
+			std::vector<ShaderResourceView> shaderResourceViews;
 
 			// Create resource description
 			D3D12_RESOURCE_DESC resourceDesc = {};
@@ -1082,15 +1089,16 @@ namespace spider_engine::d3dx12 {
 			);
 
 			// Allocate Shader Resource Views
-			shaderResourceViews.begin = new ShaderResourceView[count];
-			shaderResourceViews.end   = shaderResourceViews.begin + count;
+			shaderResourceViews.reserve(count);
 			
 			size_t offset    = 0;
 			UINT8* dataBegin = nullptr;
 			size_t i         = 0;
 			auto fn = [&shaderResourceViews, &resource, &names, stage, &dataBegin, &offset, &data, &sizes, &i, this](DescriptorHeap* descriptorHeap) {
+				shaderResourceViews.emplace_back();
+				
 				// Create Shader Resource View struct
-				ShaderResourceView& shaderResourceView = shaderResourceViews.begin[i];
+				ShaderResourceView& shaderResourceView = shaderResourceViews[i];
 				shaderResourceView.heap_               = descriptorHeap->heap;
 				shaderResourceView.resource_           = resource;
 				shaderResourceView.name_               = names[i];
@@ -1134,14 +1142,14 @@ namespace spider_engine::d3dx12 {
 		/// @param names Shader Resource names
 		/// @param data Shader Resource data
 		/// @param stage Shader Resources stage
-		ShaderResourceViews createShaderResourceViewsForTexture2D(std::vector<std::string>& names,
-																  std::vector<Texture2D>&   data,
-																  const ShaderStage         stage) 
+		std::vector<ShaderResourceView> createShaderResourceViewsForTexture2D(std::vector<std::string>& names,
+																              std::vector<Texture2D>&   data,
+																              const ShaderStage         stage) 
 		{
 			const size_t count = data.size();
-			if (count == 0) return ShaderResourceViews{};
+			if (count == 0) return std::vector<ShaderResourceView>{};
 
-			ShaderResourceViews shaderResourceViews;
+			std::vector<ShaderResourceView> shaderResourceViews;
 
 			// Calculate sizes and total size
 			size_t			  totalDataSize = 0;
@@ -1152,19 +1160,21 @@ namespace spider_engine::d3dx12 {
 			}
 
 			// Allocate Shader Resource Views
-			shaderResourceViews.begin = new ShaderResourceView[count];
-			shaderResourceViews.end   = shaderResourceViews.begin + count;
+			shaderResourceViews.reserve(count);
 
 			size_t i = 0;
 			auto fn = [&i, &shaderResourceViews, &names, &sizes, stage, &data, this](DescriptorHeap* descriptorHeap) {
+				shaderResourceViews.emplace_back();
+
 				// Create Shader Resource View struct
-				shaderResourceViews.begin[i].heap_        = descriptorHeap->heap;
-				shaderResourceViews.begin[i].name_        = names[i];
-				shaderResourceViews.begin[i].sizeInBytes_ = sizes[i];
-				shaderResourceViews.begin[i].stage_       = stage;
-				shaderResourceViews.begin[i].cpuHandle_   = cbvSrvUavDescriptorHeap_->cpuHandle;
-				shaderResourceViews.begin[i].gpuHandle_   = cbvSrvUavDescriptorHeap_->gpuHandle;
-				shaderResourceViews.begin[i].index_       = i;
+				ShaderResourceView& shaderResourceView = shaderResourceViews[i];
+				shaderResourceView.heap_			   = descriptorHeap->heap;
+				shaderResourceView.name_			   = names[i];
+				shaderResourceView.sizeInBytes_		   = sizes[i];
+				shaderResourceView.stage_			   = stage;
+				shaderResourceView.cpuHandle_		   = cbvSrvUavDescriptorHeap_->cpuHandle;
+				shaderResourceView.gpuHandle_		   = cbvSrvUavDescriptorHeap_->gpuHandle;
+				shaderResourceView.index_			   = i;
 
 				// Create Shader Resource View Description
 				D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescription = {};
@@ -1178,7 +1188,7 @@ namespace spider_engine::d3dx12 {
 				device_->CreateShaderResourceView(
 					data[i].resource.Get(), 
 					&shaderResourceViewDescription, 
-					shaderResourceViews.begin[i].cpuHandle_
+					shaderResourceView.cpuHandle_
 				);
 
 				data[i].resource->SetName(L"TexturedShaderResourceView");
@@ -1227,22 +1237,23 @@ namespace spider_engine::d3dx12 {
 		/// @brief Creates multiple Samplers
 		/// @param names Sampler names
 		/// @param stage Sampler stages
-		Samplers createSamplers(const std::vector<std::string>& names,
+		std::vector<Sampler> createSamplers(const std::vector<std::string>& names,
 								const ShaderStage               stage) 
 		{
 			const size_t count = names.size();
-			if (count == 0) return Samplers{};
+			if (count == 0) return std::vector<Sampler>();
 
-			Samplers samplers;
+			std::vector<Sampler> samplers;
 
 			// Allocate samplers
-			samplers.begin = new Sampler[count];
-			samplers.end   = samplers.begin + count;
+			samplers.reserve(count);
 
 			size_t i = 0;
 			auto fn = [&names, &samplers, stage, &i, this](DescriptorHeap* descriptorHeap) {
+				samplers.emplace_back();
+
 				// Create Sampler struct
-				auto& sampler      = samplers.begin[i];
+				auto& sampler      = samplers[i];
 				sampler.heap_      = descriptorHeap->heap;
 				sampler.cpuHandle_ = samplerDescriptorHeap_->cpuHandle;
 				sampler.gpuHandle_ = samplerDescriptorHeap_->gpuHandle;
@@ -1287,7 +1298,89 @@ namespace spider_engine::d3dx12 {
 
 			return mesh;
 		}
-		
+
+		Renderizable createRenderizable(const std::wstring& path) {
+			std::string utf8Path(path.begin(), path.end());
+
+			const aiScene* scene = importer.ReadFile(
+				utf8Path,
+				aiProcess_Triangulate |
+				aiProcess_JoinIdenticalVertices |
+				aiProcess_CalcTangentSpace |
+				aiProcess_GenSmoothNormals |
+				aiProcess_FlipUVs |
+				aiProcess_MakeLeftHanded |
+				aiProcess_FlipWindingOrder
+			);
+
+			if (!scene || !scene->mRootNode || (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE)) {
+				throw std::runtime_error(std::string("Assimp error: ") + importer.GetErrorString());
+			}
+
+			std::vector<Vertex>  vertices;
+			std::vector<uint32_t> indices;
+
+			size_t vertexOffset = 0;
+
+			// Loop through every mesh
+			for (uint32_t m = 0; m < scene->mNumMeshes; ++m) {
+				aiMesh* mesh = scene->mMeshes[m];
+
+				for (uint32_t i = 0; i < mesh->mNumVertices; ++i) {
+					Vertex v {};
+					v.position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
+
+					if (mesh->HasNormals())
+						v.normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
+					else
+						v.normal = { 0.f, 1.f, 0.f };
+
+					if (mesh->mTextureCoords[0])
+						v.uv = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
+					else
+						v.uv = { 0.f, 0.f };
+
+					if (mesh->HasTangentsAndBitangents())
+						v.tangent = { mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z };
+					else
+						v.tangent = { 0.f, 0.f, 0.f };
+
+					vertices.push_back(v);
+				}
+
+				for (uint32_t i = 0; i < mesh->mNumFaces; ++i) {
+					const aiFace& face = mesh->mFaces[i];
+					for (uint32_t j = 0; j < face.mNumIndices; ++j)
+						indices.push_back(face.mIndices[j] + static_cast<uint32_t>(vertexOffset));
+				}
+
+				vertexOffset += mesh->mNumVertices;
+			}
+
+			// Try to load first diffuse texture
+			Texture2D texture {};
+			for (uint32_t m = 0; m < scene->mNumMeshes; ++m) {
+				aiMesh* mesh = scene->mMeshes[m];
+				if (mesh->mMaterialIndex < 0)
+					continue;
+
+				aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+				aiString texPath;
+				if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == AI_SUCCESS) {
+					std::filesystem::path folder = std::filesystem::path(utf8Path).parent_path();
+					std::filesystem::path texFullPath = folder / texPath.C_Str();
+					texture = createTexture2D(texFullPath.wstring());
+					break;
+				}
+			}
+
+			Renderizable renderizable;
+			renderizable.mesh    = std::move(createMesh(vertices, indices));
+			renderizable.texture = std::move(texture);
+
+			return renderizable;
+		}
+
 		/// @brief Creates a Renderizable that, if put on flecs, can be actually rendered.
 		Renderizable createRenderizable(const std::vector<Vertex>&   vertices,
 										const std::vector<uint32_t>& indices)
@@ -2129,10 +2222,10 @@ namespace spider_engine::d3dx12 {
 			auto& requiredConstantBuffers = renderPipeline.requiredConstantBuffers_;
 
 			// Required variables for creating constant buffers
-			std::vector<std::string>     constantBufferNames;
-			std::vector<size_t>	         constantBufferSizes;
-			std::vector<ShaderStage>     constantBufferStages;
-			std::vector<ConstantBuffers> constantBuffersArray;
+			std::vector<std::string>				 constantBufferNames;
+			std::vector<size_t>						 constantBufferSizes;
+			std::vector<ShaderStage>				 constantBufferStages;
+			std::vector<std::vector<ConstantBuffer>> constantBuffersArray;
 
 			// Create constant buffers
 			for (uint32_t i = 0; i < renderPipeline.shaders_.size(); ++i) {
@@ -2164,7 +2257,7 @@ namespace spider_engine::d3dx12 {
 			// Finish the constant buffers creation, populating the required Constant Buffers Map
 			for (auto it = constantBuffersArray.begin(); it != constantBuffersArray.end(); ++it) {
 				uint32_t index = 0;
-				for (auto constantBuffer = it->begin; constantBuffer != it->end; ++constantBuffer) {
+				for (auto constantBuffer = it->begin(); constantBuffer != it->end(); ++constantBuffer) {
 					// Try to find root parameter index for this constant buffer using its name and stage
 					auto key    = std::make_pair(constantBuffer->name_, constantBuffer->stage_);
 					auto rootIt = rootIndexMap.find(key);
@@ -2225,9 +2318,9 @@ namespace spider_engine::d3dx12 {
 			auto& requiredSamplers = renderPipeline.requiredSamplers_;
 
 			// Required variables for creating samplers
-			std::vector<std::string> samplerNames;
-			std::vector<ShaderStage> samplerStages;
-			std::vector<Samplers>    samplerArray(shaders.size());
+			std::vector<std::string>	 	  samplerNames;
+			std::vector<ShaderStage>	 	  samplerStages;
+			std::vector<std::vector<Sampler>> samplerArray;
 
 			// Create samplers
 			for (size_t i = 0; i < renderPipeline.shaders_.size(); ++i) {
@@ -2256,7 +2349,7 @@ namespace spider_engine::d3dx12 {
 			// Finish the shade resource view creation, populating the required Constant Buffers Map
 			for (auto it = samplerArray.begin(); it != samplerArray.end(); ++it) {
 				size_t index = 0;
-				for (auto sampler = it->begin; sampler != it->end; ++sampler) {
+				for (auto sampler = it->begin(); sampler != it->end(); ++sampler) {
 					// Try to find root parameter index for this shader resource view using its name and stage
 					auto key    = std::make_pair(sampler->name_, sampler->stage_);
 					auto rootIt = rootIndexMap.find(key);

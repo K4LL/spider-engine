@@ -1,0 +1,13 @@
+C:/Users/gupue/source/repos/spider engine/spider engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/uninstall.dir
+C:/Users/gupue/source/repos/spider engine/spider engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/UpdateAssimpLibsDebugSymbolsAndDLLs.dir
+C:/Users/gupue/source/repos/spider engine/spider engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/INSTALL.dir
+C:/Users/gupue/source/repos/spider engine/spider engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/ALL_BUILD.dir
+C:/Users/gupue/source/repos/spider engine/spider engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/ZERO_CHECK.dir
+C:/Users/gupue/source/repos/spider engine/spider engine/dependencies/assimp-6.0.2/build_x64/contrib/zlib/CMakeFiles/zlibstatic.dir
+C:/Users/gupue/source/repos/spider engine/spider engine/dependencies/assimp-6.0.2/build_x64/contrib/zlib/CMakeFiles/INSTALL.dir
+C:/Users/gupue/source/repos/spider engine/spider engine/dependencies/assimp-6.0.2/build_x64/contrib/zlib/CMakeFiles/ALL_BUILD.dir
+C:/Users/gupue/source/repos/spider engine/spider engine/dependencies/assimp-6.0.2/build_x64/code/CMakeFiles/assimp.dir
+C:/Users/gupue/source/repos/spider engine/spider engine/dependencies/assimp-6.0.2/build_x64/code/CMakeFiles/INSTALL.dir
+C:/Users/gupue/source/repos/spider engine/spider engine/dependencies/assimp-6.0.2/build_x64/test/CMakeFiles/unit.dir
+C:/Users/gupue/source/repos/spider engine/spider engine/dependencies/assimp-6.0.2/build_x64/test/CMakeFiles/INSTALL.dir
+C:/Users/gupue/source/repos/spider engine/spider engine/dependencies/assimp-6.0.2/build_x64/test/headercheck/CMakeFiles/INSTALL.dir
