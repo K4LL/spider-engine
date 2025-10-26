@@ -4,26 +4,26 @@
 
 <h1 align="center">🕷️ Spider Engine 0.3</h1>
 
-A modern **C++20 game engine prototype** built directly on **DirectX 12**.  
-It experiments with explicit rendering, reflection-based shader binding, and a modular **Entity–Component System** powered by [Flecs](https://flecs.dev).
+A modern **C++20 game engine prototype** built directly and only on **DirectX 12**.  
+Have explicit rendering, reflection-based shader binding, and a modular **Entity–Component System** powered by [Flecs](https://flecs.dev).
 
-> 🧪 *Spider Engine is currently a prototype and architectural sandbox — not production-ready software.*  
-> Its systems are unstable, experimental, and under continuous redesign.
+> 🧪 *Spider Engine is currently a prototype/skeleton — not production-ready software.*  
+> All systems are unstable and may not be working.
 
 ---
 
 ## 🧠 Overview
 
-Spider Engine’s goal is to provide a **clear, explicit, and modular foundation** for modern graphics programming.  
-It isn’t trying to hide DirectX 12 — it’s designed to *teach, explore, and evolve* around it.
+Spider Engine’s goal is to provide a **clear, explicit, and modular foundation** for modern graphics programming.
+Note that Spider Engine is currently a **PROTOTYPE**.
 
 The project focuses on:
 - **Transparency:** no hidden pipelines or black-box managers.  
-- **Control:** developers own their resources, descriptors, and draw calls.  
+- **Control:** developers own their resources and draw calls.  
 - **Simplicity:** minimal dependencies, direct mapping to DX12 concepts.  
-- **Extensibility:** architecture organized in independent subsystems that can be replaced, re-implemented, or extended.
+- **Extensibility:** architecture organized in mostly independent subsystems that can be replaced, re-implemented, or extended.
 
-At this stage, Spider Engine functions as a **skeleton for experimentation** — a base for building editors, tools, or custom render pipelines later on.
+At this stage, Spider Engine is basically a **skeleton** — a base for building editors, tools, or custom render pipelines later on.
 
 ---
 
@@ -36,7 +36,6 @@ At this stage, Spider Engine functions as a **skeleton for experimentation** —
 
 - **Windowing Layer**  
   Minimal Win32 wrapper with support for resizing, focus, and full-screen toggling.  
-  Designed to stay out of the way — only what’s necessary to get a valid DirectX context running.
 
 - **Engine Bootstrap**  
   `CoreEngine` ties together the ECS world, the renderer, and the window system into one controllable loop.  
@@ -58,8 +57,8 @@ At this stage, Spider Engine functions as a **skeleton for experimentation** —
 
 ### 🧱 Rendering Goals
 The rendering layer focuses on being:
-- **Explicit** — clear control over what happens on GPU and when.  
-- **Predictable** — no hidden batching or background synchronization.  
+- **Explicit** — clear control over what happens on GPU and when.
+- **Efficient** — clear syntax yet efficient.
 - **Expandable** — future support for new rendering backends and advanced features like deferred shading, compute pipelines, and material systems.
 
 While the current renderer is functional, it is still considered **experimental** and is being restructured frequently.
@@ -72,15 +71,12 @@ While the current renderer is functional, it is still considered **experimental*
 - Provides just enough structure to render simple scenes while leaving room for future scene graph and editor integration.
 
 ---
-
-### 🧩 Philosophy
-Spider Engine’s design aims to serve as a **learning platform and research base**, not as a finished tool.  
-It’s written with **clarity over convenience**, to make experimentation with rendering pipelines and ECS design easier.  
-
+### ⏳ Goals
 Long-term goals include:
-- Replacing ad-hoc systems with data-driven ones.  
 - Building an editor and runtime reflection system.  
-- Implementing a more complete resource manager and material system.
+- Implementing multiple meshes per Renderizable, material system, etc...
+- Implementing a more complete backend (mainly for the renderer).
+- Implementing more subsystems (input system, audio system, etc...)
 
 ---
 
