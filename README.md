@@ -1,4 +1,8 @@
-# 🕷️ Spider Engine 0.3
+<p align="center">
+  <img src="docs/transparent/1280x720_transparent.png" alt="Spider Engine Logo" width="160"/>
+</p>
+
+<h1 align="center">🕷️ Spider Engine 0.3</h1>
 
 A modern **C++20 game engine prototype** built directly on **DirectX 12**.  
 It experiments with explicit rendering, reflection-based shader binding, and a modular **Entity–Component System** powered by [Flecs](https://flecs.dev).
