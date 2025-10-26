@@ -41,8 +41,6 @@ namespace spider_engine::core_engine {
 		{}
 	};
 
-	/// @class CoreEngine
-	/// @brief Controls pretty much everything.
 	class CoreEngine {
 	private:
 		flecs::world world_;
@@ -86,8 +84,6 @@ namespace spider_engine::core_engine {
 			(world_.component<Types>(), ...);
 		}
 
-		/// @brief Initalize rendering systems.
-		/// @param description Rendering system description
 		void intitializeRenderingSystems(const RenderingSystemDescription& description) 
 		{
 			window_ = std::make_unique<Window>(
@@ -112,10 +108,6 @@ namespace spider_engine::core_engine {
 			camera_ = std::make_unique<spider_engine::rendering::Camera>(window_->width_, window_->height_);
 		}
 
-		/// @brief Initialize debug systems
-		/// @param enableLogs Enable logs
-		/// @param enableWarnings Enable warnings
-		/// @param enableErrors Enable Errors
 		void initializeDebugSystems(const bool enableLogs     = true,
 									const bool enableWarnings = true,
 									const bool enableErrors   = true)
@@ -164,10 +156,6 @@ namespace spider_engine::core_engine {
 
 			std::wcout << L"\n";
 		}
-		/// @brief Initialize debug systems only if on debug mode
-		/// @param enableLogs Enable logs
-		/// @param enableWarnings Enable warnings
-		/// @param enableErrors Enable Errors
 		void initializeDebugSystemsOnDebugMode(const bool enableLogs     = true,
 											   const bool enableWarnings = true,
 											   const bool enableErrors   = true)
@@ -219,7 +207,6 @@ namespace spider_engine::core_engine {
 #endif
 		}
 
-		/// @brief Starts the main loop
 		void start(std::function<void()> fn) {
 			MSG msg = {};
 			while (msg.message != WM_QUIT && window_->isRunning_) {
@@ -231,49 +218,35 @@ namespace spider_engine::core_engine {
 			}
 		}
 
-		/// @brief Creates a flecs entity associated with a name
-		/// @param name Entity name
 		flecs::entity createEntity(const std::string& name = "") {
 			if (name.empty()) return world_.entity();
 			return world_.entity(name.c_str());
 		}
 
-		/// @brief Adds a component to an entity.
-		/// @tparam Ty Component type.
-		/// @param entity The entity to add the component.
-		/// @param item The component to add.
 		template <typename Ty>
 		void addComponent(flecs::entity entity, Ty&& item) {
 			entity.set<Ty>(std::forward<Ty>(item));
 		}
-		/// @brief Returns a component pointer from an entity.
-		/// @tparam Ty Component type.
 		template <typename Ty>
 		Ty* getComponent(flecs::entity entity) {
 			return entity.get_mut<Ty>();
 		}
-		/// @brief Returns a constant component pointer from an entity.
-		/// @tparam Ty Component type.
 		template <typename Ty>
 		const Ty* getConstComponent(flecs::entity entity) {
 			return entity.get<Ty>();
 		}
 
-		/// @brief Returns the flecs world.
 		flecs::world& getWorld() {
 			return world_;
 		}
 
-		/// @brief Returns the renderer.
 		d3dx12::DX12Renderer& getRenderer() {
 			return *renderer_;
 		}
-		/// @brief Returns the compiler.
 		d3dx12::DX12Compiler& getCompiler() {
 			return *compiler_;
 		}
 
-		/// @brief Get the actual camera.
 		spider_engine::rendering::Camera& getCamera() {
 			return *camera_;
 		}

@@ -1,11 +1,3 @@
-/**
- * @file dx12_types.hpp
- *
- * @brief Defines types for managing DirectX 12.
- *
- * @version 0.2
- */
-
 #include <DirectXMath.h>
 #include <DirectXColors.h>
 #include <wrl/client.h>
@@ -75,9 +67,6 @@ namespace spider_engine::d3dx12 {
 	class DX12Renderer;
 	class DX12Compiler;
 
-	/// @struct Vertex
-	/// @brief Vertex struct.
-	/// @details Stores posion, normal, uv and tangent.
 	struct Vertex {
 		DirectX::XMFLOAT3 position;
 		DirectX::XMFLOAT3 normal;
@@ -116,8 +105,6 @@ namespace spider_engine::d3dx12 {
 		size_t size;
 	};
 
-	/// @struct Texture 2D
-	/// @brief Texture 2D struct.
 	struct Texture2D {
 		Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 		Microsoft::WRL::ComPtr<ID3D12Resource> uploadResource;
@@ -168,9 +155,6 @@ namespace spider_engine::d3dx12 {
 		ShaderStage stage;
 	};
 
-	/// @class ShaderDescription
-	/// @brief Describes a shader for creation.
-	/// @details Stores shader path or source and shader stage (vertex, pixel etc...).
 	class ShaderDescription {
 	public:
 		std::wstring pathOrSource;
@@ -210,9 +194,6 @@ namespace spider_engine::d3dx12 {
 		}
 	};
 
-	/// @struct ConstantBuffer
-	/// @brief Main way to pass data to shaders at runtime.
-	/// @details Main way to pass data to shaders at runtime, by enabling to copy data to the GPU.
 	class ConstantBuffer {
 	private:
 		std::string name_;
@@ -237,46 +218,34 @@ namespace spider_engine::d3dx12 {
 		ConstantBuffer(const ConstantBuffer&) = default;
 		ConstantBuffer(ConstantBuffer&&) noexcept = default;
 
-		/// @brief Open buffer for mapping.
-		/// @note This is usually done automatically.
 		void open() {
 			resource_->Map(0, nullptr, &mappedData_);
 			mappedData_ = reinterpret_cast<uint8_t*>(mappedData_) + (index_ * sizeInBytes_);
 		}
-		/// @brief Copy data to the buffer
-		/// @param data	Data to be copied
 		template <typename Ty>
 		void copy(const Ty& data) {
 			memcpy(mappedData_, &data, sizeof(Ty));
 		}
-		/// @brief Close buffer for mapping.
 		void unmap() {
 			resource_->Unmap(0, nullptr);
 		}
 
-		/// @brief Get buffer name.
 		std::string_view getName() {
 			return this->name_;
 		}
-		/// @brief Get size in bytes.
 		size_t getSizeInBytes() {
 			return this->sizeInBytes_;
 		}
-		/// @brief Get buffer stage (vertex, pixel etc...)
 		ShaderStage getStage() {
 			return this->stage_;
 		}
-		/// @brief Get a pointer to the mapped data.
 		template <typename Type>
 		Type* getPtr() {
 			return reinterpret_cast<Type*>(mappedData_);
 		}
-		/// @brief Get GPU virtual address.
 		D3D12_GPU_VIRTUAL_ADDRESS getGPUVirtualAddress() const {
 			return resource_->GetGPUVirtualAddress();
 		}
-		/// @brief Get buffer index
-		/// @note The index isn't directly related to the bind point(b0, b1 b2...)
 		uint32_t getIndex() const {
 			return this->index_;
 		}
@@ -285,8 +254,6 @@ namespace spider_engine::d3dx12 {
 		ConstantBuffer& operator=(ConstantBuffer&& other) noexcept = default;
 	};
 
-	/// @brief Shader resource view class. 
-	/// @details Mainly used for texturing. This class is not mutable.
 	class ShaderResourceView {
 	private:
 		std::string name_;
@@ -317,25 +284,18 @@ namespace spider_engine::d3dx12 {
 		ShaderResourceView(const ShaderResourceView&)     = default;
 		ShaderResourceView(ShaderResourceView&&) noexcept = default;
 
-		/// @brief Get shader resource name.
 		std::string_view getName() {
 			return this->name_;
 		}
-		/// @brief Get shader resource size in bytes.
-		/// @warning Size is not initalized. Tryng to read this will return always 0.
 		size_t getSizeInBytes() {
 			return this->sizeInBytes_;
 		}
-		/// @brief Get shader resource stage(vertex, pixel etc...)
 		ShaderStage getStage() {
 			return this->stage_;
 		}
-		/// @brief Get GPU virtual address.
 		D3D12_GPU_VIRTUAL_ADDRESS getGPUVirtualAddress() const {
 			return resource_->GetGPUVirtualAddress();
 		}
-		/// @brief Get shader resource index.
-		/// @note The index isn't directly related to the bind point(b0, b1 b2...)
 		uint32_t getIndex() const {
 			return this->index_;
 		}
@@ -408,21 +368,17 @@ namespace spider_engine::d3dx12 {
 		std::vector<ResourceBindingData>               shaderResourceBindingData;
 	};
 
-	/// @brief Mesh struct used on Renderizables.
 	struct Mesh {
 		std::unique_ptr<VertexArrayBuffer> vertexArrayBuffer;
 		std::unique_ptr<IndexArrayBuffer>  indexArrayBuffer;
 	};
 
-	/// @brief Only way to render anything.
 	struct Renderizable {
 		Mesh				 mesh;
 		Texture2D			 texture;
 		rendering::Transform transform;
 	};
 
-	/// @brief Shader class.
-	/// @details Stores shader's path or source, shader blob, stage and data.
 	struct Shader {
 		std::wstring pathOrSource;
 
@@ -432,9 +388,6 @@ namespace spider_engine::d3dx12 {
 		ShaderData  data;
 	};
 
-	/// @class SynchronizationObject
-	/// @brief Object used for GPU synchronization.
-	/// @details This class manages DirectX12 fences and events to synchronize GPU operations.
 	class SynchronizationObject {
 	public:
 		Microsoft::WRL::ComPtr<ID3D12Fence> fence_;
@@ -725,8 +678,6 @@ namespace spider_engine::d3dx12 {
 		HeapAllocator& operator=(HeapAllocator&&) noexcept = default;
 	};
 
-	/// @struct RenderPipelineRequirements
-	/// @brief Contains the Requirements to bind resources on the Render Pipeline.
 	struct RenderPipelineRequirements {
 		std::vector<std::string_view> constantBufferName;
 		std::vector<ShaderStage>      constantBufferStage;
@@ -736,8 +687,6 @@ namespace spider_engine::d3dx12 {
 		std::vector<ShaderStage>      shaderResourceStage;
 	};
 
-	/// @class RenderPipeline
-	/// @brief Provides an interface to interact with shaders and tells the Renderer how to draw.
 	class RenderPipeline {
 	private:
 		DX12Renderer* renderer_;
@@ -766,7 +715,6 @@ namespace spider_engine::d3dx12 {
 		friend class DX12Renderer;
 		friend class DX12Compiler;
 
-		/// @brief Returns the Requirements to bind resources on the Render Pipeline.
 		RenderPipelineRequirements getRequirements() {
 			RenderPipelineRequirements requirements;
 
@@ -783,10 +731,6 @@ namespace spider_engine::d3dx12 {
 			return requirements;
 		}
 
-		/// @brief Binds a buffer to the Render Pipeline
-		/// @param name Buffer name
-		/// @param stage Buffer stage
-		/// @param data Buffer data
 		template <typename Ty>
 		void bindBuffer(const std::string& name,
 						const ShaderStage  stage,
@@ -801,10 +745,6 @@ namespace spider_engine::d3dx12 {
 			it->second.copy(std::forward<Ty>(data));
 		}
 
-		/// @brief Binds a Shader Resource to the pipeline.
-		/// @param name Buffer name.
-		/// @param name Buffer stage.
-		/// @param name Buffer data.
 		template <typename Ty>
 		void bindShaderResource(const std::string& name,
 								const ShaderStage  stage,
@@ -818,10 +758,6 @@ namespace spider_engine::d3dx12 {
 
 			it->second = (renderer_->*createShaderResourceViewForStructuredDataFunction_)(name, data, stage);
 		}
-		/// @brief Binds a Shader Resource with a Texture 2D to the pipeline.
-		/// @param name Buffer name.
-		/// @param name Buffer stage.
-		/// @param name Buffer data.
 		void bindShaderResourceForTexture2D(const std::string& name,
 								            const ShaderStage  stage,
 								            Texture2D&         data)
@@ -835,9 +771,6 @@ namespace spider_engine::d3dx12 {
 			it->second = (renderer_->*createShaderResourceViewForTexture2DFunction_)(name, data, stage);
 		}
 
-		/// @brief Returns a buffer
-		/// @param Buffer name
-		/// @param Buffer stage
 		ConstantBuffer* getBufferPtr(const std::string& name,
 									 const ShaderStage  stage) noexcept
 		{
@@ -849,9 +782,6 @@ namespace spider_engine::d3dx12 {
 			return &it->second;
 		}
 
-		/// @brief Returns a Shader Resource
-		/// @param Buffer name
-		/// @param Buffer stage
 		ShaderResourceView* getShaderResourcePtr(const std::string& name,
 												 const ShaderStage  stage) noexcept
 		{

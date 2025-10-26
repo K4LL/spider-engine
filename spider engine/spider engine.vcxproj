@@ -169,11 +169,15 @@
     <ClInclude Include="policies.hpp" />
     <ClInclude Include="dx12_renderer.hpp" />
     <ClInclude Include="concepts.hpp" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="types.hpp" />
     <ClInclude Include="window.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Doxyfile" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\docs\transparent\icon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

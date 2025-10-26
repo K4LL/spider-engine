@@ -21,6 +21,9 @@
     <Filter Include="flecs">
       <UniqueIdentifier>{029d3902-0f41-473e-afcd-0f68363b9e31}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{8df3f3b8-cddc-486e-a6c9-a2c5516ef318}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -67,8 +70,16 @@
     <ClInclude Include="window.hpp">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Doxyfile" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\docs\transparent\icon.ico">
+      <Filter>Resource</Filter>
+    </Image>
   </ItemGroup>
 </Project>

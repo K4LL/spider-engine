@@ -1,11 +1,3 @@
-/**
- * @file dx12_renderer.hpp
- * 
- * @brief Defines main classes for managing DirectX 12 rendering.
- * 
- * @version 0.2
- */
-
 #pragma once
 
 #pragma warning(push, 0)
@@ -54,9 +46,6 @@
 #pragma comment(lib, "d3dcompiler.lib")
 
 namespace spider_engine::d3dx12 {
-	/// @class DX12Renderer 
-	/// @brief Main class for managing DirectX 12 rendering.
-	/// @note Almost all function can throw a runtime_exception.
 	class DX12Renderer {
 	private:
 		template <typename Ty>
@@ -554,10 +543,6 @@ namespace spider_engine::d3dx12 {
 			}
 		}
 
-		/// @brief Creates a texture 2D that can be used on Shader Resource Views and Meshes.
-		/// @param path Path to the texture.
-		/// @param width Texture width.
-		/// @param height Texture height.
 		Texture2D createTexture2D(const std::wstring& path,
 								  const uint32_t      width,
 								  const uint32_t      height) 
@@ -666,8 +651,6 @@ namespace spider_engine::d3dx12 {
 
 			return texture;
 		}
-		/// @brief Creates a texture 2D that can be used on Shader Resource Views and Meshes.
-		/// @param path Path to the texture.
 		Texture2D createTexture2D(const std::wstring& path) {
 			// Get command allocator and list
 			ID3D12CommandAllocator*    commandAllocator = nonRenderingRelatedCommandAllocators_[0].Get();
@@ -803,10 +786,6 @@ namespace spider_engine::d3dx12 {
 			return texture;
 		}
 
-		/// @brief Creates a Constant Buffer that can be bound in a Render Pipeline.
-		/// @param name Constant Buffer name.
-		/// @param size Constant Buffer size.
-		/// @param stage Constant Buffer stage.
 		ConstantBuffer createConstantBuffer(const std::string& name, 
 											const size_t	   size,
 											const ShaderStage  stage) 
@@ -855,10 +834,6 @@ namespace spider_engine::d3dx12 {
 
 			return constantBuffer;
 		}
-		/// @brief Creates multiple Constant Buffers that can be bound in a Render Pipeline.
-		/// @param names Constant Buffer names.
-		/// @param sizes Constant Buffer sizes.
-		/// @param stage Constant Buffer stages.
 		std::vector<ConstantBuffer> createConstantBuffers(const std::vector<std::string> names,
 											  const std::vector<size_t>      sizes,
 											  const ShaderStage			     stage)
@@ -929,10 +904,6 @@ namespace spider_engine::d3dx12 {
 			return constantBuffers;
 		}
 
-		/// @brief Creates a Shader Resource that can be bound in the pipeline.
-		/// @param name Shader Resource name.
-		/// @param data Shader Resource data.
-		/// @param stage Shader Resource stage.
 		ShaderResourceView createShaderResourceView(const std::string&          name,
 													const std::vector<uint8_t>& data,
 													const ShaderStage           stage)
@@ -997,10 +968,6 @@ namespace spider_engine::d3dx12 {
 
 			return shaderResourceView;
 		}
-		/// @brief Creates a Shader Resource for a Texture 2D that can be bound in a Render Pipeline.
-		/// @param name Shader Resource name.
-		/// @param data Shader Resource texture.
-		/// @param stage Shader Resource stage.
 		ShaderResourceView createShaderResourceViewForTexture2D(const std::string& name,
 															    Texture2D&         data,
 															    const ShaderStage  stage) 
@@ -1040,10 +1007,6 @@ namespace spider_engine::d3dx12 {
 
 			return shaderResourceView;
 		}
-		/// @brief Creates multiple Shader Resource Views that can be bound in a Render Pipeline.
-		/// @param names Shader Resource names.
-		/// @param data Shader Resource data.
-		/// @param stage Shader Resource stage.
 		std::vector<ShaderResourceView> createShaderResourceViews(const std::vector<std::string>&	       names,
 													              const std::vector<std::vector<uint8_t>>& data,
 													              const ShaderStage                        stage)
@@ -1138,10 +1101,6 @@ namespace spider_engine::d3dx12 {
 
 			return shaderResourceViews;
 		}
-		/// @brief Create multiple Shader Resources for multiple Texture 2Ds that can be bound in a Render Pipeline.
-		/// @param names Shader Resource names
-		/// @param data Shader Resource data
-		/// @param stage Shader Resources stage
 		std::vector<ShaderResourceView> createShaderResourceViewsForTexture2D(std::vector<std::string>& names,
 																              std::vector<Texture2D>&   data,
 																              const ShaderStage         stage) 
@@ -1200,9 +1159,6 @@ namespace spider_engine::d3dx12 {
 			return shaderResourceViews;
 		}
 		
-		/// @brief Creates a sampler
-		/// @param name Sampler name
-		/// @param stage Sampler stage
 		Sampler createSampler(const std::string& name,
 							  const ShaderStage  stage) 
 		{
@@ -1234,9 +1190,6 @@ namespace spider_engine::d3dx12 {
 
 			return sampler;
 		}
-		/// @brief Creates multiple Samplers
-		/// @param names Sampler names
-		/// @param stage Sampler stages
 		std::vector<Sampler> createSamplers(const std::vector<std::string>& names,
 								const ShaderStage               stage) 
 		{
@@ -1282,10 +1235,6 @@ namespace spider_engine::d3dx12 {
 			return samplers;
 		}
 
-		/// @brief Creates a mesh that can bound in a Renderizable
-		/// @param vertices Vertex array
-		/// @param indices Index array
-		/// @note This is the only function to create meshes, and actually there aren't any ways to load models.
 		Mesh createMesh(const std::vector<Vertex>&   vertices,
 						const std::vector<uint32_t>& indices)
 		{
@@ -1381,7 +1330,6 @@ namespace spider_engine::d3dx12 {
 			return renderizable;
 		}
 
-		/// @brief Creates a Renderizable that, if put on flecs, can be actually rendered.
 		Renderizable createRenderizable(const std::vector<Vertex>&   vertices,
 										const std::vector<uint32_t>& indices)
 		{
@@ -1390,9 +1338,7 @@ namespace spider_engine::d3dx12 {
 
 			return renderizable;
 		}
-		
-		/// @brief Creates a Renderizable that, if put on flecs, can be actually rendered.
-		/// @param mesh Mesh to be put on the Renderizable
+
 		Renderizable createRenderizable(Mesh&& mesh)
 		{
 			Renderizable renderizable;
@@ -1401,7 +1347,6 @@ namespace spider_engine::d3dx12 {
 			return renderizable;
 		}
 
-		/// @brief Begins the frame creation, allowing Renderizables to be rendered.
 		void beginFrame() {
 			// Get current back buffer index
 			frameIndex_ = swapChain_->GetCurrentBackBufferIndex();
@@ -1417,10 +1362,6 @@ namespace spider_engine::d3dx12 {
 			));
 		}
 
-		/// @brief Draws a Renderizable.
-		/// @param entity Entity containing a Renderizable.
-		/// @param pipeline The Render Pipeline.
-		/// @param camera The camera
 		void draw(flecs::entity&     entity,
 				  RenderPipeline&    pipeline,
 				  rendering::Camera& camera)
@@ -1516,7 +1457,6 @@ namespace spider_engine::d3dx12 {
 			cmd->ResourceBarrier(1, &barrier);
 		}
 
-		/// @brief Ends the frame creation.
 		void endFrame() {
 			// Close command list
 			commandLists_[frameIndex_]->Close();
@@ -1529,7 +1469,6 @@ namespace spider_engine::d3dx12 {
 			synchronizationObject_->signal(commandQueue_.Get(), frameIndex_);
 		}
 
-		/// @brief Presents the created frame. 
 		void present() {
 			HRESULT hr;
 
@@ -1537,7 +1476,6 @@ namespace spider_engine::d3dx12 {
 			SPIDER_DX12_ERROR_CHECK(swapChain_->Present(isVSync_, isVSync_ ? 0 : DXGI_PRESENT_ALLOW_TEARING));
 		}
 
-		/// @brief Set full screen
 		void setFullScreen(bool enabled) {
 			HRESULT hr;
 
@@ -1548,41 +1486,34 @@ namespace spider_engine::d3dx12 {
 				SPIDER_DX12_ERROR_CHECK(swapChain_->SetFullscreenState(FALSE, nullptr));
 			}
 		}
-		/// @brief Set full screen
 		void setFullScreen(BOOL enabled) {
 			HRESULT hr;
 
 			SPIDER_DX12_ERROR_CHECK(swapChain_->SetFullscreenState(enabled, nullptr));
 			isFullScreen_ = enabled;
 		}
-		/// @brief Set full screen
 		bool isFullScreenBool() const {
 			HRESULT hr;
 
 			return isFullScreen_ == TRUE;
 		}
-		/// @brief Is full screen?
 		BOOL isFullScreen() const {
 			return isFullScreen_;
 		}
 
-		/// @brief Set VSync.
 		void setVSync(bool enabled) {
 			HRESULT hr;
 
 			isVSync_ = enabled ? TRUE : FALSE;
 		}
-		/// @brief Set VSync.
 		void setVSync(BOOL enabled) {
 			isVSync_ = enabled;
 		}
-		/// @brief Is VSync?
 		bool isVSyncBool() const {
 			HRESULT hr;
 
 			return isVSync_ == TRUE;
 		}
-		/// @brief Is VSync?
 		BOOL isVSync() const {
 			HRESULT hr;
 
@@ -1612,8 +1543,6 @@ namespace spider_engine::d3dx12 {
 		}
 	};
 
-	/// @class DX12Compiler
-	/// @brief Class that manages Render Pipelines and Shaders
 	class DX12Compiler {
 	private:
 		template <typename Ty>
@@ -2057,13 +1986,6 @@ namespace spider_engine::d3dx12 {
 			SPIDER_DX12_ERROR_CHECK(compilerUtils_->CreateDefaultIncludeHandler(&compilerIncludeHandler_));
 		}
 
-		/*
-		 *  @brief Creates a Render Pipeline.
-		 *  @details Creates a Render Pipeline based on the descriptions.
-		 *  this function returns an interface to bind Constant Buffers and Shader Resources.
-		 *	@param descriptions The shader descriptions.
-		 *  @tparam Policy The policy used to determine whether will use shader paths or sources.
-		 */
 		template <typename Policy>
 		RenderPipeline createRenderPipeline(std::vector<ShaderDescription>& descriptions) {
 			HRESULT hr = 0;

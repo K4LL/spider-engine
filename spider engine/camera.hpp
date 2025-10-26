@@ -4,7 +4,6 @@
 #include "types.hpp"
 
 namespace spider_engine::rendering {
-    /// @brief Camera class
     class Camera {
     private:
         uint32_t width_  = 1;

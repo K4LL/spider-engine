@@ -1,0 +1,45 @@
+:root {
+  /* Spider Engine colors */
+  --primary-color: #7B2FF7;          /* your purple accent */
+  --primary-color-dark: #4A00E0;     /* darker shade for hover/focus */
+  --link-color: #00C6FF;             /* highlight color for links */
+  --code-background: #0D0D0D;        /* background for code blocks */
+  --page-background-color: #101010;  /* main background */
+  --text-color: #EDEDED;             /* text */
+  --nav-background: #0B0B0C;         /* sidebar background */
+  --header-background: #0B0B0C;      /* header bar */
+  --border-color: #202225;           /* divider lines */
+
+  /* Fonts */
+  --font-family: "Inter", "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-family-monospace: "Fira Code", monospace;
+
+  /* Rounded corners (optional) */
+  --border-radius-small: 6px;
+  --border-radius-medium: 10px;
+}
+
+/* Top navigation bar */
+.navbar {
+  background-color: var(--header-background);
+  border-bottom: 1px solid var(--primary-color);
+}
+
+/* Sidebar */
+.sidebar {
+  background-color: var(--nav-background);
+}
+.sidebar a:hover {
+  color: var(--primary-color);
+}
+
+/* Highlight active page */
+.sidebar .active {
+  border-left: 3px solid var(--primary-color);
+}
+
+/* Logo area */
+#projectlogo img {
+  border-radius: 12px;
+  filter: drop-shadow(0 0 5px var(--primary-color));
+}

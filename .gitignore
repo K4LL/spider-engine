@@ -362,5 +362,11 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
+# Doxygen
 Doxyfile
-docs
+
+# tester file
+tester.cpp
+
+# hidden folder :)
+hiddenFolder

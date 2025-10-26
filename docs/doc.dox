@@ -1,0 +1,670 @@
+/**
+
+* @file spider_engine_detailed_docs.dox
+* @brief Unified, highly detailed Doxygen documentation for Spider Engine public API and internals.
+* @details
+* This single file describes every exposed class/struct/enum/concept in the uploaded headers,
+* with intent, invariants, usage examples, edge cases, and performance/DX12 notes.
+* You can keep this as a standalone .dox (recommended) or copy blocks back into headers.
+*
+* Headers covered:
+* ```
+  - concepts.hpp
+  ```
+* ```
+  - types.hpp
+  ```
+* ```
+  - camera.hpp
+  ```
+* ```
+  - window.hpp
+  ```
+* ```
+  - core_engine.hpp
+  ```
+* ```
+  - dx12_policies.hpp
+  ```
+* ```
+  - dx12_types.hpp
+  ```
+* ```
+  - dx12_renderer.hpp (DX12Renderer, DX12Compiler)
+  ```
+* ```
+  - definitions.hpp
+  ```
+* ```
+  - debug.hpp
+  ```
+*
+* To generate docs:
+* ```
+  - Add this file to INPUT in your Doxyfile along with headers, or paste blocks into headers.
+  ```
+* ```
+  - Suggested Doxygen config flags at the end of this file.
+  ```
+
+*/
+
+/** @defgroup Core Core
+
+* @brief Engine bootstrap, windowing, and high-level control.
+  */
+  /** @defgroup Rendering Rendering
+* @brief Graphics-facing types, camera math, frame data.
+  */
+  /** @defgroup DX12 DirectX12
+* @brief DX12 abstractions, resources, pipelines, reflection, and synchronization.
+  */
+  /** @defgroup Diagnostics Diagnostics
+* @brief Debugging helpers, macros, and console utilities.
+  */
+  /** @defgroup Meta Meta
+* @brief C++20 concepts and policies used in templates and compile-time checks.
+  */
+
+// =============================================================================
+// concepts.hpp
+// =============================================================================
+/** @addtogroup Meta
+
+* @{
+  */
+
+/** @concept spider_engine::NothrowMoveConstructible
+
+* @brief True if a type is nothrow move-constructible.
+* @details Used to enforce exception safety in containers and allocators.
+* @par Edge cases
+* * Types with deleted move constructors will fail this concept.
+* * Types that move but may throw (custom allocators) will also fail.
+    */
+
+/** @concept spider_engine::MoveConstructible
+
+* @brief True if a type is move-constructible.
+  */
+
+/** @concept spider_engine::CopyConstructible
+
+* @brief True if a type is copy-constructible.
+  */
+
+/** @concept spider_engine::TriviallyCopyable
+
+* @brief True if a type is trivially copyable (POD-like). Useful for fast memcpy paths.
+  */
+
+/** @concept spider_engine::SameAs
+
+* @brief Alias to std::is_same_v for concept usage.
+  */
+
+/** @concept spider_engine::DifferentFrom
+
+* @brief Negation of SameAs.
+  */
+
+/** @concept spider_engine::Callable
+
+* @brief True if type is invocable with no args.
+  */
+
+/** @concept spider_engine::CallableAs
+
+* @brief True if F is invocable with signature R(Args...).
+  */
+
+/** @} */ // end Meta
+
+// =============================================================================
+// types.hpp
+// =============================================================================
+/** @addtogroup Rendering
+
+* @{
+  */
+
+/** @struct spider_engine::rendering::Transform
+
+* @brief Affine transform in LH space, aligned to 16 bytes for SIMD.
+* @details Holds scale, position, rotation (quaternion) as XMVECTOR.
+* @note Default: scale = 1, position = 0, rotation = identity.
+* @par Invariants
+* * Each XMVECTOR is 16-byte aligned to satisfy DirectXMath.
+* * Rotation must remain a normalized quaternion for correct view/model computation.
+* @par Example
+* @code{.cpp}
+* using namespace spider_engine::rendering;
+* Transform t;
+* t.position = DirectX::XMVectorSet(0, 1, -5, 0);
+* t.rotation = DirectX::XMQuaternionRotationRollPitchYaw(0, 0.5f, 0);
+* t.scale    = DirectX::XMVectorSet(1, 2, 1, 0);
+* @endcode
+  */
+
+/** @struct spider_engine::rendering::FrameData
+
+* @brief Per-draw matrices: projection, view, model.
+* @details Typically uploaded each frame to a vertex-stage constant buffer.
+  */
+
+/** @} */ // end Rendering
+
+// =============================================================================
+// camera.hpp
+// =============================================================================
+/** @addtogroup Rendering
+
+* @{
+  */
+
+/** @class spider_engine::rendering::Camera
+
+* @brief Left-handed perspective camera with cached view/projection.
+* @details
+* * Uses DirectXMath, LH conventions (XMMatrixPerspectiveFovLH, LookAtLH).
+* * Stores viewport size, FOV-Y, near/far planes, and an internal up vector.
+* * Exposes a public Transform used to compute view.
+* @par Usage
+* 1. Set viewport via setViewport, FOV via setFov, clipping via setClippingPlanes.
+* 2. Call updateProjectionMatrix() when viewport/FOV/planes change.
+* 3. Update transform, then call updateViewMatrix() before rendering.
+* @par Edge cases
+* * height == 0 will cause a divide-by-zero aspect ratio. Keep height >= 1.
+* * Excessively small nearZ (e.g., 1e-6) reduces depth precision. Prefer >= 0.01.
+* * farZ too large increases z-fighting. Prefer scene-tight bounds.
+* @par Example
+* @code{.cpp}
+* using spider_engine::rendering::Camera;
+* Camera cam(w, h);
+* cam.setFov(DirectX::XM_PIDIV4);
+* cam.setClippingPlanes(0.01f, 1000.0f);
+* cam.updateProjectionMatrix();
+* cam.transform.position = DirectX::XMVectorSet(0, 2, -6, 0);
+* cam.updateViewMatrix();
+* auto vp = cam.getViewProjectionMatrix();
+* @endcode
+  */
+
+/** @} */ // end Rendering
+
+// =============================================================================
+// window.hpp
+// =============================================================================
+/** @addtogroup Core
+
+* @{
+  */
+
+/** @class spider_engine::core_engine::Window
+
+* @brief Thin Win32 window wrapper that owns HWND and geometry.
+* @details
+* * Registers a class, creates a WS_OVERLAPPEDWINDOW, shows it.
+* * If width/height are 0, defaults to half of primary monitor and centers.
+* * Move-only to ensure HWND uniqueness.
+* @par Lifetime
+* * Destroys the HWND in destructor if valid.
+* @par Threading
+* * Expected to run on UI thread. Calls are not thread-safe.
+* @par Example
+* @code{.cpp}
+* using spider_engine::core_engine::Window;
+* Window win(L"Spider Engine", 1280, 720, 100, 100);
+* auto hwnd = win.getHWND();
+* win.setTitle(L"My Game");
+* @endcode
+  */
+
+/** @} */ // end Core
+
+// =============================================================================
+// core_engine.hpp
+// =============================================================================
+/** @addtogroup Core
+
+* @{
+  */
+
+/** @struct spider_engine::core_engine::RenderingSystemDescription
+
+* @brief Parameters to bootstrap the rendering stack and window.
+* @details Includes swapchain buffer count, thread count, VSync, fullscreen, and adapter id.
+* @note If width/height are zero, Window centers and sizes to half display.
+  */
+
+/** @class spider_engine::core_engine::CoreEngine
+
+* @brief High-level orchestrator that owns flecs world, Window, DX12Renderer/Compiler, and Camera.
+* @details
+* * Template constructor registers ECS components: both engine-internal (DX12 types) and variadic user types.
+* * initializeRenderingSystems creates Window, Renderer, Compiler, and Camera.
+* * Provides helpers to create entities and add/get components.
+* * start pumps the Win32 message loop and calls a user callback each frame.
+* @par Example
+* @code{.cpp}
+* using namespace spider_engine::core_engine;
+* CoreEngine<> engine;
+* RenderingSystemDescription desc;
+* desc.width = 1280; desc.height = 720;
+* engine.intitializeRenderingSystems(desc);
+* engine.initializeDebugSystemsOnDebugMode();
+* engine.start([&]{
+* ```
+   auto& cam = engine.getCamera();
+  ```
+* ```
+   cam.updateViewMatrix();
+  ```
+* ```
+   // per-frame work here
+  ```
+* });
+* @endcode
+* @par Edge cases
+* * start runs until WM_QUIT or Window::isRunning_ becomes false. Ensure fn() doesn’t throw.
+* * Component registration duplicates are harmless in flecs but avoid repeating types.
+    */
+
+/** @} */ // end Core
+
+// =============================================================================
+// dx12_policies.hpp
+// =============================================================================
+/** @addtogroup Meta
+
+* @{
+  */
+
+/** @struct spider_engine::d3dx12::UsePathPolicy
+
+* @brief Policy tag indicating shader compilation from filesystem path.
+  */
+  /** @struct spider_engine::d3dx12::UseSourcePolicy
+* @brief Policy tag indicating shader compilation from in-memory source.
+  */
+
+/** @} */ // end Meta
+
+// =============================================================================
+// dx12_types.hpp (Enums, PODs, resources, allocators, pipeline facade)
+// =============================================================================
+/** @addtogroup DX12
+
+* @{
+  */
+
+/** @enum spider_engine::d3dx12::ShaderStage
+
+* @brief Enumerates shader stages supported in this renderer.
+  */
+
+/** @enum spider_engine::d3dx12::TextureDimension
+
+* @brief Texture dimensionality.
+  */
+
+/** @enum spider_engine::d3dx12::BindingType
+
+* @brief Resource binding family (CBV, SRV, Sampler).
+  */
+
+/** @struct spider_engine::d3dx12::Vertex
+
+* @brief Position, normal, uv, tangent. Matches psInputLayout.
+* @details Layout:
+* * POSITION: float3
+* * NORMAL:   float3
+* * TEXCOORD: float2
+* * TANGENT:  float3
+    */
+
+/** @struct spider_engine::d3dx12::VertexArrayBuffer
+
+* @brief Upload heap vertex buffer and view plus logical vertex count.
+  */
+
+/** @struct spider_engine::d3dx12::IndexArrayBuffer
+
+* @brief Upload heap index buffer and view plus logical index count.
+  */
+
+/** @struct spider_engine::d3dx12::Texture2D
+
+* @brief GPU default resource + upload resource + subresource metadata.
+* @details Created in DX12Renderer::createTexture2D(); SRV created separately.
+  */
+
+/** @struct spider_engine::d3dx12::ConstantBufferVariable
+
+* @brief Reflected CB variable: name, byte offset, size.
+  */
+
+/** @struct spider_engine::d3dx12::ConstantBufferData
+
+* @brief Reflected CB metadata: name, total size, variable list, register and space.
+  */
+
+/** @struct spider_engine::d3dx12::ShaderResourceViewData
+
+* @brief Reflected resource data: name, size, bind point/space, stage, texture flag.
+  */
+
+/** @struct spider_engine::d3dx12::SamplerData
+
+* @brief Reflected sampler: name, register/space, stage.
+  */
+
+/** @class spider_engine::d3dx12::ShaderDescription
+
+* @brief High-level shader descriptor: path or source, stage.
+* @note Used by DX12Compiler::createRenderPipeline.
+  */
+
+/** @class spider_engine::d3dx12::ConstantBuffer
+
+* @brief Packed CBV handle around a big upload heap region with per-CB offset.
+* @details
+* * Open() maps and internally bumps the mapped pointer to index_ * size.
+* * copy<T>() memcpy’s to mapped region. Unmap() closes mapping.
+* @par Edge cases
+* * Always call open() before first copy if not auto-opened by creator.
+* * Size is aligned up to 256; write exactly sizeof(T) or less.
+* @par Example
+* @code{.cpp}
+* struct PerObject { DirectX::XMMATRIX M; };
+* auto cb = pipeline.getBufferPtr("frameData", ShaderStage::STAGE_VERTEX);
+* cb->open();
+* cb->copy(PerObject{M});
+* cb->unmap();
+* @endcode
+  */
+
+/** @class spider_engine::d3dx12::ShaderResourceView
+
+* @brief Non-mutable SRV handle for buffers or textures, with CPU/GPU descriptors.
+* @details Created by DX12Renderer or via RenderPipeline bind calls.
+  */
+
+/** @class spider_engine::d3dx12::Sampler
+
+* @brief Sampler handle stored in a shader-visible sampler heap.
+  */
+
+/** @struct spider_engine::d3dx12::ResourceBindingData
+
+* @brief Raw reflection of bound resources (type, bind point/count, space, stage).
+  */
+
+/** @struct spider_engine::d3dx12::ShaderData
+
+* @brief Aggregates reflection results for a compiled shader.
+  */
+
+/** @struct spider_engine::d3dx12::Mesh
+
+* @brief Pair of vertex/index buffers owned by a Renderizable.
+  */
+
+/** @struct spider_engine::d3dx12::Renderizable
+
+* @brief Unit you can draw: mesh, optional texture, and a Transform.
+  */
+
+/** @struct spider_engine::d3dx12::Shader
+
+* @brief Compiled shader blob + stage + reflection data.
+  */
+
+/** @class spider_engine::d3dx12::SynchronizationObject
+
+* @brief Fence + per-buffer values + per-buffer events for frame sync.
+* @details
+* * wait(i) stalls CPU until fence >= values_[i].
+* * signal(queue,i) increments currentValue_ and updates values_[i]; signals fence.
+* @par Edge cases
+* * Always signal before destroying; destructor closes per-buffer handles.
+    */
+
+/** @struct spider_engine::d3dx12::DescriptorHeap
+
+* @brief Thin wrapper with heap pointer, CPU/GPU rolling handles, type/flags and sizes.
+  */
+
+/** @class spider_engine::d3dx12::HeapAllocator
+
+* @brief Grows descriptor heaps on demand and advances rolling handles.
+* @details
+* * Maintains named heaps (rtv/dsv/cbv-srv-uav/sampler) with capacity and size.
+* * writeOnDescriptorHeap(...) reserves N, reallocates if needed, then calls a functor N times,
+* ```
+   advancing CPU/GPU handles each time.
+  ```
+* @par Edge cases
+* * Reallocation copies descriptors with CopyDescriptorsSimple() but not underlying resources.
+* * You must not hold stale CPU/GPU descriptor handles across a reallocation.
+* @par Example
+* @code{.cpp}
+* auto* heap = allocator.getDescriptorHeap("CbvUavDescriptorHeap");
+* allocator.writeOnDescriptorHeap(heap, 3, [](auto* h){ /* create CBV/SRV */ });
+* @endcode
+  */
+
+/** @struct spider_engine::d3dx12::RenderPipelineRequirements
+
+* @brief Names/stages/sizes of required CBVs and SRVs for a pipeline.
+  */
+
+/** @class spider_engine::d3dx12::RenderPipeline
+
+* @brief Facade for binding CBVs/SRVs/Samplers and issuing draw via DX12Renderer.
+* @details
+* * After DX12Compiler builds it, required* maps are populated by reflection.
+* * bindBuffer(name,stage,data) finds CB and copies data.
+* * bindShaderResource(name,stage,data) builds SRV from structured data; for textures use bindShaderResourceForTexture2D.
+* * get*Ptr helpers allow manual staging.
+* @par Edge cases
+* * Name+stage must match reflection exactly or lookups throw.
+* * Index stored in CB/SRV is the root table offset chosen by reflection or fallback order.
+    */
+
+/** @} */ // end DX12
+
+// =============================================================================
+// dx12_renderer.hpp (Renderer and Compiler)
+// =============================================================================
+/** @addtogroup DX12
+
+* @{
+  */
+
+/** @class spider_engine::d3dx12::DX12Renderer
+
+* @brief Device/swapchain/command-queue owner; creates resources and draws.
+* @details
+* Responsibilities:
+* ```
+   - Device and factory creation on a chosen adapter.
+  ```
+* ```
+   - Command allocators/lists per backbuffer and for non-render work.
+  ```
+* ```
+   - Swapchain and RTV/DSV creation.
+  ```
+* ```
+   - Global CBV/SRV/UAV and Sampler descriptor heaps via HeapAllocator.
+  ```
+* ```
+   - Texture/mesh creation helpers, Renderizable factory methods.
+  ```
+* ```
+   - Frame control: beginFrame, draw(entity,pipeline,camera), endFrame, present.
+  ```
+* Debug:
+* ```
+   - In debug builds, enables debug layer and GPU-based validation, and breaks on error/corruption.
+  ```
+* @par Render loop example
+* @code{.cpp}
+* auto& renderer = engine.getRenderer();
+* auto& compiler = engine.getCompiler();
+* std::vector<ShaderDescription> descs = {
+* ```
+   {L"shaders/mesh.vs.hlsl", ShaderStage::STAGE_VERTEX},
+  ```
+* ```
+   {L"shaders/mesh.ps.hlsl", ShaderStage::STAGE_PIXEL}
+  ```
+* };
+* auto pipeline = compiler.createRenderPipeline<UsePathPolicy>(descs);
+*
+* auto entity = engine.createEntity("Cube");
+* d3dx12::Renderizable cube = renderer.createRenderizable(vertices, indices);
+* engine.addComponent(entity, std::move(cube));
+*
+* engine.start([&]{
+* ```
+   renderer.beginFrame();
+  ```
+* ```
+   auto& cam = engine.getCamera();
+  ```
+* ```
+   cam.updateViewMatrix();
+  ```
+* ```
+   renderer.draw(entity, pipeline, cam);
+  ```
+* ```
+   renderer.endFrame();
+  ```
+* ```
+   renderer.present();
+  ```
+* });
+* @endcode
+* @par Edge cases
+* * GPU sync: always call endFrame() before present(), and do not reset allocators while GPU is using them.
+* * Descriptor heaps: SetDescriptorHeaps must include both CBV/SRV/UAV and Sampler heaps when needed.
+* * Resource barriers: backbuffer transitions Present <-> RenderTarget are mandatory around draw.
+    */
+
+/** @class spider_engine::d3dx12::DX12Compiler
+
+* @brief Shader compiler/reflection and RenderPipeline builder.
+* @details
+* * compileShader<UsePathPolicy|UseSourcePolicy>() chooses entry/target by stage (vs_6_0, ps_6_0).
+* * reflect() extracts CBs, SRVs, Samplers, and raw binding data with bind points and spaces.
+* * createRenderPipeline() emits a root signature with two descriptor tables:
+* ```
+   table0: CBV+SRV, table1: samplers. It then creates PSO and populates required resources maps.
+  ```
+* @par Pitfalls
+* * Pixel-only samplers: samplers table is set to pixel visibility; adjust if future stages need samplers.
+* * Reflection order determines default indices if rootIndexMap misses; stable naming across shaders is advised.
+    */
+
+/** @} */ // end DX12
+
+// =============================================================================
+// definitions.hpp
+// =============================================================================
+/** @addtogroup Diagnostics
+
+* @{
+  */
+
+/** @def SPIDER_DX12_ERROR_CHECK(expr)
+
+* @brief In debug builds, throws with pretty-printed COM error; in release, evaluates expr.
+* @details Special-cases DXGI_ERROR_DEVICE_REMOVED to print removal reason.
+  */
+
+/** @def SPIDER_DBG_CODE(code)
+
+* @brief Compiles code only in debug builds.
+  */
+
+/** @def SPIDER_CODE_SWAP(dbg, rel)
+
+* @brief Chooses debug or release implementation depending on build.
+  */
+
+/** @fn bool isButtonDown(int vkey)
+
+* @brief Edge-triggered key press detector using GetAsyncKeyState.
+* @warning `prev` array is function-local and resets each call, so this acts more like an immediate
+* ```
+        tester than a persistent one. For real edge detection, persist state across frames.
+  ```
+
+*/
+
+/** @typedef uint_t
+
+* @brief Unsigned int alias used for sizes/indices in the engine.
+  */
+
+/** @} */ // end Diagnostics
+
+// =============================================================================
+// debug.hpp
+// =============================================================================
+/** @addtogroup Diagnostics
+
+* @{
+  */
+
+/** @enum spider_engine::DebugLevel
+
+* @brief Severity for console output.
+  */
+
+/** @class spider_engine::DebugConsole
+
+* @brief RAII-ish console setup with colorized println/print helpers.
+* @details Allocates a Win32 console on first use, sets stdout/stderr/stdin, tracks an instance count,
+* ```
+        and frees console when the last internal instance is destroyed.
+  ```
+* @par Example
+* @code{.cpp}
+* using spider_engine::DebugConsole;
+* DebugConsole::println("Hello info");
+* DebugConsole::println("Careful", DebugLevel::Warning);
+* DebugConsole::println("Boom", DebugLevel::Fatal); // throws after printing
+* @endcode
+  */
+
+/** @} */ // end Diagnostics
+
+// =============================================================================
+// Advanced usage notes and gotchas
+// =============================================================================
+/** @page advanced Advanced Notes
+*
+
+* @section perf Performance Tips
+* * Prefer packed CB creation via DX12Renderer::createConstantBuffers for fewer resources and better locality.
+* * Keep nearZ reasonable (> 0.01) and fit farZ to scene to reduce z-fighting.
+* * Avoid frequent descriptor heap reallocation by sizing appropriately up-front (e.g., 2048+ descriptors).
+*
+* @section threading Threading
+* * Non-rendering command lists exist but are reused single-threaded in the current code. If you fan out, ensure
+* each thread owns its allocator/list and is synchronized before ExecuteCommandLists.
+*
+* @section reflection Reflection Naming
+* * CB/SRV/Sampler lookups are by (name, stage). Keep shader binding names stable and unique per stage.
+*
+* @section barriers Resource Barriers
+* * Backbuffer transitions around draw are handled in DX12Renderer::draw; keep that order unless you extend the pass.
+*
+* @section assimp Assimp Loading
+* * createRenderizable(path) triangulates, joins verts, generates smooth normals, flips UVs for LH. It tries to
+* load the first diffuse texture next to the model. Missing texture is not fatal; you still get geometry.
+  */
