@@ -96,3 +96,17 @@ Long-term goals include:
 Documentation is available online:  
 👉 [**Spider Engine Docs**](https://k4ll.github.io/spider-engine-docs/)  
 or in the `docs/` folder within the repository.
+
+---
+
+### 🧾 Note
+Spider Engine builds as a **Windows executable project**.  
+You can create a `.cpp` file anywhere in the solution containing a standard Windows entry point, for example:
+
+```cpp
+#include <Windows.h>
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
+    // Your test or prototype entry point here
+    return 0;
+}
