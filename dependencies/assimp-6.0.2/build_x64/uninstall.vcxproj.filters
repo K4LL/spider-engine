@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\gupue\source\repos\spider-engine\dependencies\assimp-6.0.2\build_x64\CMakeFiles\a8855f9e0a5acb93a1c9a9b35dc12050\uninstall.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\gupue\source\repos\spider-engine\dependencies\assimp-6.0.2\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\gupue\source\repos\spider-engine\dependencies\assimp-6.0.2\build_x64\CMakeFiles\uninstall" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{14F6B6D4-2E4C-3512-B617-EE1603C5DF32}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

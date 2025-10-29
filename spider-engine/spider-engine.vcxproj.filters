@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Arquivos de Origem">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Arquivos de Cabeçalho">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Arquivos de Cabeçalho\dx12">
+      <UniqueIdentifier>{12eef540-e0bc-4a4a-8c57-11ef6ff95c81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Arquivos de Cabeçalho\framework">
+      <UniqueIdentifier>{bca208c2-e36c-4331-9d4e-ef331ba16f60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Arquivos de Cabeçalho\rendering">
+      <UniqueIdentifier>{f4edfcc5-cb56-464b-8fc1-0c6e589832e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="flecs">
+      <UniqueIdentifier>{029d3902-0f41-473e-afcd-0f68363b9e31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{8df3f3b8-cddc-486e-a6c9-a2c5516ef318}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="test.cpp">
+      <Filter>Arquivos de Origem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dependencies\flecs\distr\flecs.c">
+      <Filter>flecs</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="dx12_policies.hpp">
+      <Filter>Arquivos de Cabeçalho\dx12</Filter>
+    </ClInclude>
+    <ClInclude Include="dx12_renderer.hpp">
+      <Filter>Arquivos de Cabeçalho\dx12</Filter>
+    </ClInclude>
+    <ClInclude Include="dx12_types.hpp">
+      <Filter>Arquivos de Cabeçalho\dx12</Filter>
+    </ClInclude>
+    <ClInclude Include="policies.hpp">
+      <Filter>Arquivos de Cabeçalho\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="fast_array.hpp">
+      <Filter>Arquivos de Cabeçalho\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="definitions.hpp">
+      <Filter>Arquivos de Cabeçalho\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="debug.hpp">
+      <Filter>Arquivos de Cabeçalho\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="concepts.hpp">
+      <Filter>Arquivos de Cabeçalho\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.hpp">
+      <Filter>Arquivos de Cabeçalho\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="types.hpp">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
+    <ClInclude Include="core_engine.hpp">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
+    <ClInclude Include="window.hpp">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\docs\transparent\icon.ico">
+      <Filter>Resource</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

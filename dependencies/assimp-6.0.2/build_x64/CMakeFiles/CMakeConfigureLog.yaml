@@ -1,0 +1,631 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineSystem.cmake:205 (message)"
+      - "CMakeLists.txt:107 (PROJECT)"
+    message: |
+      The system is: Windows - 10.0.19045 - AMD64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:107 (PROJECT)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler:  
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      VersÃ£o do MSBuild 17.14.23+b0019275e para .NET Framework
+      CompilaÃ§Ã£o de 29/10/2025 13:38:34 iniciada.
+      
+      Projeto "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\4.0.0-rc4\\CompilerIdC\\CompilerIdC.vcxproj" no nÃ³ 1 (destinos padrÃ£o).
+      PrepareForBuild:
+        Criando o diretÃ³rio "Debug\\".
+        A saÃ­da estruturada estÃ¡ habilitada. A formataÃ§Ã£o do diagnÃ³stico do compilador refletirÃ¡ a hierarquia de erros. Consulte https://aka.ms/cpp/structured-output para obter mais detalhes.
+        Criando o diretÃ³rio "Debug\\CompilerIdC.tlog\\".
+      InitializeBuildStatus:
+        Criando "Debug\\CompilerIdC.tlog\\unsuccessfulbuild" porque "AlwaysCreate" foi especificado.
+        Tocando "Debug\\CompilerIdC.tlog\\unsuccessfulbuild".
+      ClCompile:
+        D:\\VS\\VS22IDE\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /nologo /W0 /WX- /diagnostics:column /Od /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc143.pdb" /external:W0 /Gd /TC /FC /errorReport:queue CMakeCCompilerId.c
+        CMakeCCompilerId.c
+      Link:
+        D:\\VS\\VS22IDE\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdC.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdC.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdC.lib" /MACHINE:X64 Debug\\CMakeCCompilerId.obj
+        CompilerIdC.vcxproj -> C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\4.0.0-rc4\\CompilerIdC\\CompilerIdC.exe
+      PostBuildEvent:
+        for %%i in (cl.exe) do @echo CMAKE_C_COMPILER=%%~$PATH:i
+        :VCEnd
+        CMAKE_C_COMPILER=D:\\VS\\VS22IDE\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe
+      FinalizeBuildStatus:
+        Excluindo o arquivo "Debug\\CompilerIdC.tlog\\unsuccessfulbuild".
+        Tocando "Debug\\CompilerIdC.tlog\\CompilerIdC.lastbuildstate".
+      Projeto de compilaÃ§Ã£o pronto "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\4.0.0-rc4\\CompilerIdC\\CompilerIdC.vcxproj" (destinos padrÃ£o).
+      
+      CompilaÃ§Ã£o com Ãªxito.
+          0 Aviso(s)
+          0 Erro(s)
+      
+      Tempo Decorrido 00:00:07.59
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.exe"
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.vcxproj"
+      
+      The C compiler identification is MSVC, found in:
+        C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/4.0.0-rc4/CompilerIdC/CompilerIdC.exe
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:107 (PROJECT)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler:  
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      VersÃ£o do MSBuild 17.14.23+b0019275e para .NET Framework
+      CompilaÃ§Ã£o de 29/10/2025 13:38:45 iniciada.
+      
+      Projeto "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\4.0.0-rc4\\CompilerIdCXX\\CompilerIdCXX.vcxproj" no nÃ³ 1 (destinos padrÃ£o).
+      PrepareForBuild:
+        Criando o diretÃ³rio "Debug\\".
+        A saÃ­da estruturada estÃ¡ habilitada. A formataÃ§Ã£o do diagnÃ³stico do compilador refletirÃ¡ a hierarquia de erros. Consulte https://aka.ms/cpp/structured-output para obter mais detalhes.
+        Criando o diretÃ³rio "Debug\\CompilerIdCXX.tlog\\".
+      InitializeBuildStatus:
+        Criando "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild" porque "AlwaysCreate" foi especificado.
+        Tocando "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild".
+      ClCompile:
+        D:\\VS\\VS22IDE\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /nologo /W0 /WX- /diagnostics:column /Od /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc143.pdb" /external:W0 /Gd /TP /FC /errorReport:queue CMakeCXXCompilerId.cpp
+        CMakeCXXCompilerId.cpp
+      Link:
+        D:\\VS\\VS22IDE\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdCXX.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdCXX.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdCXX.lib" /MACHINE:X64 Debug\\CMakeCXXCompilerId.obj
+        CompilerIdCXX.vcxproj -> C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\4.0.0-rc4\\CompilerIdCXX\\CompilerIdCXX.exe
+      PostBuildEvent:
+        for %%i in (cl.exe) do @echo CMAKE_CXX_COMPILER=%%~$PATH:i
+        :VCEnd
+        CMAKE_CXX_COMPILER=D:\\VS\\VS22IDE\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe
+      FinalizeBuildStatus:
+        Excluindo o arquivo "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild".
+        Tocando "Debug\\CompilerIdCXX.tlog\\CompilerIdCXX.lastbuildstate".
+      Projeto de compilaÃ§Ã£o pronto "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\4.0.0-rc4\\CompilerIdCXX\\CompilerIdCXX.vcxproj" (destinos padrÃ£o).
+      
+      CompilaÃ§Ã£o com Ãªxito.
+          0 Aviso(s)
+          0 Erro(s)
+      
+      Tempo Decorrido 00:00:09.39
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.vcxproj"
+      
+      The CXX compiler identification is MSVC, found in:
+        C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/4.0.0-rc4/CompilerIdCXX/CompilerIdCXX.exe
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:107 (PROJECT)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-cbwn94"
+      binary: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-cbwn94"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-cbwn94'
+        
+        Run Build Command(s): D:/VS/VS22IDE/MSBuild/Current/Bin/amd64/MSBuild.exe cmTC_e25f5.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        VersÃ£o do MSBuild 17.14.23+b0019275e para .NET Framework
+        CompilaÃ§Ã£o de 29/10/2025 13:38:56 iniciada.
+        
+        Projeto "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-cbwn94\\cmTC_e25f5.vcxproj" no nÃ³ 1 (destinos padrÃ£o).
+        PrepareForBuild:
+          Criando o diretÃ³rio "cmTC_e25f5.dir\\Debug\\".
+          A saÃ­da estruturada estÃ¡ habilitada. A formataÃ§Ã£o do diagnÃ³stico do compilador refletirÃ¡ a hierarquia de erros. Consulte https://aka.ms/cpp/structured-output para obter mais detalhes.
+          Criando o diretÃ³rio "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-cbwn94\\Debug\\".
+          Criando o diretÃ³rio "cmTC_e25f5.dir\\Debug\\cmTC_e25f5.tlog\\".
+        InitializeBuildStatus:
+          Criando "cmTC_e25f5.dir\\Debug\\cmTC_e25f5.tlog\\unsuccessfulbuild" porque "AlwaysCreate" foi especificado.
+          Tocando "cmTC_e25f5.dir\\Debug\\cmTC_e25f5.tlog\\unsuccessfulbuild".
+        ClCompile:
+          D:\\VS\\VS22IDE\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_e25f5.dir\\Debug\\\\" /Fd"cmTC_e25f5.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCCompilerABI.c"
+          Microsoft (R) C/C++ Optimizing Compiler VersÃ£o 19.44.35219 para x64
+          Copyright (C) Microsoft Corporation. Todos os direitos reservados.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_e25f5.dir\\Debug\\\\" /Fd"cmTC_e25f5.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCCompilerABI.c"
+          CMakeCCompilerABI.c
+        Link:
+          D:\\VS\\VS22IDE\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-cbwn94\\Debug\\cmTC_e25f5.exe" /INCREMENTAL /ILK:"cmTC_e25f5.dir\\Debug\\cmTC_e25f5.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-cbwn94/Debug/cmTC_e25f5.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-cbwn94/Debug/cmTC_e25f5.lib" /MACHINE:X64  /machine:x64 cmTC_e25f5.dir\\Debug\\CMakeCCompilerABI.obj
+          cmTC_e25f5.vcxproj -> C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-cbwn94\\Debug\\cmTC_e25f5.exe
+        FinalizeBuildStatus:
+          Excluindo o arquivo "cmTC_e25f5.dir\\Debug\\cmTC_e25f5.tlog\\unsuccessfulbuild".
+          Tocando "cmTC_e25f5.dir\\Debug\\cmTC_e25f5.tlog\\cmTC_e25f5.lastbuildstate".
+        Projeto de compilaÃ§Ã£o pronto "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-cbwn94\\cmTC_e25f5.vcxproj" (destinos padrÃ£o).
+        
+        CompilaÃ§Ã£o com Ãªxito.
+            0 Aviso(s)
+            0 Erro(s)
+        
+        Tempo Decorrido 00:00:01.30
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:227 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:107 (PROJECT)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'C': D:/VS/VS22IDE/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/Internal/CMakeDetermineLinkerId.cmake:36 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:264 (cmake_determine_linker_id)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:107 (PROJECT)"
+    message: |
+      Running the C compiler's linker: "D:/VS/VS22IDE/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.44.35219.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:107 (PROJECT)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-levh3l"
+      binary: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-levh3l"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
+      CMAKE_CXX_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_CXX_SCAN_FOR_MODULES: "OFF"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-levh3l'
+        
+        Run Build Command(s): D:/VS/VS22IDE/MSBuild/Current/Bin/amd64/MSBuild.exe cmTC_e8e8e.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        VersÃ£o do MSBuild 17.14.23+b0019275e para .NET Framework
+        CompilaÃ§Ã£o de 29/10/2025 13:38:58 iniciada.
+        
+        Projeto "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-levh3l\\cmTC_e8e8e.vcxproj" no nÃ³ 1 (destinos padrÃ£o).
+        PrepareForBuild:
+          Criando o diretÃ³rio "cmTC_e8e8e.dir\\Debug\\".
+          A saÃ­da estruturada estÃ¡ habilitada. A formataÃ§Ã£o do diagnÃ³stico do compilador refletirÃ¡ a hierarquia de erros. Consulte https://aka.ms/cpp/structured-output para obter mais detalhes.
+          Criando o diretÃ³rio "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-levh3l\\Debug\\".
+          Criando o diretÃ³rio "cmTC_e8e8e.dir\\Debug\\cmTC_e8e8e.tlog\\".
+        InitializeBuildStatus:
+          Criando "cmTC_e8e8e.dir\\Debug\\cmTC_e8e8e.tlog\\unsuccessfulbuild" porque "AlwaysCreate" foi especificado.
+          Tocando "cmTC_e8e8e.dir\\Debug\\cmTC_e8e8e.tlog\\unsuccessfulbuild".
+        ClCompile:
+          D:\\VS\\VS22IDE\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_e8e8e.dir\\Debug\\\\" /Fd"cmTC_e8e8e.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCXXCompilerABI.cpp"
+          Microsoft (R) C/C++ Optimizing Compiler VersÃ£o 19.44.35219 para x64
+          Copyright (C) Microsoft Corporation. Todos os direitos reservados.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_e8e8e.dir\\Debug\\\\" /Fd"cmTC_e8e8e.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCXXCompilerABI.cpp"
+          CMakeCXXCompilerABI.cpp
+        Link:
+          D:\\VS\\VS22IDE\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-levh3l\\Debug\\cmTC_e8e8e.exe" /INCREMENTAL /ILK:"cmTC_e8e8e.dir\\Debug\\cmTC_e8e8e.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-levh3l/Debug/cmTC_e8e8e.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-levh3l/Debug/cmTC_e8e8e.lib" /MACHINE:X64  /machine:x64 cmTC_e8e8e.dir\\Debug\\CMakeCXXCompilerABI.obj
+          cmTC_e8e8e.vcxproj -> C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-levh3l\\Debug\\cmTC_e8e8e.exe
+        FinalizeBuildStatus:
+          Excluindo o arquivo "cmTC_e8e8e.dir\\Debug\\cmTC_e8e8e.tlog\\unsuccessfulbuild".
+          Tocando "cmTC_e8e8e.dir\\Debug\\cmTC_e8e8e.tlog\\cmTC_e8e8e.lastbuildstate".
+        Projeto de compilaÃ§Ã£o pronto "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-levh3l\\cmTC_e8e8e.vcxproj" (destinos padrÃ£o).
+        
+        CompilaÃ§Ã£o com Ãªxito.
+            0 Aviso(s)
+            0 Erro(s)
+        
+        Tempo Decorrido 00:00:00.65
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:227 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:107 (PROJECT)"
+    message: |
+      Parsed CXX implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'CXX': D:/VS/VS22IDE/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/Internal/CMakeDetermineLinkerId.cmake:36 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:264 (cmake_determine_linker_id)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:107 (PROJECT)"
+    message: |
+      Running the CXX compiler's linker: "D:/VS/VS22IDE/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.44.35219.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckIncludeFile.cmake:99 (try_compile)"
+      - "contrib/zlib/CMakeLists.txt:35 (check_include_file)"
+    checks:
+      - "Looking for sys/types.h"
+    directories:
+      source: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-e4elu1"
+      binary: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-e4elu1"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/cmake-modules"
+    buildResult:
+      variable: "HAVE_SYS_TYPES_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-e4elu1'
+        
+        Run Build Command(s): D:/VS/VS22IDE/MSBuild/Current/Bin/amd64/MSBuild.exe cmTC_4d828.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        VersÃ£o do MSBuild 17.14.23+b0019275e para .NET Framework
+        CompilaÃ§Ã£o de 29/10/2025 13:38:59 iniciada.
+        
+        Projeto "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-e4elu1\\cmTC_4d828.vcxproj" no nÃ³ 1 (destinos padrÃ£o).
+        PrepareForBuild:
+          Criando o diretÃ³rio "cmTC_4d828.dir\\Debug\\".
+          A saÃ­da estruturada estÃ¡ habilitada. A formataÃ§Ã£o do diagnÃ³stico do compilador refletirÃ¡ a hierarquia de erros. Consulte https://aka.ms/cpp/structured-output para obter mais detalhes.
+          Criando o diretÃ³rio "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-e4elu1\\Debug\\".
+          Criando o diretÃ³rio "cmTC_4d828.dir\\Debug\\cmTC_4d828.tlog\\".
+        InitializeBuildStatus:
+          Criando "cmTC_4d828.dir\\Debug\\cmTC_4d828.tlog\\unsuccessfulbuild" porque "AlwaysCreate" foi especificado.
+          Tocando "cmTC_4d828.dir\\Debug\\cmTC_4d828.tlog\\unsuccessfulbuild".
+        ClCompile:
+          D:\\VS\\VS22IDE\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_4d828.dir\\Debug\\\\" /Fd"cmTC_4d828.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-e4elu1\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler VersÃ£o 19.44.35219 para x64
+          Copyright (C) Microsoft Corporation. Todos os direitos reservados.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_4d828.dir\\Debug\\\\" /Fd"cmTC_4d828.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-e4elu1\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        Link:
+          D:\\VS\\VS22IDE\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-e4elu1\\Debug\\cmTC_4d828.exe" /INCREMENTAL /ILK:"cmTC_4d828.dir\\Debug\\cmTC_4d828.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-e4elu1/Debug/cmTC_4d828.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-e4elu1/Debug/cmTC_4d828.lib" /MACHINE:X64  /machine:x64 cmTC_4d828.dir\\Debug\\CheckIncludeFile.obj
+          cmTC_4d828.vcxproj -> C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-e4elu1\\Debug\\cmTC_4d828.exe
+        FinalizeBuildStatus:
+          Excluindo o arquivo "cmTC_4d828.dir\\Debug\\cmTC_4d828.tlog\\unsuccessfulbuild".
+          Tocando "cmTC_4d828.dir\\Debug\\cmTC_4d828.tlog\\cmTC_4d828.lastbuildstate".
+        Projeto de compilaÃ§Ã£o pronto "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-e4elu1\\cmTC_4d828.vcxproj" (destinos padrÃ£o).
+        
+        CompilaÃ§Ã£o com Ãªxito.
+            0 Aviso(s)
+            0 Erro(s)
+        
+        Tempo Decorrido 00:00:00.67
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckIncludeFile.cmake:99 (try_compile)"
+      - "contrib/zlib/CMakeLists.txt:36 (check_include_file)"
+    checks:
+      - "Looking for stdint.h"
+    directories:
+      source: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-ejmaks"
+      binary: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-ejmaks"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/cmake-modules"
+    buildResult:
+      variable: "HAVE_STDINT_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-ejmaks'
+        
+        Run Build Command(s): D:/VS/VS22IDE/MSBuild/Current/Bin/amd64/MSBuild.exe cmTC_ae898.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        VersÃ£o do MSBuild 17.14.23+b0019275e para .NET Framework
+        CompilaÃ§Ã£o de 29/10/2025 13:39:00 iniciada.
+        
+        Projeto "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-ejmaks\\cmTC_ae898.vcxproj" no nÃ³ 1 (destinos padrÃ£o).
+        PrepareForBuild:
+          Criando o diretÃ³rio "cmTC_ae898.dir\\Debug\\".
+          A saÃ­da estruturada estÃ¡ habilitada. A formataÃ§Ã£o do diagnÃ³stico do compilador refletirÃ¡ a hierarquia de erros. Consulte https://aka.ms/cpp/structured-output para obter mais detalhes.
+          Criando o diretÃ³rio "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-ejmaks\\Debug\\".
+          Criando o diretÃ³rio "cmTC_ae898.dir\\Debug\\cmTC_ae898.tlog\\".
+        InitializeBuildStatus:
+          Criando "cmTC_ae898.dir\\Debug\\cmTC_ae898.tlog\\unsuccessfulbuild" porque "AlwaysCreate" foi especificado.
+          Tocando "cmTC_ae898.dir\\Debug\\cmTC_ae898.tlog\\unsuccessfulbuild".
+        ClCompile:
+          D:\\VS\\VS22IDE\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_ae898.dir\\Debug\\\\" /Fd"cmTC_ae898.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-ejmaks\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler VersÃ£o 19.44.35219 para x64
+          Copyright (C) Microsoft Corporation. Todos os direitos reservados.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_ae898.dir\\Debug\\\\" /Fd"cmTC_ae898.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-ejmaks\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        Link:
+          D:\\VS\\VS22IDE\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-ejmaks\\Debug\\cmTC_ae898.exe" /INCREMENTAL /ILK:"cmTC_ae898.dir\\Debug\\cmTC_ae898.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-ejmaks/Debug/cmTC_ae898.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-ejmaks/Debug/cmTC_ae898.lib" /MACHINE:X64  /machine:x64 cmTC_ae898.dir\\Debug\\CheckIncludeFile.obj
+          cmTC_ae898.vcxproj -> C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-ejmaks\\Debug\\cmTC_ae898.exe
+        FinalizeBuildStatus:
+          Excluindo o arquivo "cmTC_ae898.dir\\Debug\\cmTC_ae898.tlog\\unsuccessfulbuild".
+          Tocando "cmTC_ae898.dir\\Debug\\cmTC_ae898.tlog\\cmTC_ae898.lastbuildstate".
+        Projeto de compilaÃ§Ã£o pronto "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-ejmaks\\cmTC_ae898.vcxproj" (destinos padrÃ£o).
+        
+        CompilaÃ§Ã£o com Ãªxito.
+            0 Aviso(s)
+            0 Erro(s)
+        
+        Tempo Decorrido 00:00:00.66
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckIncludeFile.cmake:99 (try_compile)"
+      - "contrib/zlib/CMakeLists.txt:37 (check_include_file)"
+    checks:
+      - "Looking for stddef.h"
+    directories:
+      source: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-ayy5l6"
+      binary: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-ayy5l6"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/cmake-modules"
+    buildResult:
+      variable: "HAVE_STDDEF_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-ayy5l6'
+        
+        Run Build Command(s): D:/VS/VS22IDE/MSBuild/Current/Bin/amd64/MSBuild.exe cmTC_387a6.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        VersÃ£o do MSBuild 17.14.23+b0019275e para .NET Framework
+        CompilaÃ§Ã£o de 29/10/2025 13:39:01 iniciada.
+        
+        Projeto "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-ayy5l6\\cmTC_387a6.vcxproj" no nÃ³ 1 (destinos padrÃ£o).
+        PrepareForBuild:
+          Criando o diretÃ³rio "cmTC_387a6.dir\\Debug\\".
+          A saÃ­da estruturada estÃ¡ habilitada. A formataÃ§Ã£o do diagnÃ³stico do compilador refletirÃ¡ a hierarquia de erros. Consulte https://aka.ms/cpp/structured-output para obter mais detalhes.
+          Criando o diretÃ³rio "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-ayy5l6\\Debug\\".
+          Criando o diretÃ³rio "cmTC_387a6.dir\\Debug\\cmTC_387a6.tlog\\".
+        InitializeBuildStatus:
+          Criando "cmTC_387a6.dir\\Debug\\cmTC_387a6.tlog\\unsuccessfulbuild" porque "AlwaysCreate" foi especificado.
+          Tocando "cmTC_387a6.dir\\Debug\\cmTC_387a6.tlog\\unsuccessfulbuild".
+        ClCompile:
+          D:\\VS\\VS22IDE\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_387a6.dir\\Debug\\\\" /Fd"cmTC_387a6.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-ayy5l6\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler VersÃ£o 19.44.35219 para x64
+          Copyright (C) Microsoft Corporation. Todos os direitos reservados.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_387a6.dir\\Debug\\\\" /Fd"cmTC_387a6.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-ayy5l6\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        Link:
+          D:\\VS\\VS22IDE\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-ayy5l6\\Debug\\cmTC_387a6.exe" /INCREMENTAL /ILK:"cmTC_387a6.dir\\Debug\\cmTC_387a6.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-ayy5l6/Debug/cmTC_387a6.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-ayy5l6/Debug/cmTC_387a6.lib" /MACHINE:X64  /machine:x64 cmTC_387a6.dir\\Debug\\CheckIncludeFile.obj
+          cmTC_387a6.vcxproj -> C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-ayy5l6\\Debug\\cmTC_387a6.exe
+        FinalizeBuildStatus:
+          Excluindo o arquivo "cmTC_387a6.dir\\Debug\\cmTC_387a6.tlog\\unsuccessfulbuild".
+          Tocando "cmTC_387a6.dir\\Debug\\cmTC_387a6.tlog\\cmTC_387a6.lastbuildstate".
+        Projeto de compilaÃ§Ã£o pronto "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-ayy5l6\\cmTC_387a6.vcxproj" (destinos padrÃ£o).
+        
+        CompilaÃ§Ã£o com Ãªxito.
+            0 Aviso(s)
+            0 Erro(s)
+        
+        Tempo Decorrido 00:00:00.62
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckTypeSize.cmake:212 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckTypeSize.cmake:339 (__check_type_size_impl)"
+      - "contrib/zlib/CMakeLists.txt:55 (check_type_size)"
+    checks:
+      - "Check size of off64_t"
+    directories:
+      source: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-vf1k18"
+      binary: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-vf1k18"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/cmake-modules"
+    buildResult:
+      variable: "HAVE_OFF64_T"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-vf1k18'
+        
+        Run Build Command(s): D:/VS/VS22IDE/MSBuild/Current/Bin/amd64/MSBuild.exe cmTC_383ce.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        VersÃ£o do MSBuild 17.14.23+b0019275e para .NET Framework
+        CompilaÃ§Ã£o de 29/10/2025 13:39:02 iniciada.
+        
+        Projeto "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\cmTC_383ce.vcxproj" no nÃ³ 1 (destinos padrÃ£o).
+        PrepareForBuild:
+          Criando o diretÃ³rio "cmTC_383ce.dir\\Debug\\".
+          A saÃ­da estruturada estÃ¡ habilitada. A formataÃ§Ã£o do diagnÃ³stico do compilador refletirÃ¡ a hierarquia de erros. Consulte https://aka.ms/cpp/structured-output para obter mais detalhes.
+          Criando o diretÃ³rio "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\Debug\\".
+          Criando o diretÃ³rio "cmTC_383ce.dir\\Debug\\cmTC_383ce.tlog\\".
+        InitializeBuildStatus:
+          Criando "cmTC_383ce.dir\\Debug\\cmTC_383ce.tlog\\unsuccessfulbuild" porque "AlwaysCreate" foi especificado.
+          Tocando "cmTC_383ce.dir\\Debug\\cmTC_383ce.tlog\\unsuccessfulbuild".
+        ClCompile:
+          D:\\VS\\VS22IDE\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _LARGEFILE64_SOURCE=1 /D HAVE_SYS_TYPES_H /D HAVE_STDINT_H /D HAVE_STDDEF_H /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_383ce.dir\\Debug\\\\" /Fd"cmTC_383ce.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\OFF64_T.c"
+          Microsoft (R) C/C++ Optimizing Compiler VersÃ£o 19.44.35219 para x64
+          Copyright (C) Microsoft Corporation. Todos os direitos reservados.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _LARGEFILE64_SOURCE=1 /D HAVE_SYS_TYPES_H /D HAVE_STDINT_H /D HAVE_STDDEF_H /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_383ce.dir\\Debug\\\\" /Fd"cmTC_383ce.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\OFF64_T.c"
+          OFF64_T.c
+        C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\OFF64_T.c(29,12): error C2065: 'off64_t': identificador nÃ£o declarado [C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\cmTC_383ce.vcxproj]
+        C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\OFF64_T.c(30,12): error C2065: 'off64_t': identificador nÃ£o declarado [C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\cmTC_383ce.vcxproj]
+        C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\OFF64_T.c(31,12): error C2065: 'off64_t': identificador nÃ£o declarado [C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\cmTC_383ce.vcxproj]
+        C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\OFF64_T.c(32,12): error C2065: 'off64_t': identificador nÃ£o declarado [C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\cmTC_383ce.vcxproj]
+        C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\OFF64_T.c(33,12): error C2065: 'off64_t': identificador nÃ£o declarado [C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\cmTC_383ce.vcxproj]
+        Projeto de compilaÃ§Ã£o pronto "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\cmTC_383ce.vcxproj" (destinos padrÃ£o) -- FALHA.
+        
+        FALHA da compilaÃ§Ã£o.
+        
+        "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\cmTC_383ce.vcxproj" (destino padrÃ£o) (1) ->
+        (ClCompile destino) -> 
+          C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\OFF64_T.c(29,12): error C2065: 'off64_t': identificador nÃ£o declarado [C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\cmTC_383ce.vcxproj]
+          C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\OFF64_T.c(30,12): error C2065: 'off64_t': identificador nÃ£o declarado [C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\cmTC_383ce.vcxproj]
+          C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\OFF64_T.c(31,12): error C2065: 'off64_t': identificador nÃ£o declarado [C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\cmTC_383ce.vcxproj]
+          C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\OFF64_T.c(32,12): error C2065: 'off64_t': identificador nÃ£o declarado [C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\cmTC_383ce.vcxproj]
+          C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\OFF64_T.c(33,12): error C2065: 'off64_t': identificador nÃ£o declarado [C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-vf1k18\\cmTC_383ce.vcxproj]
+        
+            0 Aviso(s)
+            5 Erro(s)
+        
+        Tempo Decorrido 00:00:00.33
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckFunctionExists.cmake:93 (try_compile)"
+      - "contrib/zlib/CMakeLists.txt:64 (check_function_exists)"
+    checks:
+      - "Looking for fseeko"
+    directories:
+      source: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-f5t6e2"
+      binary: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-f5t6e2"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/cmake-modules"
+    buildResult:
+      variable: "HAVE_FSEEKO"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-f5t6e2'
+        
+        Run Build Command(s): D:/VS/VS22IDE/MSBuild/Current/Bin/amd64/MSBuild.exe cmTC_b23d4.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        VersÃ£o do MSBuild 17.14.23+b0019275e para .NET Framework
+        CompilaÃ§Ã£o de 29/10/2025 13:39:02 iniciada.
+        
+        Projeto "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-f5t6e2\\cmTC_b23d4.vcxproj" no nÃ³ 1 (destinos padrÃ£o).
+        PrepareForBuild:
+          Criando o diretÃ³rio "cmTC_b23d4.dir\\Debug\\".
+          A saÃ­da estruturada estÃ¡ habilitada. A formataÃ§Ã£o do diagnÃ³stico do compilador refletirÃ¡ a hierarquia de erros. Consulte https://aka.ms/cpp/structured-output para obter mais detalhes.
+          Criando o diretÃ³rio "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-f5t6e2\\Debug\\".
+          Criando o diretÃ³rio "cmTC_b23d4.dir\\Debug\\cmTC_b23d4.tlog\\".
+        InitializeBuildStatus:
+          Criando "cmTC_b23d4.dir\\Debug\\cmTC_b23d4.tlog\\unsuccessfulbuild" porque "AlwaysCreate" foi especificado.
+          Tocando "cmTC_b23d4.dir\\Debug\\cmTC_b23d4.tlog\\unsuccessfulbuild".
+        ClCompile:
+          D:\\VS\\VS22IDE\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=fseeko /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_b23d4.dir\\Debug\\\\" /Fd"cmTC_b23d4.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-f5t6e2\\CheckFunctionExists.c"
+          Microsoft (R) C/C++ Optimizing Compiler VersÃ£o 19.44.35219 para x64
+          Copyright (C) Microsoft Corporation. Todos os direitos reservados.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=fseeko /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_b23d4.dir\\Debug\\\\" /Fd"cmTC_b23d4.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-f5t6e2\\CheckFunctionExists.c"
+          CheckFunctionExists.c
+        Link:
+          D:\\VS\\VS22IDE\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-f5t6e2\\Debug\\cmTC_b23d4.exe" /INCREMENTAL /ILK:"cmTC_b23d4.dir\\Debug\\cmTC_b23d4.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-f5t6e2/Debug/cmTC_b23d4.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-f5t6e2/Debug/cmTC_b23d4.lib" /MACHINE:X64  /machine:x64 cmTC_b23d4.dir\\Debug\\CheckFunctionExists.obj
+        CheckFunctionExists.obj : error LNK2019: sÃ­mbolo externo nÃ£o resolvido, fseeko, referenciado na funÃ§Ã£o main [C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-f5t6e2\\cmTC_b23d4.vcxproj]
+        C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-f5t6e2\\Debug\\cmTC_b23d4.exe : fatal error LNK1120: 1 externo nÃ£o resolvidos [C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-f5t6e2\\cmTC_b23d4.vcxproj]
+        Projeto de compilaÃ§Ã£o pronto "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-f5t6e2\\cmTC_b23d4.vcxproj" (destinos padrÃ£o) -- FALHA.
+        
+        FALHA da compilaÃ§Ã£o.
+        
+        "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-f5t6e2\\cmTC_b23d4.vcxproj" (destino padrÃ£o) (1) ->
+        (Link destino) -> 
+          CheckFunctionExists.obj : error LNK2019: sÃ­mbolo externo nÃ£o resolvido, fseeko, referenciado na funÃ§Ã£o main [C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-f5t6e2\\cmTC_b23d4.vcxproj]
+          C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-f5t6e2\\Debug\\cmTC_b23d4.exe : fatal error LNK1120: 1 externo nÃ£o resolvidos [C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-f5t6e2\\cmTC_b23d4.vcxproj]
+        
+            0 Aviso(s)
+            2 Erro(s)
+        
+        Tempo Decorrido 00:00:00.59
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckIncludeFile.cmake:99 (try_compile)"
+      - "contrib/zlib/CMakeLists.txt:72 (check_include_file)"
+    checks:
+      - "Looking for unistd.h"
+    directories:
+      source: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-yvwpah"
+      binary: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-yvwpah"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/cmake-modules"
+    buildResult:
+      variable: "Z_HAVE_UNISTD_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/gupue/source/repos/spider-engine/dependencies/assimp-6.0.2/build_x64/CMakeFiles/CMakeScratch/TryCompile-yvwpah'
+        
+        Run Build Command(s): D:/VS/VS22IDE/MSBuild/Current/Bin/amd64/MSBuild.exe cmTC_9ec00.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        VersÃ£o do MSBuild 17.14.23+b0019275e para .NET Framework
+        CompilaÃ§Ã£o de 29/10/2025 13:39:03 iniciada.
+        
+        Projeto "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-yvwpah\\cmTC_9ec00.vcxproj" no nÃ³ 1 (destinos padrÃ£o).
+        PrepareForBuild:
+          Criando o diretÃ³rio "cmTC_9ec00.dir\\Debug\\".
+          A saÃ­da estruturada estÃ¡ habilitada. A formataÃ§Ã£o do diagnÃ³stico do compilador refletirÃ¡ a hierarquia de erros. Consulte https://aka.ms/cpp/structured-output para obter mais detalhes.
+          Criando o diretÃ³rio "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-yvwpah\\Debug\\".
+          Criando o diretÃ³rio "cmTC_9ec00.dir\\Debug\\cmTC_9ec00.tlog\\".
+        InitializeBuildStatus:
+          Criando "cmTC_9ec00.dir\\Debug\\cmTC_9ec00.tlog\\unsuccessfulbuild" porque "AlwaysCreate" foi especificado.
+          Tocando "cmTC_9ec00.dir\\Debug\\cmTC_9ec00.tlog\\unsuccessfulbuild".
+        ClCompile:
+          D:\\VS\\VS22IDE\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_9ec00.dir\\Debug\\\\" /Fd"cmTC_9ec00.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-yvwpah\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler VersÃ£o 19.44.35219 para x64
+          Copyright (C) Microsoft Corporation. Todos os direitos reservados.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_9ec00.dir\\Debug\\\\" /Fd"cmTC_9ec00.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-yvwpah\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-yvwpah\\CheckIncludeFile.c(1,10): error C1083: NÃ£o Ã© possÃ­vel abrir arquivo incluir: 'unistd.h': No such file or directory [C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-yvwpah\\cmTC_9ec00.vcxproj]
+        Projeto de compilaÃ§Ã£o pronto "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-yvwpah\\cmTC_9ec00.vcxproj" (destinos padrÃ£o) -- FALHA.
+        
+        FALHA da compilaÃ§Ã£o.
+        
+        "C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-yvwpah\\cmTC_9ec00.vcxproj" (destino padrÃ£o) (1) ->
+        (ClCompile destino) -> 
+          C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-yvwpah\\CheckIncludeFile.c(1,10): error C1083: NÃ£o Ã© possÃ­vel abrir arquivo incluir: 'unistd.h': No such file or directory [C:\\Users\\gupue\\source\\repos\\spider-engine\\dependencies\\assimp-6.0.2\\build_x64\\CMakeFiles\\CMakeScratch\\TryCompile-yvwpah\\cmTC_9ec00.vcxproj]
+        
+            0 Aviso(s)
+            1 Erro(s)
+        
+        Tempo Decorrido 00:00:00.33
+        
+      exitCode: 1
+...

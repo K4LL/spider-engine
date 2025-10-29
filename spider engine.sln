@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "spider engine", "spider engine\spider engine.vcxproj", "{FF49FE3D-36F4-4B83-9694-FD54112826D1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "spider-engine", "spider-engine\spider-engine.vcxproj", "{FF49FE3D-36F4-4B83-9694-FD54112826D1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
