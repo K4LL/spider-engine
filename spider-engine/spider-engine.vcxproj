@@ -143,7 +143,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\assimp-6.0.2\build_x64\include\;$(SolutionDir)dependencies\DirectX-Headers\include\directx;$(SolutionDir)dependencies\DirectX-Headers\include\wsl;$(SolutionDir)dependencies\DirectX-Headers\include\dxguids;$(SolutionDir)dependencies\flecs\distr;$(SolutionDir)dependencies\flat_hash_map;$(SolutionDir)dependencies\DirectXTex;$(SolutionDir)dependencies\dxc\inc;$(SolutionDir)dependencies\assimp-6.0.2\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SolutionDir)dependencies\assimp-6.0.2\build_x64\include\;$(SolutionDir)dependencies\DirectX-Headers\include\directx;$(SolutionDir)dependencies\DirectX-Headers\include\wsl;$(SolutionDir)dependencies\DirectX-Headers\include\dxguids;$(SolutionDir)dependencies\flecs\distr;$(SolutionDir)dependencies\flat_hash_map;$(SolutionDir)dependencies\DirectXTex;$(SolutionDir)dependencies\dxc\inc;$(SolutionDir)dependencies\assimp-6.0.2\include\</AdditionalIncludeDirectories>
       <AdditionalOptions>-DNOMINMAX %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
