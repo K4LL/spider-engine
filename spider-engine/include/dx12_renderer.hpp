@@ -618,18 +618,38 @@ namespace spider_engine::d3dx12 {
 			ID3D12GraphicsCommandList* commandList      = nonRenderingRelatedCommandLists_[0].Get();
 
 			// Reset command allocator and list
-			commandAllocator->Reset();
-			commandList->Reset(
-				commandAllocator,
-				nullptr
-			);
+			SPIDER_DX12_ERROR_CHECK(commandAllocator->Reset());
+			SPIDER_DX12_ERROR_CHECK(
+				commandList->Reset(
+					commandAllocator,
+					nullptr
+				);
+			)
 
-			// Load image from file
-			DirectX::ScratchImage image;
-			DirectX::LoadFromWICFile(path.c_str(), DirectX::WIC_FLAGS_NONE, nullptr, image);
+			DirectX::ScratchImage src;
+			DirectX::LoadFromWICFile(path.c_str(),
+									 DirectX::WIC_FLAGS_NONE,
+									 nullptr, src);
 
-			const DirectX::Image* img  = image.GetImage(0, 0, 0);
+			DirectX::ScratchImage converted;
+			DirectX::Convert(src.GetImages(), src.GetImageCount(), src.GetMetadata(),
+							 DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+							 DirectX::TEX_FILTER_DEFAULT, 0.0f, converted);
+
+			// If you want a target size:
+			DirectX::ScratchImage resized;
+			DirectX::Resize(*converted.GetImage(0, 0, 0), width, height,
+							DirectX::TEX_FILTER_CUBIC, resized);
+			DirectX::ScratchImage mips;
+			DirectX::GenerateMipMaps(resized.GetImages(), resized.GetImageCount(),
+									 resized.GetMetadata(),
+									 DirectX::TEX_FILTER_CUBIC,
+									 0, mips);
+
+			const DirectX::Image* img  = mips.GetImage(0, 0, 0);
 			const uint8_t*        data = img->pixels;
+
+			const uint_t mipCount = static_cast<uint_t>(mips.GetMetadata().mipLevels);
 
 			// Create Texture2D (struct)
 			Texture2D texture;
@@ -643,7 +663,7 @@ namespace spider_engine::d3dx12 {
 			textureDesc.Width			    = width;
 			textureDesc.Height			    = height;
 			textureDesc.DepthOrArraySize	= 1;
-			textureDesc.MipLevels		    = 1;
+			textureDesc.MipLevels		    = static_cast<uint_t>(mips.GetMetadata().mipLevels);
 			textureDesc.Format			    = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 			textureDesc.SampleDesc.Count    = 1;
 			textureDesc.SampleDesc.Quality  = 0;
@@ -664,7 +684,7 @@ namespace spider_engine::d3dx12 {
 			);
 
 			// Create Texture2D (upload resource)
-			const UINT64 uploadBufferSize = GetRequiredIntermediateSize(texture.resource.Get(), 0, 1);
+			const uint64_t uploadBufferSize = GetRequiredIntermediateSize(texture.resource.Get(), 0, mipCount);
 
 			heapProps                            = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 			D3D12_RESOURCE_DESC uploadBufferDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
@@ -680,10 +700,15 @@ namespace spider_engine::d3dx12 {
 			);
 
 			// Prepare data
-			texture.textureData.pData      = data;
-			texture.textureData.RowPitch   = width * 4; // 4 bytes per pixel (RGBA8)
-			texture.textureData.SlicePitch = texture.textureData.RowPitch * height;
+			for (int i = 0; i < mipCount; ++i) {
+				texture.textureData.emplace_back();
 
+				const DirectX::Image* image = mips.GetImage(i, 0, 0);
+
+				texture.textureData[i].pData      = image->pixels;
+				texture.textureData[i].RowPitch   = image->rowPitch;
+				texture.textureData[i].SlicePitch = image->slicePitch;
+			}
 			// Copy data to GPU
 			UpdateSubresources(
 				commandList,
@@ -691,8 +716,8 @@ namespace spider_engine::d3dx12 {
 				texture.uploadResource.Get(),
 				0,
 				0,
-				1,
-				&texture.textureData
+				mipCount,
+				texture.textureData.data()
 			);
 
 			// After copy, transition to shader-read state
@@ -724,16 +749,6 @@ namespace spider_engine::d3dx12 {
 			ID3D12CommandAllocator*    commandAllocator = nonRenderingRelatedCommandAllocators_[0].Get();
 			ID3D12GraphicsCommandList* commandList      = nonRenderingRelatedCommandLists_[0].Get();
 
-			if (nonRenderingRelatedCommandLists_.empty()) {
-				throw std::runtime_error("Command list is null!");
-			}
-
-			if (!nonRenderingRelatedCommandLists_[0].Get()) {
-				throw std::runtime_error("Command list is null!");
-			}
-
-			assert(nonRenderingRelatedCommandLists_[0] != nullptr);
-
 			// Reset command allocator and list
 			SPIDER_DX12_ERROR_CHECK(commandAllocator->Reset());
 			SPIDER_DX12_ERROR_CHECK(commandList->Reset(
@@ -741,33 +756,42 @@ namespace spider_engine::d3dx12 {
 				nullptr
 			));
 
-			// Load image from file
-			DirectX::ScratchImage image;
-			HRESULT hr = DirectX::LoadFromWICFile(path.c_str(), DirectX::WIC_FLAGS_FORCE_RGB, nullptr, image);
-			if (FAILED(hr)) {
-				throw std::runtime_error("Failed to load image");
-			}
+			DirectX::ScratchImage src;
+			DirectX::LoadFromWICFile(path.c_str(),
+									 DirectX::WIC_FLAGS_NONE,        // don’t force RGB; keep alpha if present
+									 nullptr, src);
 
-			const DirectX::Image* img = image.GetImage(0, 0, 0);
-			if (!img || !img->pixels) {
-				throw std::runtime_error("Failed to get image data");
-			}
+			DirectX::ScratchImage converted;
+			DirectX::Convert(src.GetImages(), src.GetImageCount(), src.GetMetadata(),
+							 DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+							 DirectX::TEX_FILTER_DEFAULT, 0.0f, converted);
+			DirectX::ScratchImage mips;
+			DirectX::GenerateMipMaps(converted.GetImages(), converted.GetImageCount(),
+									 converted.GetMetadata(),
+									 DirectX::TEX_FILTER_CUBIC,
+									 0, mips);
 
+			const DirectX::Image* img  = mips.GetImage(0, 0, 0);
 			const uint8_t* data = img->pixels;
+
+			const uint_t mipCount = static_cast<uint_t>(mips.GetMetadata().mipLevels);
+
+			const uint_t width  = src.GetMetadata().width;
+			const uint_t height = src.GetMetadata().height;
 
 			// Create Texture2D (struct)
 			Texture2D texture;
-			texture.width  = img->width;
-			texture.height = img->height;
+			texture.width  = width;
+			texture.height = height;
 
 			// Create texture description
 			D3D12_RESOURCE_DESC textureDesc = {};
 			textureDesc.Dimension		    = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 			textureDesc.Alignment		    = 0;
-			textureDesc.Width			    = img->width;
-			textureDesc.Height			    = img->height;
+			textureDesc.Width			    = width;
+			textureDesc.Height			    = height;
 			textureDesc.DepthOrArraySize	= 1;
-			textureDesc.MipLevels		    = 1;
+			textureDesc.MipLevels		    = static_cast<uint_t>(mips.GetMetadata().mipLevels);
 			textureDesc.Format			    = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 			textureDesc.SampleDesc.Count    = 1;
 			textureDesc.SampleDesc.Quality  = 0;
@@ -787,9 +811,9 @@ namespace spider_engine::d3dx12 {
 				)
 			);
 
-			const UINT64 uploadBufferSize = GetRequiredIntermediateSize(texture.resource.Get(), 0, 1);
-
 			// Create Texture2D (upload resource)
+			const uint64_t uploadBufferSize = GetRequiredIntermediateSize(texture.resource.Get(), 0, mipCount);
+
 			heapProps                            = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 			D3D12_RESOURCE_DESC uploadBufferDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
 			SPIDER_DX12_ERROR_CHECK(
@@ -804,32 +828,25 @@ namespace spider_engine::d3dx12 {
 			);
 
 			// Prepare data
-			size_t rowPitch	  = 0;
-			size_t slicePitch = 0;
-			DirectX::ComputePitch(
-				DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-				img->width,
-				img->height,
-				rowPitch,
-				slicePitch
-			);
-			texture.textureData.pData      = data;
-			texture.textureData.RowPitch   = rowPitch;
-			texture.textureData.SlicePitch = slicePitch;
+			for (int i = 0; i < mipCount; ++i) {
+				texture.textureData.emplace_back();
 
+				const DirectX::Image* image = mips.GetImage(i, 0, 0);
+
+				texture.textureData[i].pData      = image->pixels;
+				texture.textureData[i].RowPitch   = image->rowPitch;
+				texture.textureData[i].SlicePitch = image->slicePitch;
+			}
 			// Copy data to GPU
-			if (UpdateSubresources(
+			UpdateSubresources(
 				commandList,
 				texture.resource.Get(),
 				texture.uploadResource.Get(),
 				0,
 				0,
-				1,
-				&texture.textureData
-			) == 0) 
-			{
-				throw std::runtime_error("UpdateSubresources returned 0!");
-			}
+				mipCount,
+				texture.textureData.data()
+			);
 
 			// After copy, transition to shader-read state
 			CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -850,7 +867,7 @@ namespace spider_engine::d3dx12 {
 
 			SPIDER_DBG_CODE(
 				texture.resource->SetName(L"Texture2D");
-				texture.uploadResource->SetName(L"Texture2D_Upload");
+			texture.uploadResource->SetName(L"Texture2D_Upload");
 			)
 
 			return texture;

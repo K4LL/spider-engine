@@ -92,7 +92,9 @@ namespace spider_engine::hub {
             logoDescriptorHeap_ = renderer_->createUserDescriptorHeap("LogoDescriptorHeap");
 
             logoTexture2D_ = renderer_->createTexture2D(
-                L"C:\\Users\\gupue\\source\\repos\\spider-engine\\docs\\transparent\\1280x720_transparent.png"
+                L"C:\\Users\\gupue\\source\\repos\\spider-engine\\docs\\transparent\\1280x720_transparent.png",
+                320, 
+                180
             );
             
             logoSrv_ = renderer_->createShaderResourceViewForTexture2D(

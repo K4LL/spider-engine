@@ -115,7 +115,7 @@ namespace spider_engine::d3dx12 {
 		Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 		Microsoft::WRL::ComPtr<ID3D12Resource> uploadResource;
 
-		D3D12_SUBRESOURCE_DATA textureData;
+		std::vector<D3D12_SUBRESOURCE_DATA> textureData;
 
 		uint32_t width;
 		uint32_t height;
