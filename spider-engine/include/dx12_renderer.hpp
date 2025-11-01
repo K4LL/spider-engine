@@ -27,6 +27,12 @@
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 
+#include "imgui.h"
+#include "imgui_internal.h"
+#include "imconfig.h"
+#include "backends/imgui_impl_win32.h"
+#include "backends/imgui_impl_dx12.h"
+
 // Framework includes
 #include "definitions.hpp"
 #include "policies.hpp"
@@ -79,6 +85,7 @@ namespace spider_engine::d3dx12 {
 		DescriptorHeap* dsvDescriptorHeap_;
 		DescriptorHeap* cbvSrvUavDescriptorHeap_;
 		DescriptorHeap* samplerDescriptorHeap_;
+		DescriptorHeap* imGuiDescriptorHeap;
 
 		UINT frameIndex_;
 
@@ -88,6 +95,36 @@ namespace spider_engine::d3dx12 {
 		size_t bufferCount_;
 
 		Assimp::Importer importer;
+
+		void initImGui()
+		{
+			imGuiDescriptorHeap = heapAllocator_->createDescriptorHeap(
+				"ImGuiDescriptorHeap",
+				D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+				D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
+			);
+
+			IMGUI_CHECKVERSION();
+			ImGui::CreateContext();
+			ImGuiIO& io     = ImGui::GetIO();
+			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+			io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+			ImGui::StyleColorsDark();
+
+			ImGui_ImplWin32_Init(hwnd_);
+
+			ImGui_ImplDX12_InitInfo initInfo	  = {};
+			initInfo.Device					      = device_.Get();
+			initInfo.NumFramesInFlight			  = bufferCount_;
+			initInfo.RTVFormat				      = DXGI_FORMAT_R8G8B8A8_UNORM;
+			initInfo.SrvDescriptorHeap			  = imGuiDescriptorHeap->heap.Get();
+			initInfo.LegacySingleSrvCpuDescriptor = imGuiDescriptorHeap->heap->GetCPUDescriptorHandleForHeapStart();
+			initInfo.LegacySingleSrvGpuDescriptor = imGuiDescriptorHeap->heap->GetGPUDescriptorHandleForHeapStart();
+			initInfo.CommandQueue                 = commandQueue_.Get();
+			ImGui_ImplDX12_Init(&initInfo);
+		}
 
 		void createCommandAllocatorQueueAndList() {
 			// Create command queue
@@ -502,6 +539,8 @@ namespace spider_engine::d3dx12 {
 			// Create Swap Chain, Render Target Views and Depth Stencil Views
 			this->createSwapChain();
 			this->createRenderTargetViewsAndDepthStencilViews();
+
+			this->initImGui();
 
 			// Create Synchronization Objects
 			synchronizationObject_					  = std::make_unique<SynchronizationObject>(device_.Get(), bufferCount_);
@@ -1347,6 +1386,35 @@ namespace spider_engine::d3dx12 {
 			return renderizable;
 		}
 
+		void clear(const DirectX::XMVECTORF32& color) {
+			auto* cmd = commandLists_[frameIndex_].Get();
+
+			CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(
+				rtvDescriptorHeap_->heap->GetCPUDescriptorHandleForHeapStart(),
+				frameIndex_,
+				device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV)
+			);
+
+			CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(
+				dsvDescriptorHeap_->heap->GetCPUDescriptorHandleForHeapStart(),
+				frameIndex_,
+				device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV)
+			);
+
+			cmd->OMSetRenderTargets(1, &rtvHandle, FALSE, dsvDescriptorHeap_ ? &dsvHandle : nullptr);
+
+			// Viewport e scissor do tamanho do backbuffer
+			auto backDesc = backBuffers_[frameIndex_]->GetDesc();
+			float w       = static_cast<float>(backDesc.Width);
+			float h       = static_cast<float>(backDesc.Height);
+			CD3DX12_VIEWPORT vp(0.0f, 0.0f, w, h);
+			CD3DX12_RECT sc(0, 0, static_cast<LONG>(w), static_cast<LONG>(h));
+			cmd->RSSetViewports(1, &vp);
+			cmd->RSSetScissorRects(1, &sc);
+
+			cmd->ClearRenderTargetView(rtvHandle, color, 0, nullptr);
+		}
+
 		void beginFrame() {
 			// Get current back buffer index
 			frameIndex_ = swapChain_->GetCurrentBackBufferIndex();
@@ -1360,6 +1428,14 @@ namespace spider_engine::d3dx12 {
 				commandAllocators_[frameIndex_].Get(),
 				nullptr
 			));
+
+			// Transition the back buffer to be used as render target
+			CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+				backBuffers_[frameIndex_].Get(),
+				D3D12_RESOURCE_STATE_PRESENT,
+				D3D12_RESOURCE_STATE_RENDER_TARGET
+			);
+			commandLists_[frameIndex_]->ResourceBarrier(1, &barrier);
 		}
 
 		void draw(flecs::entity&     entity,
@@ -1392,14 +1468,6 @@ namespace spider_engine::d3dx12 {
 			// Get current command list
 			ID3D12GraphicsCommandList* cmd = commandLists_[frameIndex_].Get();
 
-			// Transition the back buffer to be used as render target
-			CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-				backBuffers_[frameIndex_].Get(),
-				D3D12_RESOURCE_STATE_PRESENT,
-				D3D12_RESOURCE_STATE_RENDER_TARGET
-			);
-			cmd->ResourceBarrier(1, &barrier);
-
 			// Get the cpu descriptor handle for the current back buffer
 			CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(
 				rtvDescriptorHeap_->heap->GetCPUDescriptorHandleForHeapStart(),
@@ -1424,7 +1492,7 @@ namespace spider_engine::d3dx12 {
 			// Descriptor heaps
 			ID3D12DescriptorHeap* descriptorHeaps[] = {
 				cbvSrvUavDescriptorHeap_->heap.Get(),
-				samplerDescriptorHeap_->heap.Get()
+				samplerDescriptorHeap_->heap.Get(),
 			};
 			cmd->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
@@ -1447,17 +1515,51 @@ namespace spider_engine::d3dx12 {
 
 			// Draw
 			cmd->DrawIndexedInstanced(static_cast<UINT>(mesh.indexArrayBuffer->size), 1, 0, 0, 0);
+		}
 
+		void beginImGui() {
+			ImGui_ImplDX12_NewFrame();
+			ImGui_ImplWin32_NewFrame();
+			ImGui::NewFrame();
+		}
+		void endImGui()
+		{
+			ImGui::Render();
+
+			auto* cmd = commandLists_[frameIndex_].Get();
+
+			CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(
+				rtvDescriptorHeap_->heap->GetCPUDescriptorHandleForHeapStart(),
+				frameIndex_,
+				device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV)
+			);
+
+			cmd->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+
+			auto backDesc = backBuffers_[frameIndex_]->GetDesc();
+			float w = static_cast<float>(backDesc.Width);
+			float h = static_cast<float>(backDesc.Height);
+			CD3DX12_VIEWPORT vp(0.0f, 0.0f, w, h);
+			CD3DX12_RECT sc(0, 0, static_cast<LONG>(w), static_cast<LONG>(h));
+			cmd->RSSetViewports(1, &vp);
+			cmd->RSSetScissorRects(1, &sc);
+
+			// Heap do ImGui
+			ID3D12DescriptorHeap* heaps[] = { imGuiDescriptorHeap->heap.Get() };
+			cmd->SetDescriptorHeaps(1, heaps);
+
+			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmd);
+		}
+
+		void endFrame() {
 			// Transition the back buffer to be used to present
-			barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+			CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
 				backBuffers_[frameIndex_].Get(),
 				D3D12_RESOURCE_STATE_RENDER_TARGET,
 				D3D12_RESOURCE_STATE_PRESENT
 			);
-			cmd->ResourceBarrier(1, &barrier);
-		}
+			commandLists_[frameIndex_]->ResourceBarrier(1, &barrier);
 
-		void endFrame() {
 			// Close command list
 			commandLists_[frameIndex_]->Close();
 

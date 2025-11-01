@@ -209,7 +209,7 @@ namespace spider_engine::core_engine {
 
 		void start(std::function<void()> fn) {
 			MSG msg = {};
-			while (msg.message != WM_QUIT && window_->isRunning_) {
+			while (msg.message != WM_QUIT && window_->isRunning) {
 				while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
 					TranslateMessage(&msg);
 					DispatchMessage(&msg);
@@ -249,6 +249,10 @@ namespace spider_engine::core_engine {
 
 		spider_engine::rendering::Camera& getCamera() {
 			return *camera_;
+		}
+
+		Window& getWindow() {
+			return *window_;
 		}
 	};
 }

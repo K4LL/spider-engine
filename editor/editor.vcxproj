@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{ff49fe3d-36f4-4b83-9694-fd54112826d1}</ProjectGuid>
-    <RootNamespace>spiderengine</RootNamespace>
+    <ProjectGuid>{b3d25210-6da2-476e-8a01-9f876cd1cab3}</ProjectGuid>
+    <RootNamespace>editor</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -46,7 +46,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Utility</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -74,32 +74,16 @@
     <Import Project="..\spider-engine-dependencies.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <CustomBuildAfterTargets />
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <CustomBuildAfterTargets />
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <CustomBuildAfterTargets />
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <CustomBuildAfterTargets />
-  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\assimp-6.0.2\build_x86\include\;$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\distr;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\DirectXTex;$(ProjectDir)dependencies\dxc\inc;$(ProjectDir)dependencies\assimp-6.0.2\include\</AdditionalIncludeDirectories>
-      <AdditionalOptions>-DNOMINMAX %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(ProjectDir)dependencies\dxc\lib\x86\dxcompiler.lib;$(ProjectDir)dependencies\dxc\lib\x86\dxil.lib;$(ProjectDir)dependencies\DirectXTex\DirectXTex\Bin\Windows10_2022\x86\Debug\DirectXTex.lib;$(ProjectDir)dependencies\assimp-6.0.2\build_x86\lib\Debug\assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -110,16 +94,10 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\assimp-6.0.2\build_x86\include\;$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\distr;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\DirectXTex;$(ProjectDir)dependencies\dxc\inc;$(ProjectDir)dependencies\assimp-6.0.2\include\</AdditionalIncludeDirectories>
-      <AdditionalOptions>-DNOMINMAX %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(ProjectDir)dependencies\dxc\lib\x86\dxcompiler.lib;$(ProjectDir)dependencies\dxc\lib\x86\dxil.lib;$(ProjectDir)dependencies\DirectXTex\DirectXTex\Bin\Windows10_2022\x86\Release\DirectXTex.lib;$(ProjectDir)dependencies\assimp-6.0.2\build_x86\lib\Release\assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -128,14 +106,10 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\assimp-6.0.2\build_x64\include\;$(ProjectDir)dependencies\DirectX-Headers\include\directx;$(ProjectDir)dependencies\DirectX-Headers\include\wsl;$(ProjectDir)dependencies\DirectX-Headers\include\dxguids;$(ProjectDir)dependencies\flecs\distr;$(ProjectDir)dependencies\flat_hash_map;$(ProjectDir)dependencies\DirectXTex;$(ProjectDir)dependencies\dxc\inc;$(ProjectDir)dependencies\assimp-6.0.2\include\</AdditionalIncludeDirectories>
-      <AdditionalOptions>-DNOMINMAX %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(ProjectDir)dependencies\dxc\lib\x64\dxcompiler.lib;$(ProjectDir)dependencies\dxc\lib\x64\dxil.lib;$(ProjectDir)dependencies\DirectXTex\DirectXTex\Bin\Windows10_2022\x64\Debug\DirectXTex.lib;$(ProjectDir)dependencies\assimp-6.0.2\build_x64\lib\Debug\assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -144,38 +118,30 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;NOMINMAX;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>-DNOMINMAX %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\dependencies\flecs\distr\flecs.c" />
+    <ClCompile Include="..\dependencies\imgui\backends\imgui_impl_dx12.cpp" />
+    <ClCompile Include="..\dependencies\imgui\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="..\dependencies\imgui\imgui.cpp" />
+    <ClCompile Include="..\dependencies\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\dependencies\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\dependencies\imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\dependencies\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\docs\transparent\icon.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\camera.hpp" />
-    <ClInclude Include="include\concepts.hpp" />
-    <ClInclude Include="include\core_engine.hpp" />
-    <ClInclude Include="include\debug.hpp" />
-    <ClInclude Include="include\definitions.hpp" />
-    <ClInclude Include="include\dx12_policies.hpp" />
-    <ClInclude Include="include\dx12_renderer.hpp" />
-    <ClInclude Include="include\dx12_types.hpp" />
-    <ClInclude Include="include\policies.hpp" />
-    <ClInclude Include="include\types.hpp" />
-    <ClInclude Include="include\window.hpp" />
+    <ClInclude Include="hub_page.hpp" />
+    <ClInclude Include="hub_home_page.hpp" />
+    <ClInclude Include="project_manager.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

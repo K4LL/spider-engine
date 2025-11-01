@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)editor\include;$(SolutionDir)spider-engine\include;$(SolutionDir)dependencies\assimp\build_x64\include\;$(SolutionDir)dependencies\DirectX-Headers\include\directx;$(SolutionDir)dependencies\DirectX-Headers\include\wsl;$(SolutionDir)dependencies\DirectX-Headers\include\dxguids;$(SolutionDir)dependencies\flecs\distr;$(SolutionDir)dependencies\flat_hash_map;$(SolutionDir)dependencies\DirectXTex;$(SolutionDir)dependencies\dxc\inc;$(SolutionDir)dependencies\assimp\include\;$(SolutionDir)dependencies\imgui;$(SolutionDir)dependencies\imgui\backends</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(SolutionDir)dependencies\dxc\lib\x64\dxcompiler.lib;$(SolutionDir)dependencies\dxc\lib\x64\dxil.lib;$(SolutionDir)dependencies\DirectXTex\DirectXTex\Bin\Windows10_2022\x64\Release\DirectXTex.lib;$(SolutionDir)dependencies\assimp\build_x64\lib\Release\assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>

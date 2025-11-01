@@ -26,57 +26,48 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="test.cpp">
-      <Filter>Arquivos de Origem</Filter>
-    </ClCompile>
     <ClCompile Include="..\dependencies\flecs\distr\flecs.c">
       <Filter>flecs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="dx12_policies.hpp">
-      <Filter>Arquivos de Cabeçalho\dx12</Filter>
-    </ClInclude>
-    <ClInclude Include="dx12_renderer.hpp">
-      <Filter>Arquivos de Cabeçalho\dx12</Filter>
-    </ClInclude>
-    <ClInclude Include="dx12_types.hpp">
-      <Filter>Arquivos de Cabeçalho\dx12</Filter>
-    </ClInclude>
-    <ClInclude Include="policies.hpp">
-      <Filter>Arquivos de Cabeçalho\framework</Filter>
-    </ClInclude>
-    <ClInclude Include="fast_array.hpp">
-      <Filter>Arquivos de Cabeçalho\framework</Filter>
-    </ClInclude>
-    <ClInclude Include="definitions.hpp">
-      <Filter>Arquivos de Cabeçalho\framework</Filter>
-    </ClInclude>
-    <ClInclude Include="debug.hpp">
-      <Filter>Arquivos de Cabeçalho\framework</Filter>
-    </ClInclude>
-    <ClInclude Include="concepts.hpp">
-      <Filter>Arquivos de Cabeçalho\framework</Filter>
-    </ClInclude>
-    <ClInclude Include="camera.hpp">
-      <Filter>Arquivos de Cabeçalho\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="types.hpp">
-      <Filter>Arquivos de Cabeçalho</Filter>
-    </ClInclude>
-    <ClInclude Include="core_engine.hpp">
-      <Filter>Arquivos de Cabeçalho</Filter>
-    </ClInclude>
-    <ClInclude Include="window.hpp">
-      <Filter>Arquivos de Cabeçalho</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
     <Image Include="..\docs\transparent\icon.ico">
       <Filter>Resource</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\core_engine.hpp">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
+    <ClInclude Include="include\camera.hpp">
+      <Filter>Arquivos de Cabeçalho\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="include\debug.hpp">
+      <Filter>Arquivos de Cabeçalho\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx12_policies.hpp">
+      <Filter>Arquivos de Cabeçalho\dx12</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx12_renderer.hpp">
+      <Filter>Arquivos de Cabeçalho\dx12</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx12_types.hpp">
+      <Filter>Arquivos de Cabeçalho\dx12</Filter>
+    </ClInclude>
+    <ClInclude Include="include\policies.hpp">
+      <Filter>Arquivos de Cabeçalho\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="include\concepts.hpp">
+      <Filter>Arquivos de Cabeçalho\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="include\definitions.hpp">
+      <Filter>Arquivos de Cabeçalho\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="include\types.hpp">
+      <Filter>Arquivos de Cabeçalho\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="include\window.hpp">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

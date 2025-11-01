@@ -1,21 +1,36 @@
 #pragma once
+
+#define IMGUI_ENABLE_WIN32_DEFAULT_IME_FUNCTIONS
 #include <string>
 #include <windows.h>
+#include <windowsx.h>
 #include <functional>
 #include <thread>
 #include <future>
 #include <memory>
 
+#include "imgui.h"
+#include "backends/imgui_impl_win32.h"
+#include "backends/imgui_impl_dx12.h"
+
 #include "definitions.hpp"
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	switch (uMsg) {
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		return 0;
+IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-	default:
-		return DefWindowProc(hwnd, uMsg, wParam, lParam);
+LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam)) return true;
+
+	switch (msg) {
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			return 0;
+
+		case WM_SIZE:
+			return 0;
+
+		default:
+			return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
 }
 
@@ -33,10 +48,10 @@ namespace spider_engine::core_engine {
 		uint_t x_;
 		uint_t y_;
 
-		std::atomic<bool> isRunning_ = true;
-
 	public:
 		friend class CoreEngine;
+
+		std::atomic<bool> isRunning = true;
 
 		Window() = default;
 		Window(const std::wstring& title, 
@@ -51,7 +66,7 @@ namespace spider_engine::core_engine {
 			height_(height),
 			x_(x),
 			y_(y),
-			isRunning_(true)
+			isRunning(true)
 		{
 			HINSTANCE hInstance = GetModuleHandle(nullptr);
 
@@ -71,7 +86,7 @@ namespace spider_engine::core_engine {
 
 			RECT rect = { 0, 0, static_cast<LONG>(width_), static_cast<LONG>(height_) };
 
-			int adjustedWidth = rect.right - rect.left;
+			int adjustedWidth  = rect.right - rect.left;
 			int adjustedHeight = rect.bottom - rect.top;
 
 			WNDCLASSEXW wc   = {};
@@ -115,7 +130,7 @@ namespace spider_engine::core_engine {
 			height_(other.height_),
 			x_(other.x_),
 			y_(other.y_),
-			isRunning_(other.isRunning_.load())
+			isRunning(other.isRunning.load())
 		{
 			other.hwnd_            = nullptr;
 			other.windowClassName_ = L"";
@@ -125,7 +140,7 @@ namespace spider_engine::core_engine {
 			if (hwnd_) {
 				DestroyWindow(hwnd_);
 			}
-			isRunning_ = false;
+			isRunning = false;
 		}
 
 		void setWidth(const uint_t width) {

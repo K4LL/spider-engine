@@ -5,6 +5,8 @@ VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "spider-engine", "spider-engine\spider-engine.vcxproj", "{FF49FE3D-36F4-4B83-9694-FD54112826D1}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "editor", "editor\editor.vcxproj", "{B3D25210-6DA2-476E-8A01-9F876CD1CAB3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{FF49FE3D-36F4-4B83-9694-FD54112826D1}.Release|x64.Build.0 = Release|x64
 		{FF49FE3D-36F4-4B83-9694-FD54112826D1}.Release|x86.ActiveCfg = Release|Win32
 		{FF49FE3D-36F4-4B83-9694-FD54112826D1}.Release|x86.Build.0 = Release|Win32
+		{B3D25210-6DA2-476E-8A01-9F876CD1CAB3}.Debug|x64.ActiveCfg = Debug|x64
+		{B3D25210-6DA2-476E-8A01-9F876CD1CAB3}.Debug|x64.Build.0 = Debug|x64
+		{B3D25210-6DA2-476E-8A01-9F876CD1CAB3}.Debug|x86.ActiveCfg = Debug|Win32
+		{B3D25210-6DA2-476E-8A01-9F876CD1CAB3}.Debug|x86.Build.0 = Debug|Win32
+		{B3D25210-6DA2-476E-8A01-9F876CD1CAB3}.Release|x64.ActiveCfg = Release|x64
+		{B3D25210-6DA2-476E-8A01-9F876CD1CAB3}.Release|x64.Build.0 = Release|x64
+		{B3D25210-6DA2-476E-8A01-9F876CD1CAB3}.Release|x86.ActiveCfg = Release|Win32
+		{B3D25210-6DA2-476E-8A01-9F876CD1CAB3}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
