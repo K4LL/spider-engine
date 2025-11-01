@@ -17,6 +17,7 @@
  */
 
 #include "flecs.h"
+
 /**
  * @file private_api.h
  * @brief Private functions.
@@ -82897,4 +82898,3 @@ int flecs_expr_visit_type(
 }
 
 #endif
-

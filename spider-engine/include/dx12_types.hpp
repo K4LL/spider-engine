@@ -1,3 +1,9 @@
+#pragma once
+#include <flat_hash_map.hpp>
+
+#include <d3d12.h>
+#include <dxgi1_6.h>
+#include <d3dcompiler.h>
 #include <DirectXMath.h>
 #include <DirectXColors.h>
 #include <wrl/client.h>
@@ -287,15 +293,22 @@ namespace spider_engine::d3dx12 {
 		std::string_view getName() {
 			return this->name_;
 		}
+
 		size_t getSizeInBytes() {
 			return this->sizeInBytes_;
 		}
+
 		ShaderStage getStage() {
 			return this->stage_;
 		}
+
 		D3D12_GPU_VIRTUAL_ADDRESS getGPUVirtualAddress() const {
 			return resource_->GetGPUVirtualAddress();
 		}
+		D3D12_GPU_DESCRIPTOR_HANDLE getGPUDescriptorHandle() const {
+			return gpuHandle_;
+		}
+
 		uint32_t getIndex() const {
 			return this->index_;
 		}
@@ -547,7 +560,7 @@ namespace spider_engine::d3dx12 {
 		HeapAllocator(const HeapAllocator&)     = delete;
 		HeapAllocator(HeapAllocator&&) noexcept = default;
 
-		DescriptorHeap* createDescriptorHeap(const std::string& descriptorHeapName,
+		DescriptorHeap* createDescriptorHeap(const std::string&                descriptorHeapName,
 											 const D3D12_DESCRIPTOR_HEAP_TYPE  descriptorHeapType,
 											 const D3D12_DESCRIPTOR_HEAP_FLAGS descriptorHeapFlags)
 		{
@@ -577,7 +590,7 @@ namespace spider_engine::d3dx12 {
 				std::make_unique<DescriptorHeap>(descriptorHeap)
 			).first->second.get();
 		}
-		DescriptorHeap* createDescriptorHeap(const std::string& descriptorHeapName,
+		DescriptorHeap* createDescriptorHeap(const std::string&                descriptorHeapName,
 											 const size_t					   descriptorHeapSize,
 											 const D3D12_DESCRIPTOR_HEAP_TYPE  descriptorHeapType,
 											 const D3D12_DESCRIPTOR_HEAP_FLAGS descriptorHeapFlags)

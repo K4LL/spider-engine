@@ -69,5 +69,8 @@
     <ClInclude Include="include\window.hpp">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
+    <ClInclude Include="include\dx12_concepts.hpp">
+      <Filter>Arquivos de Cabeçalho\dx12</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

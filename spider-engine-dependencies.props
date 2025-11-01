@@ -6,6 +6,8 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir)editor\include;$(SolutionDir)spider-engine\include;$(SolutionDir)dependencies\assimp\build_x64\include\;$(SolutionDir)dependencies\DirectX-Headers\include\directx;$(SolutionDir)dependencies\DirectX-Headers\include\wsl;$(SolutionDir)dependencies\DirectX-Headers\include\dxguids;$(SolutionDir)dependencies\flecs\distr;$(SolutionDir)dependencies\flat_hash_map;$(SolutionDir)dependencies\DirectXTex;$(SolutionDir)dependencies\dxc\inc;$(SolutionDir)dependencies\assimp\include\;$(SolutionDir)dependencies\imgui;$(SolutionDir)dependencies\imgui\backends</AdditionalIncludeDirectories>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>spider_engine_pch.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(SolutionDir)dependencies\dxc\lib\x64\dxcompiler.lib;$(SolutionDir)dependencies\dxc\lib\x64\dxil.lib;$(SolutionDir)dependencies\DirectXTex\DirectXTex\Bin\Windows10_2022\x64\Release\DirectXTex.lib;$(SolutionDir)dependencies\assimp\build_x64\lib\Release\assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>

@@ -37,19 +37,18 @@
 #include "definitions.hpp"
 #include "policies.hpp"
 #include "types.hpp"
-#include "flecs.h"
-
-// DirectX 12 Types include
 #include "dx12_types.hpp"
+#include "dx12_concepts.hpp"
+#include "flecs.h"
 
 // Other includes
 #include "camera.hpp"
 
-// Link DirectX libraries
+// Link DirectX libs
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
-#pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "dxguid.lib")
 
 namespace spider_engine::d3dx12 {
 	class DX12Renderer {
@@ -85,7 +84,7 @@ namespace spider_engine::d3dx12 {
 		DescriptorHeap* dsvDescriptorHeap_;
 		DescriptorHeap* cbvSrvUavDescriptorHeap_;
 		DescriptorHeap* samplerDescriptorHeap_;
-		DescriptorHeap* imGuiDescriptorHeap;
+		DescriptorHeap* imGuiDescriptorHeap_;
 
 		UINT frameIndex_;
 
@@ -96,9 +95,8 @@ namespace spider_engine::d3dx12 {
 
 		Assimp::Importer importer;
 
-		void initImGui()
-		{
-			imGuiDescriptorHeap = heapAllocator_->createDescriptorHeap(
+		void initImGui() {
+			imGuiDescriptorHeap_ = heapAllocator_->createDescriptorHeap(
 				"ImGuiDescriptorHeap",
 				D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 				D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
@@ -119,9 +117,9 @@ namespace spider_engine::d3dx12 {
 			initInfo.Device					      = device_.Get();
 			initInfo.NumFramesInFlight			  = bufferCount_;
 			initInfo.RTVFormat				      = DXGI_FORMAT_R8G8B8A8_UNORM;
-			initInfo.SrvDescriptorHeap			  = imGuiDescriptorHeap->heap.Get();
-			initInfo.LegacySingleSrvCpuDescriptor = imGuiDescriptorHeap->heap->GetCPUDescriptorHandleForHeapStart();
-			initInfo.LegacySingleSrvGpuDescriptor = imGuiDescriptorHeap->heap->GetGPUDescriptorHandleForHeapStart();
+			initInfo.SrvDescriptorHeap			  = imGuiDescriptorHeap_->heap.Get();
+			initInfo.LegacySingleSrvCpuDescriptor = imGuiDescriptorHeap_->heap->GetCPUDescriptorHandleForHeapStart();
+			initInfo.LegacySingleSrvGpuDescriptor = imGuiDescriptorHeap_->heap->GetGPUDescriptorHandleForHeapStart();
 			initInfo.CommandQueue                 = commandQueue_.Get();
 			ImGui_ImplDX12_Init(&initInfo);
 		}
@@ -216,7 +214,6 @@ namespace spider_engine::d3dx12 {
 		}
 
 		void createRenderTargetViewsAndDepthStencilViews() {
-			if (rtvDescriptorHeap_) return;
 			// Create descriptor heap for RTV
 			rtvDescriptorHeap_ = heapAllocator_->createDescriptorHeap(
 				"rtvDescriptorHeap",
@@ -582,6 +579,36 @@ namespace spider_engine::d3dx12 {
 			}
 		}
 
+		DescriptorHeap* createUserDescriptorHeap(const std::string& name, 
+												 const size_t       size) 
+		{
+			return heapAllocator_->createDescriptorHeap(
+				name, 
+				size,
+				D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 
+				D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
+			);
+		}
+		DescriptorHeap* createUserDescriptorHeap(const std::string& name) 
+		{
+			return heapAllocator_->createDescriptorHeap(
+				name,
+				D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 
+				D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
+			);
+		}
+
+		DescriptorHeap* destroyUserDescriptorHeap(const std::string& name) {
+			heapAllocator_->destroyDescriptorHeap(name);
+		}
+		DescriptorHeap* destroyUserDescriptorHeap(DescriptorHeap* target) {
+			heapAllocator_->destroyDescriptorHeap(target);
+		}
+
+		DescriptorHeap* getImGuiDescriptorHeap() {
+			return imGuiDescriptorHeap_;
+		}
+
 		Texture2D createTexture2D(const std::wstring& path,
 								  const uint32_t      width,
 								  const uint32_t      height) 
@@ -617,7 +644,7 @@ namespace spider_engine::d3dx12 {
 			textureDesc.Height			    = height;
 			textureDesc.DepthOrArraySize	= 1;
 			textureDesc.MipLevels		    = 1;
-			textureDesc.Format			    = DXGI_FORMAT_R8G8B8A8_UNORM;
+			textureDesc.Format			    = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 			textureDesc.SampleDesc.Count    = 1;
 			textureDesc.SampleDesc.Quality  = 0;
 			textureDesc.Layout			    = D3D12_TEXTURE_LAYOUT_UNKNOWN;
@@ -682,6 +709,8 @@ namespace spider_engine::d3dx12 {
 			// Execute Graphics Command List
 			ID3D12CommandList* ppCommandLists[] = { commandList };
 			commandQueue_->ExecuteCommandLists(1, ppCommandLists);
+			nonRenderingRelatedSynchronizationObject_->signal(commandQueue_.Get(), 0);
+			nonRenderingRelatedSynchronizationObject_->wait(0);
 
 			SPIDER_DBG_CODE(
 				texture.resource->SetName(L"Texture2D");
@@ -714,7 +743,7 @@ namespace spider_engine::d3dx12 {
 
 			// Load image from file
 			DirectX::ScratchImage image;
-			HRESULT hr = DirectX::LoadFromWICFile(path.c_str(), DirectX::WIC_FLAGS_NONE, nullptr, image);
+			HRESULT hr = DirectX::LoadFromWICFile(path.c_str(), DirectX::WIC_FLAGS_FORCE_RGB, nullptr, image);
 			if (FAILED(hr)) {
 				throw std::runtime_error("Failed to load image");
 			}
@@ -739,7 +768,7 @@ namespace spider_engine::d3dx12 {
 			textureDesc.Height			    = img->height;
 			textureDesc.DepthOrArraySize	= 1;
 			textureDesc.MipLevels		    = 1;
-			textureDesc.Format			    = DXGI_FORMAT_R8G8B8A8_UNORM;
+			textureDesc.Format			    = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 			textureDesc.SampleDesc.Count    = 1;
 			textureDesc.SampleDesc.Quality  = 0;
 			textureDesc.Layout			    = D3D12_TEXTURE_LAYOUT_UNKNOWN;
@@ -778,7 +807,7 @@ namespace spider_engine::d3dx12 {
 			size_t rowPitch	  = 0;
 			size_t slicePitch = 0;
 			DirectX::ComputePitch(
-				DXGI_FORMAT_R8G8B8A8_UNORM,
+				DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
 				img->width,
 				img->height,
 				rowPitch,
@@ -816,6 +845,8 @@ namespace spider_engine::d3dx12 {
 			// Execute Graphics Command List
 			ID3D12CommandList* ppCommandLists[] = { commandList };
 			commandQueue_->ExecuteCommandLists(1, ppCommandLists);
+			nonRenderingRelatedSynchronizationObject_->signal(commandQueue_.Get(), 0);
+			nonRenderingRelatedSynchronizationObject_->wait(0);
 
 			SPIDER_DBG_CODE(
 				texture.resource->SetName(L"Texture2D");
@@ -867,6 +898,55 @@ namespace spider_engine::d3dx12 {
 				device_->CreateConstantBufferView(&cbvDesc, cpuHandle);
 			};
 			heapAllocator_->writeOnDescriptorHeap(cbvSrvUavDescriptorHeap_, 1, fn);
+
+			// If on debug mode, set resource name
+			SPIDER_DBG_CODE(resource->SetName(L"ConstantBuffer_Packed"));
+
+			return constantBuffer;
+		}
+		ConstantBuffer createConstantBuffer(const std::string& name, 
+											const size_t	   size,
+											const ShaderStage  stage,
+											DescriptorHeap*    descriptorHeap)
+		{
+			// Align size to 256 bytes
+			size_t alignedSize = (size + 255) & ~255;
+
+			// Create constant buffer (resource)
+			D3D12_HEAP_PROPERTIES heapProps  = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+			D3D12_RESOURCE_DESC   bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(alignedSize);
+			Microsoft::WRL::ComPtr<ID3D12Resource> resource;
+			SPIDER_DX12_ERROR_CHECK(device_->CreateCommittedResource(
+				&heapProps,
+				D3D12_HEAP_FLAG_NONE,
+				&bufferDesc,
+				D3D12_RESOURCE_STATE_GENERIC_READ,
+				nullptr,
+				IID_PPV_ARGS(&resource)
+			));
+
+			ConstantBuffer constantBuffer;
+			auto fn = [&name, &size, &alignedSize, &resource, &stage, &constantBuffer, this](DescriptorHeap* descriptorHeap) {
+				// Get CPU and GPU descriptor handles
+				CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle = descriptorHeap->cpuHandle;
+				CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle = descriptorHeap->gpuHandle;
+
+				// Create Constant Buffer (struct)
+				constantBuffer.name_        = name;
+				constantBuffer.heap_        = descriptorHeap->heap;
+				constantBuffer.resource_    = resource;
+				constantBuffer.sizeInBytes_ = alignedSize;
+				constantBuffer.cpuHandle_   = cpuHandle;
+				constantBuffer.gpuHandle_   = gpuHandle;
+				constantBuffer.stage_       = stage;
+
+				// Create CBV
+				D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
+				cbvDesc.BufferLocation			    	= resource->GetGPUVirtualAddress();
+				cbvDesc.SizeInBytes		         		= static_cast<uint_t>(alignedSize);
+				device_->CreateConstantBufferView(&cbvDesc, cpuHandle);
+			};
+			heapAllocator_->writeOnDescriptorHeap(descriptorHeap, 1, fn);
 
 			// If on debug mode, set resource name
 			SPIDER_DBG_CODE(resource->SetName(L"ConstantBuffer_Packed"));
@@ -942,6 +1022,76 @@ namespace spider_engine::d3dx12 {
 
 			return constantBuffers;
 		}
+		std::vector<ConstantBuffer> createConstantBuffers(const std::vector<std::string> names,
+														  const std::vector<size_t>      sizes,
+														  const ShaderStage			     stage,
+														  DescriptorHeap*                descriptorHeap)
+		{
+			// Calculate count (size)
+			const size_t count = sizes.size();
+			if (count == 0) return std::vector<ConstantBuffer>();
+
+			// Align sizes to 256 bytes
+			std::vector<size_t> alignedSizes;
+			size_t              totalSizeInBytes = 0;
+			for (size_t i = 0; i < count; ++i) {
+				auto& size = sizes[i];
+				alignedSizes.push_back((size + 255) & ~255);
+				totalSizeInBytes += alignedSizes[i];
+			}
+
+			// Create constant buffer (resource)
+			D3D12_HEAP_PROPERTIES heapProps  = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+			D3D12_RESOURCE_DESC   bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(totalSizeInBytes);
+			Microsoft::WRL::ComPtr<ID3D12Resource> resource;
+			SPIDER_DX12_ERROR_CHECK(device_->CreateCommittedResource(
+				&heapProps,
+				D3D12_HEAP_FLAG_NONE,
+				&bufferDesc,
+				D3D12_RESOURCE_STATE_GENERIC_READ,
+				nullptr,
+				IID_PPV_ARGS(&resource)
+			));
+
+			// Create constant buffers
+			std::vector<ConstantBuffer> constantBuffers;
+
+			// Create CBVs
+			size_t i        = 0;
+			uint32_t offset = 0;
+			auto fn = [&constantBuffers, &names, &resource, &stage, &offset, &alignedSizes, &i, this](DescriptorHeap* descriptorHeap) {
+				constantBuffers.emplace_back();
+
+				// Create Constant Buffer (struct)
+				ConstantBuffer& buffer = constantBuffers[i];
+				buffer.name_           = names[i];
+				buffer.heap_           = descriptorHeap->heap;
+				buffer.resource_       = resource;
+				buffer.sizeInBytes_    = alignedSizes[i];
+				buffer.cpuHandle_      = descriptorHeap->cpuHandle;
+				buffer.gpuHandle_      = descriptorHeap->gpuHandle;
+				buffer.stage_	       = stage;
+				buffer.index_	       = i;
+
+				// Create Constant Buffer View
+				D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
+				cbvDesc.BufferLocation					= resource->GetGPUVirtualAddress() + offset;
+				cbvDesc.SizeInBytes						= static_cast<UINT>(alignedSizes[i]);
+				device_->CreateConstantBufferView(&cbvDesc, descriptorHeap->cpuHandle);
+
+				// Open (map) the buffer for writing
+				buffer.open();
+
+				offset += alignedSizes[i];
+
+				++i;
+			};
+			heapAllocator_->writeOnDescriptorHeap(descriptorHeap, count, fn);
+
+			SPIDER_DBG_CODE(resource->SetName(L"ConstantBuffer_Packed"));
+
+			return constantBuffers;
+		}
 
 		ShaderResourceView createShaderResourceView(const std::string&          name,
 													const std::vector<uint8_t>& data,
@@ -1007,6 +1157,71 @@ namespace spider_engine::d3dx12 {
 
 			return shaderResourceView;
 		}
+		ShaderResourceView createShaderResourceView(const std::string&          name,
+													const std::vector<uint8_t>& data,
+													const ShaderStage           stage,
+													DescriptorHeap*             descriptorHeap)
+		{
+			ShaderResourceView shaderResourceView;
+
+			// Create resource description
+			D3D12_RESOURCE_DESC resourceDesc = {};
+			resourceDesc.Dimension			 = D3D12_RESOURCE_DIMENSION_BUFFER;
+			resourceDesc.Alignment		     = 0;
+			resourceDesc.Width				 = data.size();
+			resourceDesc.Height				 = 1;
+			resourceDesc.DepthOrArraySize	 = 1;
+			resourceDesc.MipLevels			 = 1;
+			resourceDesc.Format				 = DXGI_FORMAT_UNKNOWN;
+			resourceDesc.SampleDesc.Count    = 1;
+			resourceDesc.SampleDesc.Quality	 = 0;
+			resourceDesc.Layout				 = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+			resourceDesc.Flags			     = D3D12_RESOURCE_FLAG_NONE;
+
+			// Create resource
+			D3D12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+			device_->CreateCommittedResource(
+				&heapProps,
+				D3D12_HEAP_FLAG_NONE,
+				&resourceDesc,
+				D3D12_RESOURCE_STATE_GENERIC_READ,
+				nullptr,
+				IID_PPV_ARGS(&shaderResourceView.resource_)
+			);
+			
+			auto fn = [&shaderResourceView, name, data, stage, this](DescriptorHeap* descriptorHeap) {
+				// Fill out Shader Resource View struct
+				shaderResourceView.heap_        = descriptorHeap->heap;
+				shaderResourceView.name_        = name;
+				shaderResourceView.sizeInBytes_ = data.size();
+				shaderResourceView.stage_       = stage;
+				shaderResourceView.cpuHandle_   = descriptorHeap->cpuHandle;
+				shaderResourceView.gpuHandle_   = descriptorHeap->gpuHandle;
+				shaderResourceView.index_       = 0;
+
+				// Copy data to the resource
+				UINT8* dataBegin = nullptr;
+				CD3DX12_RANGE readRange(0, 0);
+
+				shaderResourceView.resource_->Map(0, &readRange, reinterpret_cast<void**>(&dataBegin));
+				memcpy(dataBegin, data.data(), data.size());
+				shaderResourceView.resource_->Unmap(0, nullptr);
+
+				// Create Shader Resource View Description
+				D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescription = {};
+				shaderResourceViewDescription.Format						  = DXGI_FORMAT_UNKNOWN;
+				shaderResourceViewDescription.ViewDimension					  = D3D12_SRV_DIMENSION_BUFFER;
+				shaderResourceViewDescription.Shader4ComponentMapping		  = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+				shaderResourceViewDescription.Buffer.FirstElement			  = 0;
+				shaderResourceViewDescription.Buffer.NumElements			  = data.size();
+				device_->CreateShaderResourceView(shaderResourceView.resource_.Get(), &shaderResourceViewDescription, shaderResourceView.cpuHandle_);
+			};
+			heapAllocator_->writeOnDescriptorHeap(descriptorHeap, 1, fn);
+
+			SPIDER_DBG_CODE(shaderResourceView.resource_->SetName(L"ShaderResourceView_Buffer"));
+
+			return shaderResourceView;
+		}
 		ShaderResourceView createShaderResourceViewForTexture2D(const std::string& name,
 															    Texture2D&         data,
 															    const ShaderStage  stage) 
@@ -1031,7 +1246,7 @@ namespace spider_engine::d3dx12 {
 				CD3DX12_RANGE readRange(0, 0);
 
 				D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescription = {};
-				shaderResourceViewDescription.Format						  = DXGI_FORMAT_R8G8B8A8_UNORM;
+				shaderResourceViewDescription.Format						  = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 				shaderResourceViewDescription.ViewDimension				      = D3D12_SRV_DIMENSION_TEXTURE2D;
 				shaderResourceViewDescription.Shader4ComponentMapping		  = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 				shaderResourceViewDescription.Texture2D.MostDetailedMip	      = 0;
@@ -1041,6 +1256,46 @@ namespace spider_engine::d3dx12 {
 				device_->CreateShaderResourceView(data.resource.Get(), &shaderResourceViewDescription, shaderResourceView.cpuHandle_);
 			};
 			heapAllocator_->writeOnDescriptorHeap(cbvSrvUavDescriptorHeap_, 1, fn);
+
+			SPIDER_DBG_CODE(shaderResourceView.resource_->SetName(L"ShaderResourceView_Buffer"));
+
+			return shaderResourceView;
+		}
+		ShaderResourceView createShaderResourceViewForTexture2D(const std::string& name,
+															    Texture2D&         data,
+															    const ShaderStage  stage,
+																DescriptorHeap*    descriptorHeap) 
+		{
+			ShaderResourceView shaderResourceView;
+
+			const size_t dataSize = (data.width * data.height) * 4;
+			
+			auto fn = [&shaderResourceView, &name, dataSize, stage, &data, this](DescriptorHeap* descriptorHeap) {
+				// Create Shader Resource View struct
+				shaderResourceView.heap_        = descriptorHeap->heap;
+				shaderResourceView.name_        = name;
+				shaderResourceView.sizeInBytes_ = dataSize;
+				shaderResourceView.stage_       = stage;
+				shaderResourceView.cpuHandle_   = descriptorHeap->cpuHandle;
+				shaderResourceView.gpuHandle_   = descriptorHeap->gpuHandle;
+				shaderResourceView.index_       = 0;
+				shaderResourceView.resource_    = data.resource;
+
+				// Copy data to the resource
+				UINT8*        dataBegin = nullptr;
+				CD3DX12_RANGE readRange(0, 0);
+
+				D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescription = {};
+				shaderResourceViewDescription.Format						  = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+				shaderResourceViewDescription.ViewDimension				      = D3D12_SRV_DIMENSION_TEXTURE2D;
+				shaderResourceViewDescription.Shader4ComponentMapping		  = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+				shaderResourceViewDescription.Texture2D.MostDetailedMip	      = 0;
+				shaderResourceViewDescription.Texture2D.MipLevels			  = 1;
+
+				// Create Shader Resource View
+				device_->CreateShaderResourceView(data.resource.Get(), &shaderResourceViewDescription, shaderResourceView.cpuHandle_);
+			};
+			heapAllocator_->writeOnDescriptorHeap(descriptorHeap, 1, fn);
 
 			SPIDER_DBG_CODE(shaderResourceView.resource_->SetName(L"ShaderResourceView_Buffer"));
 
@@ -1140,6 +1395,101 @@ namespace spider_engine::d3dx12 {
 
 			return shaderResourceViews;
 		}
+		std::vector<ShaderResourceView> createShaderResourceViews(const std::vector<std::string>&	       names,
+													              const std::vector<std::vector<uint8_t>>& data,
+													              const ShaderStage                        stage,
+																  DescriptorHeap*                          descriptorHeap)
+		{
+			const size_t count = data.size();
+			if (count <= 0) return std::vector<ShaderResourceView>();
+
+			size_t			    totalSizeInBytes = 0;
+			std::vector<size_t> sizes(count);
+			for (int i = 0; i < data.size(); ++i) {
+				// Get each block size
+				sizes.push_back(data[i].size());
+				// Calculate total size
+				totalSizeInBytes += data[i].size();
+			}
+
+			std::vector<ShaderResourceView> shaderResourceViews;
+
+			// Create resource description
+			D3D12_RESOURCE_DESC resourceDesc = {};
+			resourceDesc.Dimension			 = D3D12_RESOURCE_DIMENSION_BUFFER;
+			resourceDesc.Alignment		     = 0;
+			resourceDesc.Width				 = totalSizeInBytes;
+			resourceDesc.Height				 = 1;
+			resourceDesc.DepthOrArraySize	 = 1;
+			resourceDesc.MipLevels			 = 1;
+			resourceDesc.Format				 = DXGI_FORMAT_UNKNOWN;
+			resourceDesc.SampleDesc.Count    = 1;
+			resourceDesc.SampleDesc.Quality	 = 0;
+			resourceDesc.Layout				 = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+			resourceDesc.Flags			     = D3D12_RESOURCE_FLAG_NONE;
+			D3D12_HEAP_PROPERTIES heapProps  = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+
+			// Create resource
+			ComPtr<ID3D12Resource> resource;
+			device_->CreateCommittedResource(
+				&heapProps,
+				D3D12_HEAP_FLAG_NONE,
+				&resourceDesc,
+				D3D12_RESOURCE_STATE_GENERIC_READ,
+				nullptr,
+				IID_PPV_ARGS(&resource)
+			);
+
+			// Allocate Shader Resource Views
+			shaderResourceViews.reserve(count);
+			
+			size_t offset    = 0;
+			UINT8* dataBegin = nullptr;
+			size_t i         = 0;
+			auto fn = [&shaderResourceViews, &resource, &names, stage, &dataBegin, &offset, &data, &sizes, &i, this](DescriptorHeap* descriptorHeap) {
+				shaderResourceViews.emplace_back();
+				
+				// Create Shader Resource View struct
+				ShaderResourceView& shaderResourceView = shaderResourceViews[i];
+				shaderResourceView.heap_               = descriptorHeap->heap;
+				shaderResourceView.resource_           = resource;
+				shaderResourceView.name_               = names[i];
+				shaderResourceView.sizeInBytes_        = sizes[i];
+				shaderResourceView.cpuHandle_          = descriptorHeap->cpuHandle;
+				shaderResourceView.gpuHandle_		   = descriptorHeap->gpuHandle;
+				shaderResourceView.stage_			   = stage;
+				shaderResourceView.index_			   = i;
+
+				CD3DX12_RANGE readRange(0, 0);
+
+				// Copy data to the resource
+				shaderResourceView.resource_->Map(0, &readRange, reinterpret_cast<void**>(&dataBegin));
+				memcpy(dataBegin + offset, data[i].data(), sizes[i]);
+				shaderResourceView.resource_->Unmap(0, nullptr);
+
+				// Increment data pointer
+				dataBegin                      += sizes[i];
+				shaderResourceView.sizeInBytes_ = sizes[i];
+
+				// Create Shader Resource View Description
+				D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescription = {};
+				shaderResourceViewDescription.Format						  = DXGI_FORMAT_UNKNOWN;
+				shaderResourceViewDescription.ViewDimension					  = D3D12_SRV_DIMENSION_BUFFER;
+				shaderResourceViewDescription.Shader4ComponentMapping	      = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+				shaderResourceViewDescription.Buffer.FirstElement			  = offset;
+				shaderResourceViewDescription.Buffer.NumElements			  = sizes[i];
+				device_->CreateShaderResourceView(shaderResourceView.resource_.Get(), &shaderResourceViewDescription, shaderResourceView.cpuHandle_);
+				
+				offset += sizes[i];
+
+				++i;
+			};
+			heapAllocator_->writeOnDescriptorHeap(descriptorHeap, count, fn);
+
+			SPIDER_DBG_CODE(resource->SetName(L"ShaderResourceView_Buffer_Packed"));
+
+			return shaderResourceViews;
+		}
 		std::vector<ShaderResourceView> createShaderResourceViewsForTexture2D(std::vector<std::string>& names,
 																              std::vector<Texture2D>&   data,
 																              const ShaderStage         stage) 
@@ -1176,7 +1526,7 @@ namespace spider_engine::d3dx12 {
 
 				// Create Shader Resource View Description
 				D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescription = {};
-				shaderResourceViewDescription.Format						  = DXGI_FORMAT_R8G8B8A8_UNORM;
+				shaderResourceViewDescription.Format						  = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 				shaderResourceViewDescription.ViewDimension				      = D3D12_SRV_DIMENSION_TEXTURE2D;
 				shaderResourceViewDescription.Shader4ComponentMapping		  = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 				shaderResourceViewDescription.Texture2D.MostDetailedMip	      = 0;
@@ -1194,6 +1544,64 @@ namespace spider_engine::d3dx12 {
 				++i;
 			};
 			heapAllocator_->writeOnDescriptorHeap(cbvSrvUavDescriptorHeap_, count, fn);
+
+			return shaderResourceViews;
+		}
+		std::vector<ShaderResourceView> createShaderResourceViewsForTexture2D(std::vector<std::string>& names,
+																              std::vector<Texture2D>&   data,
+																              const ShaderStage         stage,
+																			  DescriptorHeap*           descriptorHeap) 
+		{
+			const size_t count = data.size();
+			if (count == 0) return std::vector<ShaderResourceView>{};
+
+			std::vector<ShaderResourceView> shaderResourceViews;
+
+			// Calculate sizes and total size
+			size_t			  totalDataSize = 0;
+			std::vector<size_t> sizes(count);
+			for (UINT i = 0; i < count; ++i) {
+				totalDataSize += (data[i].width * data[i].height) * 4;
+				sizes.push_back(static_cast<size_t>(data[i].width * data[i].height) * 4);
+			}
+
+			// Allocate Shader Resource Views
+			shaderResourceViews.reserve(count);
+
+			size_t i = 0;
+			auto fn = [&i, &shaderResourceViews, &names, &sizes, stage, &data, this](DescriptorHeap* descriptorHeap) {
+				shaderResourceViews.emplace_back();
+
+				// Create Shader Resource View struct
+				ShaderResourceView& shaderResourceView = shaderResourceViews[i];
+				shaderResourceView.heap_			   = descriptorHeap->heap;
+				shaderResourceView.name_			   = names[i];
+				shaderResourceView.sizeInBytes_		   = sizes[i];
+				shaderResourceView.stage_			   = stage;
+				shaderResourceView.cpuHandle_		   = descriptorHeap->cpuHandle;
+				shaderResourceView.gpuHandle_		   = descriptorHeap->gpuHandle;
+				shaderResourceView.index_			   = i;
+
+				// Create Shader Resource View Description
+				D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescription = {};
+				shaderResourceViewDescription.Format						  = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+				shaderResourceViewDescription.ViewDimension				      = D3D12_SRV_DIMENSION_TEXTURE2D;
+				shaderResourceViewDescription.Shader4ComponentMapping		  = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+				shaderResourceViewDescription.Texture2D.MostDetailedMip	      = 0;
+				shaderResourceViewDescription.Texture2D.MipLevels			  = 1;
+
+				// Create Shader Resource View
+				device_->CreateShaderResourceView(
+					data[i].resource.Get(), 
+					&shaderResourceViewDescription, 
+					shaderResourceView.cpuHandle_
+				);
+
+				data[i].resource->SetName(L"TexturedShaderResourceView");
+
+				++i;
+			};
+			heapAllocator_->writeOnDescriptorHeap(descriptorHeap, count, fn);
 
 			return shaderResourceViews;
 		}
@@ -1230,7 +1638,7 @@ namespace spider_engine::d3dx12 {
 			return sampler;
 		}
 		std::vector<Sampler> createSamplers(const std::vector<std::string>& names,
-								const ShaderStage               stage) 
+											const ShaderStage               stage) 
 		{
 			const size_t count = names.size();
 			if (count == 0) return std::vector<Sampler>();
@@ -1273,6 +1681,7 @@ namespace spider_engine::d3dx12 {
 
 			return samplers;
 		}
+
 
 		Mesh createMesh(const std::vector<Vertex>&   vertices,
 						const std::vector<uint32_t>& indices)
@@ -1545,7 +1954,7 @@ namespace spider_engine::d3dx12 {
 			cmd->RSSetScissorRects(1, &sc);
 
 			// Heap do ImGui
-			ID3D12DescriptorHeap* heaps[] = { imGuiDescriptorHeap->heap.Get() };
+			ID3D12DescriptorHeap* heaps[] = { imGuiDescriptorHeap_->heap.Get() };
 			cmd->SetDescriptorHeaps(1, heaps);
 
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmd);
@@ -2111,7 +2520,7 @@ namespace spider_engine::d3dx12 {
 			psoDesc.NodeMask						   = 0;
 			psoDesc.PrimitiveTopologyType			   = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 			psoDesc.NumRenderTargets				   = 1;
-			psoDesc.RTVFormats[0]					   = DXGI_FORMAT_R8G8B8A8_UNORM;
+			psoDesc.RTVFormats[0]					   = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 			psoDesc.SampleDesc.Count		           = 1;
 
 			size_t cbvCount		= 0;

@@ -170,6 +170,7 @@
     <ClInclude Include="include\core_engine.hpp" />
     <ClInclude Include="include\debug.hpp" />
     <ClInclude Include="include\definitions.hpp" />
+    <ClInclude Include="include\dx12_concepts.hpp" />
     <ClInclude Include="include\dx12_policies.hpp" />
     <ClInclude Include="include\dx12_renderer.hpp" />
     <ClInclude Include="include\dx12_types.hpp" />

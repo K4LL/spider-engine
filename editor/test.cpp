@@ -1,10 +1,3 @@
-#include <iostream>
-#include <Windows.h>
-
-#include "imgui.h"
-#include "backends/imgui_impl_win32.h"
-#include "backends/imgui_impl_dx12.h"
-
 #include "core_engine.hpp"
 #include "camera.hpp"
 
@@ -93,6 +86,8 @@ using ComPtr = Microsoft::WRL::ComPtr<T>;
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
     RenderingSystemDescription renderingSystemDescription;
     renderingSystemDescription.windowName = L"Spider Engine - Hub";
+    renderingSystemDescription.width  = 720;
+    renderingSystemDescription.height = 480;
 
     CoreEngine coreEngine;
     coreEngine.initializeDebugSystems(true, true, true);
@@ -133,8 +128,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
 
         //// Demo normal
         //ImGui::ShowDemoWindow();
-
-        initalizeStyle();
 
         homePage.draw();
 
